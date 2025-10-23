@@ -5,16 +5,8 @@ import 'package:go_router/go_router.dart';
 class AsuScaffold extends StatelessWidget {
   final String? topRouteName;
   final Widget body;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  AsuScaffold({super.key, this.topRouteName, required this.body});
-
-  void _closeDrawer() {
-    if (_scaffoldKey.currentState != null &&
-        _scaffoldKey.currentState!.isDrawerOpen) {
-      _scaffoldKey.currentState!.closeDrawer();
-    }
-  }
+  const AsuScaffold({super.key, this.topRouteName, required this.body});
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +29,6 @@ class AsuScaffold extends StatelessWidget {
     }
 
     return Scaffold(
-      key: _scaffoldKey,
       appBar: AppBar(
         title: Text(title),
         actions: [
@@ -51,7 +42,7 @@ class AsuScaffold extends StatelessWidget {
                 children: [Text(Pubspec.description)],
               );
             },
-            icon: Icon(Icons.info_outline),
+            icon: const Icon(Icons.info_outline),
           ),
         ],
       ),
@@ -61,30 +52,27 @@ class AsuScaffold extends StatelessWidget {
           switch (value) {
             case 0:
               context.goNamed('operation');
-              _closeDrawer();
               break;
             case 1:
               context.goNamed('protocols');
-              _closeDrawer();
               break;
             case 2:
               context.goNamed('settings');
-              _closeDrawer();
               break;
             default:
           }
         },
         children: [
           NavigationDrawerDestination(
-            icon: Icon(Icons.local_fire_department),
+            icon: const Icon(Icons.local_fire_department),
             label: const Text("Einsatz"),
           ),
           NavigationDrawerDestination(
-            icon: Icon(Icons.description),
+            icon: const Icon(Icons.description),
             label: const Text("Protokolle"),
           ),
           NavigationDrawerDestination(
-            icon: Icon(Icons.settings),
+            icon: const Icon(Icons.settings),
             label: const Text("Einstellungen"),
           ),
         ],
