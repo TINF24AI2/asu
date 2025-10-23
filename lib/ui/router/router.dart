@@ -22,17 +22,17 @@ GoRouter goRouter(Ref ref) {
         routes: [
           GoRoute(
             path: '/operation',
-            builder: (context, state) => Placeholder(),
+            builder: (context, state) => const Placeholder(),
             name: 'operation',
           ),
           GoRoute(
             path: '/protocols',
-            builder: (context, state) => Placeholder(),
+            builder: (context, state) => const Placeholder(),
             name: 'protocols',
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => Placeholder(),
+            builder: (context, state) => const Placeholder(),
             name: 'settings',
           ),
         ],
