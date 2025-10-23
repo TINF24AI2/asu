@@ -11,7 +11,7 @@ class AsuApp extends ConsumerWidget {
     final router = ref.watch(goRouterProvider);
     return MaterialApp.router(
       title: 'Atemschutzüberwachung',
-      theme: ThemeData(primarySwatch: Colors.red),
+      theme: ThemeData(colorScheme: ColorScheme.fromSeed(seedColor: Colors.red)),
       routerConfig: router,
     );
   }
