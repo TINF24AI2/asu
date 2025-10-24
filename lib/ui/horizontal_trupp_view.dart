@@ -96,10 +96,10 @@ class _HorizontalTruppViewState extends State<HorizontalTruppView> {
                   ? Center(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Icon(Icons.add, size: 48, color: Colors.black54),
-                          SizedBox(height: 8),
-                          Text('Neuer Trupp', style: TextStyle(fontSize: 18)),
+                        children: [
+                          const Icon(Icons.add, size: 48, color: Colors.black54),
+                          const SizedBox(height: 8),
+                          const Text('Neuer Trupp', style: TextStyle(fontSize: 18)),
                         ],
                       ),
                     )
