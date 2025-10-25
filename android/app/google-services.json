@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "162036889365",
+    "project_id": "asu-tinf24ai2",
+    "storage_bucket": "asu-tinf24ai2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:162036889365:android:717df524818ecddfb35b1c",
+        "android_client_info": {
+          "package_name": "com.example.asu"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBDu_MFjM5Hb_XM_4Q4hagvcrcmuam6Eog"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
