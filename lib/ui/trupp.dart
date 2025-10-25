@@ -24,20 +24,20 @@ class Trupp extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 16,
                         backgroundColor: Colors.black,
-                        child: const Text(
+                        child: Text(
                           // TODO: Set first letter of Sur- and Lastname
                           "A.B",
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      CircleAvatar(
+                      const CircleAvatar(
                         radius: 16,
                         backgroundColor: Colors.grey,
-                        child: const Text(
+                        child: Text(
                           // TODO: Set first letter of Sur- and Lastname
                           "D.G",
                           style: TextStyle(color: Colors.white, fontSize: 12),
@@ -81,10 +81,10 @@ class PressureReading extends StatefulWidget {
   const PressureReading({Key? key}) : super(key: key);
 
   @override
-  _PressureReadingState createState() => _PressureReadingState();
+  PressureReadingState createState() => PressureReadingState();
 }
 
-class _PressureReadingState extends State<PressureReading> {
+class PressureReadingState extends State<PressureReading> {
   // Example value for pressure
   final int maxPressure = 300;
   // TODO: Set to start pressure
@@ -129,10 +129,10 @@ class OperationInfo extends StatefulWidget {
   const OperationInfo({Key? key}) : super(key: key);
 
   @override
-  _OperationInfoState createState() => _OperationInfoState();
+  OperationInfoState createState() => OperationInfoState();
 }
 
-class _OperationInfoState extends State<OperationInfo> {
+class OperationInfoState extends State<OperationInfo> {
   int elapsedTime = 0;
   int remainingTime = 400; //Only example value TODO: Initialize to actual time
   int nextQueryTime = 60 * 8;
