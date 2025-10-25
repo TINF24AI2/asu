@@ -210,41 +210,39 @@ class OperationButtons extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        children: [
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Add logic for status
-                },
-                child: const Text("Status:"),
-              ),
-              const SizedBox(width: 8),
-              const Text("Placeholder"),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Row(
-            children: [
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Add logic for "Meldungen"
-                },
-                child: const Text("Meldungen"),
-              ),
-              const SizedBox(width: 8), 
-              ElevatedButton(
-                onPressed: () {
-                  // TODO: Add logic for "Einsatz beenden"
-                },
-                child: const Text("Einsatz beenden"),
-              ),
-            ],
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Add logic for status
+              },
+              child: const Text("Status:"),
+            ),
+            const SizedBox(width: 8),
+            const Text("Placeholder"),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Row(
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Add logic for "Meldungen"
+              },
+              child: const Text("Meldungen"),
+            ),
+            const SizedBox(width: 8), 
+            ElevatedButton(
+              onPressed: () {
+                // TODO: Add logic for "Einsatz beenden"
+              },
+              child: const Text("Einsatz beenden"),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }
