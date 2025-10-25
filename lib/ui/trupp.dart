@@ -67,7 +67,7 @@ class Trupp extends StatelessWidget {
           const SizedBox(height: 20),
           const OperationInfo(),
           const SizedBox(height: 20),
-          OperationButtons(),
+          const OperationButtons(),
         ],
       ),
     );
