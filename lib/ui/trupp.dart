@@ -143,19 +143,21 @@ class _OperationInfoState extends State<OperationInfo> {
   void initState() {
     super.initState();
     timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      setState(() {
-        elapsedTime++;
-        if (remainingTime > 0) {
-          remainingTime--;
-        } else {
-          remainingTime = 0;
-        }
-        nextQueryTime--;
-        if (nextQueryTime <= 0) {
-          nextQueryTime =
-              60 * 8; //Only example TODO: When user did query, than reset timer
-        }
-      });
+      int newElapsedTime = elapsedTime + 1;
+      int newRemainingTime = remainingTime > 0 ? remainingTime - 1 : 0;
+      int newNextQueryTime = nextQueryTime - 1;
+      if (newNextQueryTime <= 0) {
+        newNextQueryTime = 60 * 8; //Only example TODO: When user did query, than reset timer
+      }
+      if (newElapsedTime != elapsedTime ||
+          newRemainingTime != remainingTime ||
+          newNextQueryTime != nextQueryTime) {
+        setState(() {
+          elapsedTime = newElapsedTime;
+          remainingTime = newRemainingTime;
+          nextQueryTime = newNextQueryTime;
+        });
+      }
     });
   }
 
