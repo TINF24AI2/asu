@@ -63,7 +63,7 @@ class Trupp extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          PressureReading(),
+          const PressureReading(),
           const SizedBox(height: 20),
           OperationInfo(),
           const SizedBox(height: 20),
