@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 class Trupp extends StatelessWidget {
-  const Trupp({Key? key}) : super(key: key);
+  const Trupp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -78,7 +78,7 @@ class Trupp extends StatelessWidget {
 // Pressure
 // ----------------------
 class PressureReading extends StatefulWidget {
-  const PressureReading({Key? key}) : super(key: key);
+  const PressureReading({super.key});
 
   @override
   PressureReadingState createState() => PressureReadingState();
@@ -126,7 +126,7 @@ class PressureReadingState extends State<PressureReading> {
 // Operation Informations
 // ----------------------
 class OperationInfo extends StatefulWidget {
-  const OperationInfo({Key? key}) : super(key: key);
+  const OperationInfo({super.key});
 
   @override
   OperationInfoState createState() => OperationInfoState();
@@ -208,7 +208,7 @@ class OperationInfoState extends State<OperationInfo> {
 // Operation Buttons
 // ----------------------
 class OperationButtons extends StatelessWidget {
-  const OperationButtons({Key? key}) : super(key: key);
+  const OperationButtons({super.key});
 
   @override
   Widget build(BuildContext context) {
