@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'modal_choice_sheet.dart';
 
 /* dialog and selector for picking a duration in minutes
    Returns the selected minutes as integer or null. */
@@ -50,7 +51,7 @@ Future<int?> showSelectDurationDialog(BuildContext context) {
             TextField(
               decoration: const InputDecoration(
                 labelText: 'Eigene Dauer in Minuten',
-                hintText: 'e.g. 17',
+                hintText: 'z.B. 32',
               ),
               keyboardType: TextInputType.number,
               onChanged: (v) => typed = v,
@@ -85,131 +86,21 @@ Future<int?> showSelectDurationDialog(BuildContext context) {
   );
 }
 
-/// Simple widget showing the selected duration
-class TimeDurationSelector extends StatefulWidget {
-  const TimeDurationSelector({super.key});
-
-  @override
-  State<TimeDurationSelector> createState() => _TimeDurationSelectorState();
-}
-
-class _TimeDurationSelectorState extends State<TimeDurationSelector> {
-  int? selectedMinutes;
-
-  Future<void> _pick() async {
-    final result = await showSelectDurationDialog(context);
-    if (result == null) return;
-    setState(() => selectedMinutes = result);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        const Text('Dauer: '),
-        if (selectedMinutes != null) ...[
-          Text('${selectedMinutes!} min'),
-          IconButton(
-            icon: const Icon(Icons.delete),
-            onPressed: () => setState(() => selectedMinutes = null),
-          ),
-        ] else ...[
-          TextButton(onPressed: _pick, child: const Text('Dauer wählen')),
-        ],
-      ],
-    );
-  }
-}
-
-/// Same UI as in add_radio_call_number.dart
-Future<int?> showSelectDurationSheet(BuildContext context) async {
-  return showModalBottomSheet<int>(
-    context: context,
-    isScrollControlled: true,
-    builder: (context) {
-      int? localSelected;
-      String? typed;
-      return Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: StatefulBuilder(
-          builder: (context, setState) {
-            return Container(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Dauer wählen',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 12),
-                  SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: defaultDurations.map((d) {
-                        final selected = localSelected == d;
-                        return Padding(
-                          padding: const EdgeInsets.only(right: 8.0),
-                          child: ChoiceChip(
-                            label: Text('$d min'),
-                            selected: selected,
-                            onSelected: (_) {
-                              setState(() => localSelected = d);
-                              // return immediately on chip tap
-                              Navigator.of(context).pop(d);
-                            },
-                          ),
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  TextField(
-                    decoration: const InputDecoration(
-                      labelText: 'Eigene Dauer in Minuten',
-                    ),
-                    keyboardType: TextInputType.number,
-                    onChanged: (v) => typed = v,
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
-                        child: const Text('Abbrechen'),
-                      ),
-                      const SizedBox(width: 8),
-                      ElevatedButton(
-                        onPressed: () {
-                          if (typed == null || typed!.trim().isEmpty) {
-                            Navigator.of(context).pop();
-                            return;
-                          }
-                          final digits = typed!.replaceAll(
-                            RegExp(r'[^0-9]'),
-                            '',
-                          );
-                          final value = int.tryParse(digits);
-                          if (value != null && value >= 1 && value <= 1440) {
-                            Navigator.of(context).pop(value);
-                          } else {
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: const Text('OK'),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-      );
+/// bottom-sheet layout with horizontal choice chips and an input field
+Future<int?> showSelectDurationSheet(BuildContext context) {
+  return showHorizontalChoiceSheet<int, int>(
+    context,
+    title: 'Dauer auswählen',
+    candidates: defaultDurations,
+    labelBuilder: (d) => '$d min',
+    valueBuilder: (d) => d,
+    normalizeTyped: (s) {
+      final digits = s.replaceAll(RegExp(r'[^0-9]'), '');
+      final value = int.tryParse(digits);
+      if (value != null && value >= 1 && value <= 1440) return value;
+      return null;
     },
+    textFieldLabel: 'Dauer in Minuten:',
+    keyboardType: TextInputType.number,
   );
 }
