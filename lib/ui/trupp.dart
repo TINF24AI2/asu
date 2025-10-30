@@ -1,8 +1,35 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 
 class Trupp extends StatelessWidget {
-  const Trupp({super.key});
+  final String truppfuehrer;
+  final String truppmann;
+  final String funkrufname;
+
+  const Trupp({
+    super.key,
+    required this.truppfuehrer,
+    required this.truppmann,
+    required this.funkrufname});
+
+  // Example values
+  final int pressure = 280;
+  final int maxPressure = 300;
+
+  final int elapsedTime = 120;
+  final int remainingTime = 400;
+  final int nextQueryTime = 480;
+
+  void handleStatus() {
+    // TODO: Add logic for status
+  }
+
+  void handleMeldungen() {
+    // TODO: Add logic for "Meldungen"
+  }
+
+  void handleEinsatzBeenden() {
+    // TODO: Add logic for "Einsatz beenden"
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,22 +51,20 @@ class Trupp extends StatelessWidget {
                 children: [
                   Row(
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 16,
                         backgroundColor: Colors.black,
                         child: Text(
-                          // TODO: Set first letter of Sur- and Lastname
-                          "A.B",
+                          "${truppfuehrer[0]}.${truppfuehrer.split(' ').last[0]}",
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
                       const SizedBox(width: 8),
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 16,
                         backgroundColor: Colors.grey,
                         child: Text(
-                          // TODO: Set first letter of Sur- and Lastname
-                          "D.G",
+                          "${truppmann[0]}.${truppmann.split(' ').last[0]}",
                           style: TextStyle(color: Colors.white, fontSize: 12),
                         ),
                       ),
@@ -52,9 +77,8 @@ class Trupp extends StatelessWidget {
                       color: Colors.amber,
                       borderRadius: BorderRadius.circular(4.0),
                     ),
-                    child: const Text(
-                      // TODO: Set "Funkrufname"
-                      "Funkrufname",
+                    child: Text(
+                      funkrufname,
                       style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -63,11 +87,22 @@ class Trupp extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          const PressureReading(),
+          PressureReading(
+            pressure: pressure,
+            maxPressure: maxPressure,
+          ),
           const SizedBox(height: 20),
-          const OperationInfo(),
+          OperationInfo(
+            elapsedTime: elapsedTime,
+            remainingTime: remainingTime,
+            nextQueryTime: nextQueryTime,
+          ),
           const SizedBox(height: 20),
-          const OperationButtons(),
+          OperationButtons(
+            onStatusPressed: handleStatus,
+            onMeldungenPressed: handleMeldungen,
+            onEinsatzBeendenPressed: handleEinsatzBeenden,
+          ),
         ],
       ),
     );
@@ -77,24 +112,15 @@ class Trupp extends StatelessWidget {
 // ----------------------
 // Pressure
 // ----------------------
-class PressureReading extends StatefulWidget {
-  const PressureReading({super.key});
+class PressureReading extends StatelessWidget {
+  final int pressure;
+  final int maxPressure;
 
-  @override
-  PressureReadingState createState() => PressureReadingState();
-}
-
-class PressureReadingState extends State<PressureReading> {
-  // Example value for pressure
-  final int maxPressure = 300;
-  // TODO: Set to start pressure
-  int pressure = 200;
-
-  void updatePressure(int newPressure) {
-    setState(() {
-      pressure = newPressure;
+  const PressureReading({
+    super.key,
+    required this.pressure,
+    required this.maxPressure,
     });
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -125,46 +151,22 @@ class PressureReadingState extends State<PressureReading> {
 // ----------------------
 // Operation Informations
 // ----------------------
-class OperationInfo extends StatefulWidget {
-  const OperationInfo({super.key});
+class OperationInfo extends StatelessWidget {
+  final int elapsedTime;
+  final int remainingTime;
+  final int nextQueryTime;
 
-  @override
-  OperationInfoState createState() => OperationInfoState();
-}
+  const OperationInfo({
+    super.key,
+    required this.elapsedTime,
+    required this.remainingTime,
+    required this.nextQueryTime,
+  });
 
-class OperationInfoState extends State<OperationInfo> {
-  int elapsedTime = 0;
-  int remainingTime = 400; //Only example value TODO: Initialize to actual time
-  int nextQueryTime = 60 * 8;
-
-  late Timer timer;
-
-  @override
-  void initState() {
-    super.initState();
-    timer = Timer.periodic(const Duration(seconds: 1), (Timer t) {
-      int newElapsedTime = elapsedTime + 1;
-      int newRemainingTime = remainingTime > 0 ? remainingTime - 1 : 0;
-      int newNextQueryTime = nextQueryTime - 1;
-      if (newNextQueryTime <= 0) {
-        newNextQueryTime = 60 * 8; //Only example TODO: When user did query, than reset timer
-      }
-      if (newElapsedTime != elapsedTime ||
-          newRemainingTime != remainingTime ||
-          newNextQueryTime != nextQueryTime) {
-        setState(() {
-          elapsedTime = newElapsedTime;
-          remainingTime = newRemainingTime;
-          nextQueryTime = newNextQueryTime;
-        });
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    timer.cancel();
-    super.dispose();
+  String formatTime(int seconds) {
+    final minutes = seconds ~/ 60;
+    final remainingSeconds = seconds % 60;
+    return "${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}";
   }
 
   @override
@@ -196,19 +198,23 @@ class OperationInfoState extends State<OperationInfo> {
       ],
     );
   }
-
-  String formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final remainingSeconds = seconds % 60;
-    return "${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}";
-  }
 }
 
 // ----------------------
 // Operation Buttons
 // ----------------------
 class OperationButtons extends StatelessWidget {
-  const OperationButtons({super.key});
+  
+  final VoidCallback onStatusPressed;
+  final VoidCallback onMeldungenPressed;
+  final VoidCallback onEinsatzBeendenPressed;
+
+  const OperationButtons({
+    super.key,
+    required this.onStatusPressed,
+    required this.onMeldungenPressed,
+    required this.onEinsatzBeendenPressed
+    });
 
   @override
   Widget build(BuildContext context) {
@@ -217,9 +223,7 @@ class OperationButtons extends StatelessWidget {
         Row(
           children: [
             ElevatedButton(
-              onPressed: () {
-                // TODO: Add logic for status
-              },
+              onPressed: onStatusPressed,
               child: const Text("Status:"),
             ),
             const SizedBox(width: 8),
@@ -230,16 +234,12 @@ class OperationButtons extends StatelessWidget {
         Row(
           children: [
             ElevatedButton(
-              onPressed: () {
-                // TODO: Add logic for "Meldungen"
-              },
+              onPressed: onMeldungenPressed,
               child: const Text("Meldungen"),
             ),
             const SizedBox(width: 8), 
             ElevatedButton(
-              onPressed: () {
-                // TODO: Add logic for "Einsatz beenden"
-              },
+              onPressed: onEinsatzBeendenPressed,
               child: const Text("Einsatz beenden"),
             ),
           ],
