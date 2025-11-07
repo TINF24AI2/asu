@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data/shared_lists.dart';
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
@@ -28,6 +29,8 @@ class _WidgetNewTroopState extends State<WidgetNewTroop> {
     final otherIndex = index == 0 ? 1 : 0;
     if (members[otherIndex] != null && members[otherIndex] == trimmed) return;
 
+    // persist to shared lists so settings reflect the new names immediately
+    SharedLists.addToTroopMembers(trimmed);
     setState(() {
       members[index] = trimmed;
     });
@@ -95,6 +98,8 @@ class _WidgetNewTroopState extends State<WidgetNewTroop> {
                 onPressed: () async {
                   final result = await showSelectCallNumberSheet(context);
                   if (result != null) {
+                    // persist selected/typed call number to shared lists
+                    SharedLists.addToCallNumbers(result);
                     setState(() => _selectedCallNumber = result);
                   }
                 },
