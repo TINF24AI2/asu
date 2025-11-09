@@ -4,18 +4,18 @@ import 'package:flutter/material.dart';
   -> shows the provided 'initialItems' in an alphabetic order and allows adding items
       through a dialog which is duplicate-safe
   -> requires confirmation for deletions
-  -> 'onChange' is called with an immutable snapshot after every change */
+  -> 'onChanged' is called with an immutable snapshot after every change */
 class SettingsListEditor extends StatefulWidget {
   final String title;
   final List<String> initialItems;
   final ValueChanged<List<String>>? onChanged;
 
   const SettingsListEditor({
-    Key? key,
+    super.key,
     required this.title,
     this.initialItems = const [],
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<SettingsListEditor> createState() => _SettingsListEditorState();
@@ -38,7 +38,8 @@ class _SettingsListEditorState extends State<SettingsListEditor> {
   void _notify() {
     // notify external listener with an immutable snapshot
     widget.onChanged?.call(List<String>.unmodifiable(items));
-    // rebuild UI to reflect the change
+    // rebuild UI to reflect the change (only if still mounted)
+    if (!mounted) return;
     setState(() {});
   }
 
@@ -68,6 +69,10 @@ class _SettingsListEditorState extends State<SettingsListEditor> {
         );
       },
     );
+
+    /* if the widget was removed while the dialog was open -> bail out to avoid
+     using the BuildContext or calling setState across an async gap. */
+    if (!mounted) return;
 
     // Validate input
     final candidate = result?.trim();
@@ -105,6 +110,8 @@ class _SettingsListEditorState extends State<SettingsListEditor> {
         ],
       ),
     );
+    // Avoid using context or setState after an async gap if the widget was disposed while the dialog was shown.
+    if (!mounted) return;
 
     if (confirmed == true) {
       // remove the item and notify listeners
@@ -140,8 +147,8 @@ class _SettingsListEditorState extends State<SettingsListEditor> {
             ),
       floatingActionButton: FloatingActionButton(
         onPressed: _addItem,
-        child: const Icon(Icons.add),
         tooltip: 'Hinzufügen',
+        child: const Icon(Icons.add),
       ),
     );
   }

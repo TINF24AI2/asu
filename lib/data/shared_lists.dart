@@ -5,7 +5,7 @@ class SharedLists {
 
   static final ValueNotifier<int> notifier = ValueNotifier<int>(0);
 
-  /* Internal backing lists, which are mutable and kept private 
+  /* Internal backing lists, each of which is mutable and kept private 
     -> callers can't accidentally mutate the shared data */
   static final List<String> _troopMembers = [
     'Anna Müller',
@@ -75,7 +75,7 @@ class SharedLists {
     notifier.value++;
   }
 
-  // add an item if it doesn't exist ( it has case-insensitive), trim whitespace, sort and notify listeners
+  // add an item if it doesn't exist (case-insensitive), trim whitespace, sort and notify listeners
   static void _addUnique(List<String> list, String s) {
     final t = s.trim();
     if (t.isEmpty) return; // ignore empty input
