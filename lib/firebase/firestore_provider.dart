@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'firestore_service.dart';
 
-final FirestoreServiceProvider = Provider<FirestoreService>((ref) {
+final firestoreServiceProvider = Provider<FirestoreService>((ref) {
   return FirestoreService();
 });
