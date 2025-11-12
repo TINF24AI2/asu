@@ -26,17 +26,15 @@ class Trupp extends ConsumerWidget {
     final truppmann = ref.watch(truppProvider.select((t) => t.memberName));
     final funkrufname = ref.watch(truppProvider.select((t) => t.callName));
 
-    final elapsedTime = ref.watch(
-      truppProvider.select((t) => t.sinceStart.inSeconds),
-    );
-    final remainingTime = ref.watch(
-      truppProvider.select(
-        (t) => t.theoreticalEnd.inSeconds - t.sinceStart.inSeconds,
-      ),
-    );
-    final nextQueryTime = ref.watch(
-      truppProvider.select((t) => t.nextCheck.inSeconds),
-    );
+    final elapsedTime = ref
+        .watch(truppProvider.select((t) => t.sinceStart))
+        .inSeconds;
+    final remainingTime = ref
+        .watch(truppProvider.select((t) => t.theoreticalEnd))
+        .inSeconds;
+    final nextQueryTime = ref
+        .watch(truppProvider.select((t) => t.nextCheck))
+        .inSeconds;
 
     final pressure = ref.watch(truppProvider.select((t) => t.lowestPressure));
     final maxPressure = ref.watch(truppProvider.select((t) => t.maxPressure));
