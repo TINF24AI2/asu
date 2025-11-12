@@ -18,6 +18,7 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
   return showModalBottomSheet<T>(
     context: context,
     isScrollControlled: true,
+    useRootNavigator: true,
     builder: (context) {
       String? typed;
       return Padding(
@@ -50,8 +51,10 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
                             child: ChoiceChip(
                               label: Text(labelBuilder(c)),
                               selected: false,
-                              onSelected: (_) =>
-                                  Navigator.of(context).pop(valueBuilder(c)),
+                              onSelected: (_) => Navigator.of(
+                                context,
+                                rootNavigator: true,
+                              ).pop(valueBuilder(c)),
                             ),
                           ),
                       ],
@@ -68,22 +71,23 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       TextButton(
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: () =>
+                            Navigator.of(context, rootNavigator: true).pop(),
                         child: const Text('Abbrechen'),
                       ),
                       const SizedBox(width: 8),
                       ElevatedButton(
                         onPressed: () {
                           if (typed == null || typed!.trim().isEmpty) {
-                            Navigator.of(context).pop();
+                            Navigator.of(context, rootNavigator: true).pop();
                             return;
                           }
                           final norm = normalizeTyped(typed!.trim());
                           if (norm == null) {
-                            Navigator.of(context).pop();
+                            Navigator.of(context, rootNavigator: true).pop();
                             return;
                           }
-                          Navigator.of(context).pop(norm);
+                          Navigator.of(context, rootNavigator: true).pop(norm);
                         },
                         child: const Text('OK'),
                       ),

@@ -33,7 +33,10 @@ Future<String?> showAddPersonDialog(
           // candidate list which uses the data bank or falls back to the default hardcoded list
           // right now it just uses the default list because there is no data backend yet
           for (var c in list)
-            ListTile(title: Text(c), onTap: () => Navigator.of(context).pop(c)),
+            ListTile(
+              title: Text(c),
+              onTap: () => Navigator.of(context, rootNavigator: true).pop(c),
+            ),
           // free text input
           TextField(
             onChanged: (v) => typed = v,
@@ -44,15 +47,21 @@ Future<String?> showAddPersonDialog(
       actions: [
         // when you cancel it return null
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
           child: const Text('Abbrechen'),
         ),
         ElevatedButton(
           onPressed: () {
             if (typed != null && typed!.trim().isNotEmpty) {
-              Navigator.of(context).pop(typed!.trim()); // return entered name
+              Navigator.of(
+                context,
+                rootNavigator: true,
+              ).pop(typed!.trim()); // return entered name
             } else {
-              Navigator.of(context).pop(); //return null if input is empty
+              Navigator.of(
+                context,
+                rootNavigator: true,
+              ).pop(); //return null if input is empty
             }
           },
           child: const Text('OK'),
