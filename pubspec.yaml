@@ -39,6 +39,8 @@ dependencies:
   go_router: ^16.3.0
   firebase_core: ^4.2.0
   freezed_annotation: ^3.1.0
+  firebase_auth: ^6.1.2
+  cloud_firestore: ^6.1.0
 
 dev_dependencies:
   flutter_test:
