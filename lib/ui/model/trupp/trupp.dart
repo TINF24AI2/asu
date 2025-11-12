@@ -1,52 +1,63 @@
 import 'dart:async';
 
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import 'history.dart';
 
+part 'trupp.freezed.dart';
 part 'trupp.g.dart';
 
-@riverpod
-class TruppNotifier extends _$TruppNotifier {
-  (double, double) _currentPressureTrend = (0.0, 0.0);
+// A simple representation of a linear function y = mx + b
+typedef LinearFunction = ({double m, double b});
+typedef PressureRecord = ({DateTime date, int pressure});
 
-  Iterable<(DateTime, int)> _pressureData(List<HistoryEntry> history) {
+@Riverpod(keepAlive: true)
+class TruppNotifier extends _$TruppNotifier {
+  LinearFunction _currentPressureTrend = (m: 0.0, b: 0.0);
+
+  // Return relevant pressure data from PressureHistory.
+  // Only the lower pressure is used as it is the deciding factor.
+  Iterable<PressureRecord> _pressureData(List<HistoryEntry> history) {
     return history.whereType<PressureHistoryEntry>().map(
       (e) => (
-        e.date,
-        e.leaderPressure <= e.memberPressure
+        date: e.date,
+        pressure: e.leaderPressure <= e.memberPressure
             ? e.leaderPressure
             : e.memberPressure,
       ),
     );
   }
 
-  (double, double) _interpolatePressure(Iterable<(DateTime, int)> data) {
+  // Interpolate a linear function (regression line) based on the last two of the given data points.
+  LinearFunction _interpolatePressure(Iterable<PressureRecord> data) {
+    data = data.toList().reversed.take(2);
     final n = data.length;
     final xBar =
         data
-            .map((e) => e.$1.millisecondsSinceEpoch / 1000)
+            .map((e) => e.date.millisecondsSinceEpoch / 1000)
             .reduce((a, b) => a + b) /
         n;
-    final yBar = data.map((e) => e.$2).reduce((a, b) => a + b) / n;
+    final yBar = data.map((e) => e.pressure).reduce((a, b) => a + b) / n;
 
-    final m =
-        (data
-            .map((e) {
-              final x = e.$1.millisecondsSinceEpoch / 1000;
-              final y = e.$2;
-              return (x - xBar) * (y - yBar);
-            })
-            .reduce((a, b) => a + b)) /
-        (data
-            .map((e) {
-              final x = e.$1.millisecondsSinceEpoch / 1000;
-              return (x - xBar) * (x - xBar);
-            })
-            .reduce((a, b) => a + b));
+    final m = n == 1
+        ? 0.0
+        : (data
+                  .map((e) {
+                    final x = e.date.millisecondsSinceEpoch / 1000;
+                    final y = e.pressure;
+                    return (x - xBar) * (y - yBar);
+                  })
+                  .reduce((a, b) => a + b)) /
+              (data
+                  .map((e) {
+                    final x = e.date.millisecondsSinceEpoch / 1000;
+                    return (x - xBar) * (x - xBar);
+                  })
+                  .reduce((a, b) => a + b));
 
     final b = yBar - m * xBar;
-    return (m, b);
+    return (m: m, b: b);
   }
 
   @override
@@ -64,25 +75,33 @@ class TruppNotifier extends _$TruppNotifier {
     final oneSec = Duration(seconds: 1);
     final seconds = Stream.periodic(oneSec, (x) => x);
     final secondsSubscription = seconds.listen((_) {
+      var newPotentialEnd = state.potentialEnd;
       if (state.potentialEnd != null && state.potentialEnd! > Duration.zero) {
-        state.potentialEnd = state.potentialEnd! - oneSec;
+        newPotentialEnd = state.potentialEnd! - oneSec;
       }
 
-      state.nextCheck -= oneSec;
+      final newNextCheck = state.nextCheck - oneSec;
 
+      var newTheoreticalEnd = state.theoreticalEnd;
       if (state.theoreticalEnd > Duration.zero) {
-        state.theoreticalEnd -= oneSec;
+        newTheoreticalEnd = state.theoreticalEnd - oneSec;
       }
 
-      state.sinceStart += oneSec;
+      final newSinceStart = state.sinceStart + oneSec;
 
-      state.lowestPressure =
-          (_currentPressureTrend.$1 *
+      final newLowestPressure =
+          (_currentPressureTrend.m *
                       (DateTime.now().millisecondsSinceEpoch / 1000) +
-                  _currentPressureTrend.$2)
+                  _currentPressureTrend.b)
               .round();
 
-      state = state;
+      state = state.copyWith(
+        potentialEnd: newPotentialEnd,
+        nextCheck: newNextCheck,
+        theoreticalEnd: newTheoreticalEnd,
+        sinceStart: newSinceStart,
+        lowestPressure: newLowestPressure,
+      );
     });
     ref.onDispose(() => secondsSubscription.cancel());
 
@@ -130,36 +149,52 @@ class TruppNotifier extends _$TruppNotifier {
   }
 
   void addHistoryEntry(HistoryEntry entry) {
-    state.history.add(entry);
+    var newState = state.copyWith();
+    newState.history.add(entry);
 
     if (entry is PressureHistoryEntry) {
       final min = entry.leaderPressure <= entry.memberPressure
           ? entry.leaderPressure
           : entry.memberPressure;
       if (min < state.lowestPressure) {
-        state.lowestPressure = min;
+        newState = newState.copyWith(lowestPressure: min);
       }
       _currentPressureTrend = _interpolatePressure(
         _pressureData(state.history),
       );
     }
+    state = newState;
   }
 }
 
-class TruppViewModel {
+@freezed
+class TruppViewModel with _$TruppViewModel {
+  @override
   final int number;
+  @override
   final String callName;
+  @override
   final String leaderName;
+  @override
   final String memberName;
+  @override
   final List<HistoryEntry> history;
-  Duration sinceStart;
-  Duration? potentialEnd;
-  Duration theoreticalEnd;
-  Duration nextCheck;
-  int lowestPressure;
+  @override
+  final Duration sinceStart;
+  @override
+  final Duration? potentialEnd;
+  @override
+  final Duration theoreticalEnd;
+  @override
+  final Duration nextCheck;
+  @override
+  final int lowestPressure;
+  @override
   final int lowestStartPressure;
+  @override
   final int maxPressure;
-  final List<AlarmType> alarms = [];
+  @override
+  final List<AlarmType> alarms;
 
   TruppViewModel({
     required this.callName,
@@ -174,6 +209,7 @@ class TruppViewModel {
     required this.lowestPressure,
     required this.lowestStartPressure,
     required this.maxPressure,
+    this.alarms = const [],
   });
 }
 

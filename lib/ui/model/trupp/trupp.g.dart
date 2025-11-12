@@ -21,7 +21,7 @@ final class TruppNotifierProvider
   }) : super(
          retry: null,
          name: r'truppProvider',
-         isAutoDispose: true,
+         isAutoDispose: false,
          dependencies: null,
          $allTransitiveDependencies: null,
        );
@@ -59,7 +59,7 @@ final class TruppNotifierProvider
   }
 }
 
-String _$truppNotifierHash() => r'89d52670474ce7201ce890cd344ed2659744a4bd';
+String _$truppNotifierHash() => r'd18a08673f4797400724c6b9e615ac2af916cb91';
 
 final class TruppNotifierFamily extends $Family
     with
@@ -76,7 +76,7 @@ final class TruppNotifierFamily extends $Family
         name: r'truppProvider',
         dependencies: null,
         $allTransitiveDependencies: null,
-        isAutoDispose: true,
+        isAutoDispose: false,
       );
 
   TruppNotifierProvider call(
