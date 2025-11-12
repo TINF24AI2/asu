@@ -7,7 +7,7 @@ part 'einsatz.g.dart';
 class EinsatzNotifier extends _$EinsatzNotifier {
   @override
   TruppList build() {
-    return TruppList([]);
+    return TruppList({});
   }
 
   void addTrupp(
@@ -32,14 +32,14 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       maxPressure,
       theoreticalDuration,
     );
-    final updatedTrupps = [...(state).trupps, (number, newTrupp)];
-    updatedTrupps.sort((a, b) => a.$1.compareTo(b.$1));
-    state = TruppList(updatedTrupps);
+    final map = state.trupps;
+    map[number] = newTrupp;
+    state = TruppList(map);
   }
 }
 
 class TruppList {
-  final List<(int, TruppNotifierProvider)> _trupps;
-  List<(int, TruppNotifierProvider)> get trupps => _trupps;
+  final Map<int, TruppNotifierProvider> _trupps;
+  Map<int, TruppNotifierProvider> get trupps => _trupps;
   TruppList(this._trupps);
 }
