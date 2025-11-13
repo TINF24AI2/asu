@@ -1,25 +1,50 @@
+import 'package:asu/ui/model/einsatz/einsatz.dart';
+import 'package:asu/ui/model/trupp/trupp.dart';
+import 'package:asu/ui/trupp.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import 'core/widget_new_troop.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
-class HorizontalTruppView extends StatefulWidget {
-  // Pages to display. The final slot is the "New Trupp" tile.
-  final List<Widget> truppPages;
-
-  // Called when the user taps the final "New Trupp" tile.
-  // Parent can add a new page and rebuild (e.g. via setState).
-  final VoidCallback? onCreateNew;
-  const HorizontalTruppView({
-    super.key,
-    required this.truppPages,
-    this.onCreateNew,
-  });
+class HorizontalTruppView extends ConsumerStatefulWidget {
+  const HorizontalTruppView({super.key});
 
   @override
-  State<HorizontalTruppView> createState() => _HorizontalTruppViewState();
+  ConsumerState<HorizontalTruppView> createState() =>
+      _HorizontalTruppViewState();
 }
 
-class _HorizontalTruppViewState extends State<HorizontalTruppView> {
+class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
   late final PageController _pageController;
+
+  final Map<int, Widget> _formPages = {};
+  int _nextTruppNumber = 1;
+
+  void _onCreateNew() {
+    setState(() {
+      _formPages[_nextTruppNumber] = WidgetNewTroop(
+        truppNumber: _nextTruppNumber,
+      );
+      _nextTruppNumber++;
+    });
+  }
+
+  List<Widget> _assembleWidgetsToList(Map<int, TruppNotifierProvider> trupps) {
+    List<Widget> pages = [];
+    for (var i = 1; i < _nextTruppNumber; i++) {
+      if (trupps.containsKey(i)) {
+        pages.add(Trupp(truppProvider: trupps[i]!));
+      } else if (_formPages.containsKey(i)) {
+        pages.add(_formPages[i]!);
+      } else {
+        throw StateError(
+          "Inconsistent state: missing trupp or form for trupp number $i",
+        );
+      }
+    }
+    return pages;
+  }
 
   @override
   void initState() {
@@ -39,8 +64,10 @@ class _HorizontalTruppViewState extends State<HorizontalTruppView> {
 
   @override
   Widget build(BuildContext context) {
+    final trupps = ref.watch(einsatzProvider).trupps;
+    final items = _assembleWidgetsToList(trupps);
     // total items = pages + final "New Trupp" tile
-    final totalItems = widget.truppPages.length + 1;
+    final totalItems = items.length + 1;
     return LayoutBuilder(
       builder: (context, constraints) {
         final itemHeight = constraints.maxHeight;
@@ -57,7 +84,7 @@ class _HorizontalTruppViewState extends State<HorizontalTruppView> {
                 padEnds: false,
                 scrollDirection: Axis.horizontal,
                 itemBuilder: (context, index) =>
-                    _buildPageItem(context, index, itemHeight),
+                    _buildPageItem(context, index, itemHeight, items),
               ),
             ],
           ),
@@ -68,8 +95,32 @@ class _HorizontalTruppViewState extends State<HorizontalTruppView> {
 
   // Builds a single page item in the horizontal scroll view.
   // Outsourced in order to keep the Widget build method cleaner, for further design changes.
-  Widget _buildPageItem(BuildContext context, int index, double itemHeight) {
-    final isNewTile = index == widget.truppPages.length;
+  Widget _buildPageItem(
+    BuildContext context,
+    int index,
+    double itemHeight,
+    List<Widget> items,
+  ) {
+    final Widget child;
+    if (index == items.length) {
+      child = InkWell(
+        onTap: _onCreateNew,
+        child: SizedBox.expand(
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.add, size: 48, color: Colors.black54),
+                const SizedBox(height: 8),
+                const Text('Neuer Trupp', style: TextStyle(fontSize: 18)),
+              ],
+            ),
+          ),
+        ),
+      );
+    } else {
+      child = SizedBox.expand(child: items[index]);
+    }
     return Container(
       height: itemHeight,
       color: Theme.of(context).scaffoldBackgroundColor,
@@ -84,28 +135,7 @@ class _HorizontalTruppViewState extends State<HorizontalTruppView> {
             side: BorderSide(color: Colors.grey.shade300, width: 1),
           ),
           clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: isNewTile
-                ? () {
-                    // TODO: Open the form to create a new Trupp here.
-                    widget.onCreateNew?.call();
-                  }
-                : null,
-            child: SizedBox.expand(
-              child: isNewTile
-                  ? Center(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          const Icon(Icons.add, size: 48, color: Colors.black54),
-                          const SizedBox(height: 8),
-                          const Text('Neuer Trupp', style: TextStyle(fontSize: 18)),
-                        ],
-                      ),
-                    )
-                  : widget.truppPages[index],
-            ),
-          ),
+          child: child,
         ),
       ),
     );

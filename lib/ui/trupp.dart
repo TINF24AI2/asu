@@ -1,23 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Trupp extends StatelessWidget {
-  final String truppfuehrer;
-  final String truppmann;
-  final String funkrufname;
+import 'model/trupp/trupp.dart';
 
-  const Trupp({
-    super.key,
-    required this.truppfuehrer,
-    required this.truppmann,
-    required this.funkrufname});
+class Trupp extends ConsumerWidget {
+  final TruppNotifierProvider truppProvider;
 
-  // Example values
-  final int pressure = 280;
-  final int maxPressure = 300;
-
-  final int elapsedTime = 120;
-  final int remainingTime = 400;
-  final int nextQueryTime = 480;
+  const Trupp({super.key, required this.truppProvider});
 
   void handleStatus() {
     // TODO: Add logic for status
@@ -32,7 +21,24 @@ class Trupp extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final truppfuehrer = ref.watch(truppProvider.select((t) => t.leaderName));
+    final truppmann = ref.watch(truppProvider.select((t) => t.memberName));
+    final funkrufname = ref.watch(truppProvider.select((t) => t.callName));
+
+    final elapsedTime = ref
+        .watch(truppProvider.select((t) => t.sinceStart))
+        .inSeconds;
+    final remainingTime = ref
+        .watch(truppProvider.select((t) => t.theoreticalEnd))
+        .inSeconds;
+    final nextQueryTime = ref
+        .watch(truppProvider.select((t) => t.nextCheck))
+        .inSeconds;
+
+    final pressure = ref.watch(truppProvider.select((t) => t.lowestPressure));
+    final maxPressure = ref.watch(truppProvider.select((t) => t.maxPressure));
+
     return Container(
       margin: const EdgeInsets.all(8.0),
       padding: const EdgeInsets.all(8.0),
@@ -70,16 +76,24 @@ class Trupp extends StatelessWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(height: 8), // Abstand zwischen Kreisen und Funkrufname
+                  const SizedBox(
+                    height: 8,
+                  ), // Abstand zwischen Kreisen und Funkrufname
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8.0,
+                      vertical: 4.0,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.amber,
                       borderRadius: BorderRadius.circular(4.0),
                     ),
                     child: Text(
                       funkrufname,
-                      style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],
@@ -87,10 +101,7 @@ class Trupp extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 20),
-          PressureReading(
-            pressure: pressure,
-            maxPressure: maxPressure,
-          ),
+          PressureReading(pressure: pressure, maxPressure: maxPressure),
           const SizedBox(height: 20),
           OperationInfo(
             elapsedTime: elapsedTime,
@@ -120,7 +131,7 @@ class PressureReading extends StatelessWidget {
     super.key,
     required this.pressure,
     required this.maxPressure,
-    });
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -204,7 +215,6 @@ class OperationInfo extends StatelessWidget {
 // Operation Buttons
 // ----------------------
 class OperationButtons extends StatelessWidget {
-  
   final VoidCallback onStatusPressed;
   final VoidCallback onMeldungenPressed;
   final VoidCallback onEinsatzBeendenPressed;
@@ -213,8 +223,8 @@ class OperationButtons extends StatelessWidget {
     super.key,
     required this.onStatusPressed,
     required this.onMeldungenPressed,
-    required this.onEinsatzBeendenPressed
-    });
+    required this.onEinsatzBeendenPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -237,7 +247,7 @@ class OperationButtons extends StatelessWidget {
               onPressed: onMeldungenPressed,
               child: const Text("Meldungen"),
             ),
-            const SizedBox(width: 8), 
+            const SizedBox(width: 8),
             ElevatedButton(
               onPressed: onEinsatzBeendenPressed,
               child: const Text("Einsatz beenden"),

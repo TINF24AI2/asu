@@ -3,7 +3,7 @@
 // ignore_for_file: public_member_api_docs, constant_identifier_names, avoid_classes_with_only_static_members
 
 mixin Pubspec {
-  static final buildDate = DateTime.utc(2025, 10, 23, 19, 35, 28);
+  static final buildDate = DateTime.utc(2025, 11, 12, 21, 2, 38);
 
   static const name = 'asu';
 
@@ -41,18 +41,22 @@ mixin Pubspec {
     'flutter_riverpod': '^3.0.3',
     'riverpod_annotation': '^3.0.3',
     'go_router': '^16.3.0',
+    'firebase_core': '^4.2.0',
+    'freezed_annotation': '^3.1.0',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
     'flutter_test': <dynamic, dynamic>{
       'sdk': 'flutter',
     },
-    'flutter_lints': '^5.0.0',
+    'flutter_lints': '^6.0.0',
     'riverpod_generator': '^3.0.3',
     'build_runner': '^2.7.1',
     'custom_lint': '^0.8.0',
     'riverpod_lint': '^3.0.3',
     'pubspec_extract': '^2.1.1',
+    'freezed': '^3.2.3',
+    'freezed_lint': '^0.0.12',
   };
 
   static const flutter = <dynamic, dynamic>{
