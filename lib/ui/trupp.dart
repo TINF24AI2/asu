@@ -25,6 +25,7 @@ class Trupp extends ConsumerWidget {
     final truppfuehrer = ref.watch(truppProvider.select((t) => t.leaderName));
     final truppmann = ref.watch(truppProvider.select((t) => t.memberName));
     final funkrufname = ref.watch(truppProvider.select((t) => t.callName));
+    final truppnumer = ref.watch(truppProvider.select((t) => t.number));
 
     final elapsedTime = ref
         .watch(truppProvider.select((t) => t.sinceStart))
@@ -47,10 +48,10 @@ class Trupp extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Text(
+              Text(
                 // Example heading
-                "Trupp 1",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                "Trupp $truppnumer",
+                style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
               const SizedBox(width: 40),
               Column(
@@ -78,7 +79,7 @@ class Trupp extends ConsumerWidget {
                   ),
                   const SizedBox(
                     height: 8,
-                  ), // Abstand zwischen Kreisen und Funkrufname
+                  ),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8.0,
