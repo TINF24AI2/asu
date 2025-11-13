@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
-import '../../data/shared_lists.dart';
+import '../settings/settings.dart'
+    show devCallNumbers, devTruppMembers; // DB placeholders
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
 
-// minimal functional implementation of widget_new_troop
+// minimal functional implementation of widget_new_trupp
 
-class WidgetNewTroop extends StatefulWidget {
-  const WidgetNewTroop({super.key});
+class WidgetNewTrupp extends StatefulWidget {
+  const WidgetNewTrupp({super.key});
 
   @override
-  State<WidgetNewTroop> createState() => _WidgetNewTroopState();
+  State<WidgetNewTrupp> createState() => _WidgetNewTruppState();
 }
 
-class _WidgetNewTroopState extends State<WidgetNewTroop> {
+class _WidgetNewTruppState extends State<WidgetNewTrupp> {
   // two-slot storage -> index 0 = leader, index 1 = other member
   final List<String?> members = [null, null];
   int? _selectedMinutes;
@@ -29,8 +30,8 @@ class _WidgetNewTroopState extends State<WidgetNewTroop> {
     final otherIndex = index == 0 ? 1 : 0;
     if (members[otherIndex] != null && members[otherIndex] == trimmed) return;
 
-    // persist to shared lists so settings reflect the new names immediately
-    SharedLists.addToTroopMembers(trimmed);
+    // persist to dev placeholder list for now (will be replaced by DB/repo)
+    devTruppMembers.add(trimmed);
     setState(() {
       members[index] = trimmed;
     });
@@ -65,7 +66,7 @@ class _WidgetNewTroopState extends State<WidgetNewTroop> {
         // Member slot (index 1)
         Row(
           children: [
-            const Text('Truppmitglied: '),
+            const Text('Truppmann: '),
             if (members[1] != null) ...[
               Text(members[1]!),
               IconButton(
@@ -96,10 +97,13 @@ class _WidgetNewTroopState extends State<WidgetNewTroop> {
             ] else ...[
               TextButton(
                 onPressed: () async {
-                  final result = await showSelectCallNumberSheet(context);
+                  final result = await showSelectCallNumberSheet(
+                    context,
+                    callNumbers: devCallNumbers,
+                  ); // pass dev placeholder list
                   if (result != null) {
-                    // persist selected/typed call number to shared lists
-                    SharedLists.addToCallNumbers(result);
+                    // persist selected/typed call number to dev placeholder list
+                    devCallNumbers.add(result);
                     setState(() => _selectedCallNumber = result);
                   }
                 },

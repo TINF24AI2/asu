@@ -1,111 +1,143 @@
 import 'package:flutter/material.dart';
-import '../../data/shared_lists.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart'; // for ConsumerWidget
 import 'settings_list_editor.dart';
+
+// ToDo: placeholder data which needs to be replaced with the DB/repository
+// I've kept it here for easy testing and example data for the DB/repository
+List<String> devTruppMembers = [
+  'Anna Müller',
+  'Bernd Schmidt',
+  'Clara Fischer',
+];
+
+List<String> devCallNumbers = [
+  'Florian München 40/1',
+  'Florian Berlin-Tegel 11/2',
+  'Florian Köln 30/1',
+];
+
+List<String> devLocations = ['1. OG', 'Erdgeschoss'];
+
+List<String> devStatus = ['Im Einsatz', 'Am Erkunden'];
 
 enum SettingsKey {
   // stable keys for the editable lists
-  troopMembers,
+  truppMembers,
   callNumbers,
   locations,
   status,
 }
 
-/* settings page shows 4 editable lists backed by 'SharedLists' as source
-  -> changes are seen app-wide e.g. in 'WidgetNewTroop' */
-class SettingsPage extends StatelessWidget {
+/* settings page shows 4 editable lists backed by placeholder lists
+  -> changes are seen app-wide e.g. in 'WidgetNewTrupp' */
+class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
 
-  // open the list editor and persist edits to 'SharedLists' using a stable key
-  void _openEditor(
+  // helper to open the stateless editor dialog and apply edits to the
+  // top-level dev lists (placeholders until DB/repo is wired)
+  Future<void> _openEditor(
     BuildContext context,
+    WidgetRef ref,
     SettingsKey key,
     String title,
     List<String> initial,
-  ) {
-    Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => SettingsListEditor(
-          title: title,
-          initialItems: initial,
-          onChanged: (newList) {
-            // Persist edits using a stable enum key -> decouples UI strings from logic
-            const setterMap = {
-              SettingsKey.troopMembers: SharedLists.setTroopMembers,
-              SettingsKey.callNumbers: SharedLists.setCallNumbers,
-              SettingsKey.locations: SharedLists.setLocations,
-              SettingsKey.status: SharedLists.setStatus,
-            };
-            setterMap[key]?.call(newList);
-            // amount of entries feedback
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('$title: ${newList.length} Einträge')),
-            );
-          },
-        ),
+  ) async {
+    await showDialog<void>(
+      context: context,
+      builder: (_) => SettingsListEditor(
+        title: title,
+        initialItems: initial,
+        onChanged: (newList) {
+          /* temporarily write edits to the dev placeholders; replace with
+          provider/notifier writes once the SettingsRepository is wired */
+          final Map<SettingsKey, void Function(List<String>)> _setters = {
+            SettingsKey.truppMembers: (items) =>
+                devTruppMembers = List<String>.from(items),
+            SettingsKey.callNumbers: (items) =>
+                devCallNumbers = List<String>.from(items),
+            SettingsKey.locations: (items) =>
+                devLocations = List<String>.from(items),
+            SettingsKey.status: (items) => devStatus = List<String>.from(items),
+          };
+
+          _setters[key]?.call(newList);
+          /* force rebuild of this widget's element so the stateless page 
+             -> reflects the updated top-level lists immediately */
+          try {
+            (context as Element).markNeedsBuild();
+          } catch (_) {}
+
+          // show feedback
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$title: ${newList.length} Einträge')),
+          );
+        },
       ),
     );
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(title: const Text('Einstellungen')),
-      body: ValueListenableBuilder<int>(
-        valueListenable: SharedLists.notifier,
-        builder: (context, _, _) => ListView(
-          children: [
-            ListTile(
-              title: const Text('Truppmitglieder'),
-              subtitle: Text('${SharedLists.troopMembers.length} Einträge'),
-              onTap: () => _openEditor(
-                context,
-                SettingsKey.troopMembers,
-                'Truppmitglieder',
-                SharedLists.troopMembers,
-              ),
-              trailing: const Icon(Icons.chevron_right),
+      body: ListView(
+        children: [
+          ListTile(
+            title: const Text('Truppmitglieder'),
+            // show current count from the dev placeholder list
+            subtitle: Text('${devTruppMembers.length} Einträge'),
+            onTap: () => _openEditor(
+              context,
+              ref,
+              SettingsKey.truppMembers,
+              'Truppmitglieder',
+              devTruppMembers,
             ),
-            const Divider(),
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          const Divider(),
 
-            ListTile(
-              title: const Text('Funkrufnummer'),
-              subtitle: Text('${SharedLists.callNumbers.length} Einträge'),
-              onTap: () => _openEditor(
-                context,
-                SettingsKey.callNumbers,
-                'Funkrufnummer',
-                SharedLists.callNumbers,
-              ),
-              trailing: const Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('Funkrufnummer'),
+            subtitle: Text('${devCallNumbers.length} Einträge'),
+            onTap: () => _openEditor(
+              context,
+              ref,
+              SettingsKey.callNumbers,
+              'Funkrufnummer',
+              devCallNumbers,
             ),
-            const Divider(),
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          const Divider(),
 
-            ListTile(
-              title: const Text('Standort'),
-              subtitle: Text('${SharedLists.locations.length} Einträge'),
-              onTap: () => _openEditor(
-                context,
-                SettingsKey.locations,
-                'Standort',
-                SharedLists.locations,
-              ),
-              trailing: const Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('Standort'),
+            subtitle: Text('${devLocations.length} Einträge'),
+            onTap: () => _openEditor(
+              context,
+              ref,
+              SettingsKey.locations,
+              'Standort',
+              devLocations,
             ),
-            const Divider(),
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          const Divider(),
 
-            ListTile(
-              title: const Text('Status'),
-              subtitle: Text('${SharedLists.status.length} Einträge'),
-              onTap: () => _openEditor(
-                context,
-                SettingsKey.status,
-                'Status',
-                SharedLists.status,
-              ),
-              trailing: const Icon(Icons.chevron_right),
+          ListTile(
+            title: const Text('Status'),
+            subtitle: Text('${devStatus.length} Einträge'),
+            onTap: () => _openEditor(
+              context,
+              ref,
+              SettingsKey.status,
+              'Status',
+              devStatus,
             ),
-          ],
-        ),
+            trailing: const Icon(Icons.chevron_right),
+          ),
+        ],
       ),
     );
   }

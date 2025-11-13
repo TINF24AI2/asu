@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import '../../data/shared_lists.dart';
+import '../settings/settings.dart'
+    show devTruppMembers; // mutable dev placeholder
 import 'modal_choice_sheet.dart';
 
-/* show a dialog that lets the user pick a name or enter a custom name
-  -> Uses 'SharedLists.troopMembers' as of now and returns the selected/entered name or null */
+// show a bottom-sheet dialog that lets the user pick a name or enter a custom name
+
 Future<String?> showAddPersonDialog(
   BuildContext context, {
   List<String>? candidates,
 }) {
-  // use the SharedLists as the source and allow override through 'candidates'
-  final list = candidates ?? SharedLists.troopMembers;
+  // use the provided candidates or fall back to the dev placeholder list
+  // ToDo: replace this with a repository or DB call later
+  final list = candidates ?? devTruppMembers;
 
-  // Use the shared bottom-sheet helper. If callers pass an empty list the
-  // sheet will show only the text field (useful for the Settings flow).
+  // use the shared bottom-sheet helper
   return showHorizontalChoiceSheet<String, String>(
     context,
     title: 'Person hinzufügen',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../data/shared_lists.dart';
+import '../settings/settings.dart'
+    show devCallNumbers; // mutable dev placeholder
 import 'modal_choice_sheet.dart';
 
 // normalize the typed call number string
@@ -15,8 +16,9 @@ Future<String?> showSelectCallNumberDialog(
   BuildContext context, {
   List<String>? callNumbers,
 }) {
-  // use SharedLists and allow optional override
-  final list = callNumbers ?? SharedLists.callNumbers;
+  // use the provided override or fall back to dev placeholder values.
+  // ToDo: wire this to the repository / DB later.
+  final list = callNumbers ?? devCallNumbers;
 
   // Use the shared bottom-sheet helper; callers may pass an empty list to
   // show only the text input (useful for Settings).
@@ -37,7 +39,7 @@ Future<String?> showSelectCallNumberSheet(
   BuildContext context, {
   List<String>? callNumbers,
 }) {
-  final list = callNumbers ?? SharedLists.callNumbers;
+  final list = callNumbers ?? devCallNumbers;
   return showHorizontalChoiceSheet<String, String>(
     context,
     title: 'Rufnummer auswählen',
