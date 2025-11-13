@@ -50,7 +50,7 @@ class SettingsPage extends ConsumerWidget {
         onChanged: (newList) {
           /* temporarily write edits to the dev placeholders; replace with
           provider/notifier writes once the SettingsRepository is wired */
-          final Map<SettingsKey, void Function(List<String>)> _setters = {
+          final Map<SettingsKey, void Function(List<String>)> setters = {
             SettingsKey.truppMembers: (items) =>
                 devTruppMembers = List<String>.from(items),
             SettingsKey.callNumbers: (items) =>
@@ -60,12 +60,15 @@ class SettingsPage extends ConsumerWidget {
             SettingsKey.status: (items) => devStatus = List<String>.from(items),
           };
 
-          _setters[key]?.call(newList);
+          setters[key]?.call(newList);
           /* force rebuild of this widget's element so the stateless page 
              -> reflects the updated top-level lists immediately */
           try {
             (context as Element).markNeedsBuild();
-          } catch (_) {}
+          } catch (e) {
+            // casting may fail if context is not mounted; log for debugging
+            debugPrint('Failed to mark context for rebuild: $e');
+          }
 
           // show feedback
           ScaffoldMessenger.of(context).showSnackBar(

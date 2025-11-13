@@ -101,12 +101,14 @@ class SettingsListEditor extends StatelessWidget {
                 // ensure the dialog's BuildContext is still valid before calling setState
                 if (!context.mounted) return;
                 if (confirmed == true) {
-                  final removed = items.removeAt(index);
-                  setState(() {});
+                  // remove inside setState for clarity, then notify and show feedback
+                  setState(() {
+                    items.removeAt(index);
+                  });
                   onChanged?.call(List<String>.unmodifiable(items));
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('"$removed" gelöscht')),
-                  );
+                  ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text('"$name" gelöscht')));
                 }
               }
 
