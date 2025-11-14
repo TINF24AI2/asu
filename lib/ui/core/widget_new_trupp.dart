@@ -30,8 +30,10 @@ class _WidgetNewTruppState extends State<WidgetNewTrupp> {
     final otherIndex = index == 0 ? 1 : 0;
     if (members[otherIndex] != null && members[otherIndex] == trimmed) return;
 
-    // persist to dev placeholder list for now (will be replaced by DB/repo)
-    devTruppMembers.add(trimmed);
+    // persist to dev placeholder list only if the name is new
+    if (!devTruppMembers.contains(trimmed)) {
+      devTruppMembers.add(trimmed);
+    }
     setState(() {
       members[index] = trimmed;
     });
@@ -102,8 +104,10 @@ class _WidgetNewTruppState extends State<WidgetNewTrupp> {
                     callNumbers: devCallNumbers,
                   ); // pass dev placeholder list
                   if (result != null) {
-                    // persist selected/typed call number to dev placeholder list
-                    devCallNumbers.add(result);
+                    // persist selected/typed call number only if it's new
+                    if (!devCallNumbers.contains(result)) {
+                      devCallNumbers.add(result);
+                    }
                     setState(() => _selectedCallNumber = result);
                   }
                 },
