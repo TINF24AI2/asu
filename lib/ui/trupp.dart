@@ -191,6 +191,44 @@ class Trupp extends ConsumerWidget {
             latestLocation: latestLocation,
             latestStatus: latestStatus,
           ),
+
+          const SizedBox(height: 10),
+
+          const Text(
+            "Historie",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: history.length > 5 ? 5 : history.length,
+              itemBuilder: (context, index) {
+                final entry = history.reversed.toList()[index];
+                if (entry is StatusHistoryEntry) {
+                  return ListTile(
+                    title: Text("Status: ${entry.status}"),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                } else if (entry is PressureHistoryEntry) {
+                  return ListTile(
+                    title: Text(
+                      "Druck: ${entry.leaderPressure}/${entry.memberPressure}",
+                    ),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                } else if (entry is LocationHistoryEntry) {
+                  return ListTile(
+                    title: Text("Standort: ${entry.location}"),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                } else {
+                  return ListTile(
+                    title: Text("Unbekannter Eintrag"),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                }
+              },
+            ),
+          ),
         ],
       ),
     );
