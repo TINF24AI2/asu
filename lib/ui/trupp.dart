@@ -1,5 +1,6 @@
 import 'package:asu/ui/model/trupp/history.dart';
 import 'package:asu/ui/trupp/report.dart';
+import 'package:asu/ui/trupp/end.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -14,17 +15,21 @@ class Trupp extends ConsumerWidget {
   // unnecessary, because status is not a button
   //}
 
+  // -----------------
+  // Enter Reports
+  // -----------------
   void handleMeldungen(BuildContext context, WidgetRef ref) {
     final lowestPressure = ref.watch(
       truppProvider.select((t) => t.lowestPressure),
     );
 
+    // Show Modal Screen and add history entries
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       builder: (context) {
         return Report(
-          onPressureSelected: (selectedPressure) {
+          onPressureSelected: (selectedPressure, role) {
             ref
                 .read(truppProvider.notifier)
                 .addHistoryEntry(
@@ -61,11 +66,102 @@ class Trupp extends ConsumerWidget {
     );
   }
 
-  void handleEinsatzBeenden() {
-    // TODO: Add logic for "Einsatz beenden"
+  // ------------------
+  // End Operation
+  // ------------------
+  void handleEinsatzBeenden(BuildContext context, WidgetRef ref) {
+    int? leaderPressure;
+    int? memberPressure;
+    String? selectedType;
+    bool isHeatExposed = false;
+
+    void onPressureSelected(int pressure, String role) {
+      if (role == "Truppführer") {
+        leaderPressure = pressure;
+      } else if (role == "Truppmann") {
+        memberPressure = pressure;
+      }
+    }
+
+    void onTypeSelected(String type) {
+      selectedType = type;
+    }
+
+    void onHeatExposedSelected(bool value) {
+      isHeatExposed = value;
+    }
+
+    // Called when user pressed submit on "end.dart"
+    void onSubmitPressed() {
+      // Pressure
+      if (leaderPressure != null && memberPressure != null) {
+        ref
+            .read(truppProvider.notifier)
+            .addHistoryEntry(
+              PressureHistoryEntry(
+                date: DateTime.now(),
+                leaderPressure: leaderPressure!,
+                memberPressure: memberPressure!,
+              ),
+            );
+      }
+
+      // Type of Operation
+      if (selectedType != null) {
+        // Here I am not sure if we write that in the History
+        // Maybe we need another history entry for that
+        ref
+            .read(truppProvider.notifier)
+            .addHistoryEntry(
+              StatusHistoryEntry(date: DateTime.now(), status: selectedType!),
+            );
+      }
+
+      // Hitzebeaufschlagt
+      ref
+          .read(truppProvider.notifier)
+          .addHistoryEntry(
+            // Same here
+            StatusHistoryEntry(
+              date: DateTime.now(),
+              status: "Hitzebeaufschlagt: ${isHeatExposed ? "Ja" : "Nein"}",
+            ),
+          );
+
+      // Add end of operation to history
+      ref
+        .read(truppProvider.notifier)
+        .addHistoryEntry(
+          StatusHistoryEntry(date: DateTime.now(), status: "Einsatz beendet"),
+        );
+
+      Navigator.pop(context);
+    }
+
+    // Show Modal-Screen
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return End(
+          operationTime: ref.watch(truppProvider.select((t) => t.sinceStart)),
+          lowestPressure: ref.watch(
+            truppProvider.select((t) => t.lowestPressure),
+          ),
+          onPressureSelected: onPressureSelected,
+          onTypeSelected: onTypeSelected,
+          onHeatExposedSelected: onHeatExposedSelected,
+          isHeatExposed: isHeatExposed,
+          onSubmitPressed: onSubmitPressed,
+        );
+      },
+    );
+
+    // TODO: End operation for this troup
   }
 
-  // Those functions can be writte somewhere else in future
+
+  // Used to display latest location and status on screen
   String getLatestLocation(List<HistoryEntry> history) {
     final locationEntry =
         history.lastWhere(
@@ -187,7 +283,7 @@ class Trupp extends ConsumerWidget {
           OperationButtons(
             //  onStatusPressed: handleStatus,
             onMeldungenPressed: () => handleMeldungen(context, ref),
-            onEinsatzBeendenPressed: handleEinsatzBeenden,
+            onEinsatzBeendenPressed: () => handleEinsatzBeenden(context, ref),
             latestLocation: latestLocation,
             latestStatus: latestStatus,
           ),

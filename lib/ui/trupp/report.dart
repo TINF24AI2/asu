@@ -4,7 +4,7 @@ import 'package:asu/ui/trupp/status.dart';
 import 'package:flutter/material.dart';
 
 class Report extends StatelessWidget {
-  final Function(int) onPressureSelected;
+  final Function(int, String) onPressureSelected;
   final Function(String) onStatusSelected;
   final Function(String) onLocationSelected;
   final int lowestPressure;
@@ -49,7 +49,9 @@ class Report extends StatelessWidget {
                     isScrollControlled: true,
                     builder: (context) {
                       return Pressure(
-                        onPressureSelected: onPressureSelected,
+                        onPressureSelected: (selectedPressure, role) {
+                          onPressureSelected(selectedPressure, role);
+                        },
                         lowestPressure: lowestPressure,
                       );
                     },
