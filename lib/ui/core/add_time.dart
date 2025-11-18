@@ -31,7 +31,7 @@ Future<int?> showSelectDurationDialog(BuildContext context) {
             for (var d in defaultDurations)
               ListTile(
                 title: Text('$d min'),
-                onTap: () => Navigator.of(context).pop(d),
+                onTap: () => Navigator.of(context, rootNavigator: true).pop(d),
               ),
             const Divider(),
             // free-text entry for a custom minute value
@@ -53,19 +53,19 @@ Future<int?> showSelectDurationDialog(BuildContext context) {
             if (typed != null && typed!.trim().isNotEmpty) {
               final norm = normalize(typed!.trim());
               if (norm != null) {
-                Navigator.of(context).pop(norm);
+                Navigator.of(context, rootNavigator: true).pop(norm);
               } else {
-                Navigator.of(context).pop();
+                Navigator.of(context, rootNavigator: true).pop();
               }
             } else {
-              Navigator.of(context).pop();
+              Navigator.of(context, rootNavigator: true).pop();
             }
           },
           child: const Text('OK'),
         ),
         // cancel and return null
         TextButton(
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
           child: const Text('Abbrechen'),
         ),
       ],

@@ -1,4 +1,5 @@
 import 'package:asu/ui/core/core.dart';
+import 'package:asu/ui/horizontal_trupp_view.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:go_router/go_router.dart';
@@ -11,6 +12,8 @@ GoRouter goRouter(Ref ref) {
   // and we are already logged in
   // TODO change this as soon as firebase is integrated
 
+  final einsatzKey = GlobalKey();
+
   return GoRouter(
     initialLocation: '/operation',
     routes: [
@@ -22,7 +25,7 @@ GoRouter goRouter(Ref ref) {
         routes: [
           GoRoute(
             path: '/operation',
-            builder: (context, state) => const Placeholder(),
+            builder: (context, state) => HorizontalTruppView(key: einsatzKey),
             name: 'operation',
           ),
           GoRoute(
