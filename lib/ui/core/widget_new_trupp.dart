@@ -1,4 +1,6 @@
+import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../settings/settings.dart'
     show devCallNumbers, devTruppMembers; // DB placeholders
 import 'add_person.dart';
@@ -7,14 +9,15 @@ import 'add_time.dart';
 
 // minimal functional implementation of widget_new_trupp
 
-class WidgetNewTrupp extends StatefulWidget {
-  const WidgetNewTrupp({super.key});
+class WidgetNewTrupp extends ConsumerStatefulWidget {
+  final int truppNumber;
+  const WidgetNewTrupp({super.key, required this.truppNumber});
 
   @override
-  State<WidgetNewTrupp> createState() => _WidgetNewTruppState();
+  ConsumerState<WidgetNewTrupp> createState() => _WidgetNewTruppState();
 }
 
-class _WidgetNewTruppState extends State<WidgetNewTrupp> {
+class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
   // two-slot storage -> index 0 = leader, index 1 = other member
   final List<String?> members = [null, null];
   int? _selectedMinutes;
@@ -122,7 +125,24 @@ class _WidgetNewTruppState extends State<WidgetNewTrupp> {
         // action row -> start and duration selector
         Row(
           children: [
-            ElevatedButton(onPressed: () {}, child: const Text('Start')),
+            ElevatedButton(
+              onPressed: () {
+                ref
+                    .read(einsatzProvider.notifier)
+                    .addTrupp(
+                      widget.truppNumber,
+                      _selectedCallNumber ?? "",
+                      members[0] ?? "",
+                      members[1] ?? "",
+                      DateTime.now(),
+                      280,
+                      270,
+                      300,
+                      Duration(minutes: _selectedMinutes ?? 30),
+                    );
+              },
+              child: const Text('Start'),
+            ),
             const SizedBox(width: 20),
             ElevatedButton(
               onPressed: () async {
