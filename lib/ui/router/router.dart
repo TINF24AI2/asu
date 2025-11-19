@@ -1,26 +1,56 @@
-import 'package:asu/ui/core/core.dart';
-import 'package:asu/ui/horizontal_trupp_view.dart';
 import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../firebase/firebase_auth_provider.dart';
+import '../auth/auth.dart';
+import '../core/core.dart';
+import '../horizontal_trupp_view.dart';
 
 part 'router.g.dart';
 
 @riverpod
 GoRouter goRouter(Ref ref) {
-  // Assume we have an authState provider that notifies about authentication changes
-  // and we are already logged in
-  // TODO change this as soon as firebase is integrated
-
   final einsatzKey = GlobalKey();
 
   return GoRouter(
     initialLocation: '/operation',
+    redirect: (context, state) {
+      final authenticated =
+          ref.read(firebaseAuthServiceProvider).currentUser != null;
+      if (['/login', '/register'].contains(state.matchedLocation)) {
+        if (authenticated) {
+          return '/operation';
+        }
+        return null;
+      } else {
+        if (!authenticated) {
+          return '/login';
+        }
+        return null;
+      }
+    },
     routes: [
+      GoRoute(
+        path: "/login",
+        name: 'login',
+        builder: (context, state) => LoginScreen(),
+      ),
+      GoRoute(
+        path: "/register",
+        name: 'register',
+        builder: (context, state) => RegisterScreen(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           final name = state.topRoute?.name;
-          return AsuScaffold(body: child, topRouteName: name);
+          return AsuScaffold(
+            body: child,
+            topRouteName: name,
+            signOut: () async {
+              await ref.read(firebaseAuthServiceProvider).signOut();
+            },
+          );
         },
         routes: [
           GoRoute(

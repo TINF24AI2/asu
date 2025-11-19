@@ -5,8 +5,14 @@ import 'package:go_router/go_router.dart';
 class AsuScaffold extends StatelessWidget {
   final String? topRouteName;
   final Widget body;
+  final Future<void> Function()? signOut;
 
-  const AsuScaffold({super.key, this.topRouteName, required this.body});
+  const AsuScaffold({
+    super.key,
+    this.topRouteName,
+    required this.body,
+    this.signOut,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +49,16 @@ class AsuScaffold extends StatelessWidget {
               );
             },
             icon: const Icon(Icons.info_outline),
+          ),
+          IconButton(
+            onPressed: () async {
+              if (signOut != null) {
+                await signOut!();
+                if (!context.mounted) return;
+                context.goNamed('login');
+              }
+            },
+            icon: Icon(Icons.logout),
           ),
         ],
       ),
