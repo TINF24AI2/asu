@@ -1,28 +1,14 @@
 import 'package:flutter/material.dart';
 import 'modal_choice_sheet.dart';
 
-/* dialog and selector for picking a duration in minutes
-   Returns the selected minutes as integer or null. */
-const List<int> defaultDurations = [
-  5,
-  10,
-  15,
-  20,
-  25,
-  30,
-  35,
-  40,
-  45,
-  50,
-  55,
-  60,
-];
+/* dialog for picking a duration in minutes
+  -> it returns the selected minutes as int */
+const List<int> defaultDurations = [20, 25, 30];
 
 Future<int?> showSelectDurationDialog(BuildContext context) {
   String? typed;
 
-  // Normalize typed input to an integer minute value.
-  // Accepts only numeric input and bounds to 1..1440 (24 hours).
+  // Normalize typed input to an integer minute value of 1-1440 (24 hours)
   int? normalize(String input) {
     final digits = input.replaceAll(RegExp(r'[^0-9]'), '');
     if (digits.isEmpty) return null;
@@ -41,13 +27,14 @@ Future<int?> showSelectDurationDialog(BuildContext context) {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            // default candidates
             for (var d in defaultDurations)
               ListTile(
                 title: Text('$d min'),
                 onTap: () => Navigator.of(context, rootNavigator: true).pop(d),
               ),
             const Divider(),
-            // Free-text entry for custom values.
+            // free-text entry for a custom minute value
             TextField(
               decoration: const InputDecoration(
                 labelText: 'Eigene Dauer in Minuten',
@@ -76,7 +63,7 @@ Future<int?> showSelectDurationDialog(BuildContext context) {
           },
           child: const Text('OK'),
         ),
-        // Cancel and return null
+        // cancel and return null
         TextButton(
           onPressed: () => Navigator.of(context, rootNavigator: true).pop(),
           child: const Text('Abbrechen'),

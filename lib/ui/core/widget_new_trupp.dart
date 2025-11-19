@@ -1,21 +1,23 @@
 import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../settings/settings.dart'
+    show devCallNumbers, devTruppMembers; // DB placeholders
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
 
-// minimal functional implementation of widget_new_troop
+// minimal functional implementation of widget_new_trupp
 
-class WidgetNewTroop extends ConsumerStatefulWidget {
+class WidgetNewTrupp extends ConsumerStatefulWidget {
   final int truppNumber;
-  const WidgetNewTroop({super.key, required this.truppNumber});
+  const WidgetNewTrupp({super.key, required this.truppNumber});
 
   @override
-  ConsumerState<WidgetNewTroop> createState() => _WidgetNewTroopState();
+  ConsumerState<WidgetNewTrupp> createState() => _WidgetNewTruppState();
 }
 
-class _WidgetNewTroopState extends ConsumerState<WidgetNewTroop> {
+class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
   // two-slot storage -> index 0 = leader, index 1 = other member
   final List<String?> members = [null, null];
   int? _selectedMinutes;
@@ -31,6 +33,10 @@ class _WidgetNewTroopState extends ConsumerState<WidgetNewTroop> {
     final otherIndex = index == 0 ? 1 : 0;
     if (members[otherIndex] != null && members[otherIndex] == trimmed) return;
 
+    // persist to dev placeholder list only if the name is new
+    if (!devTruppMembers.contains(trimmed)) {
+      devTruppMembers.add(trimmed);
+    }
     setState(() {
       members[index] = trimmed;
     });
@@ -65,7 +71,7 @@ class _WidgetNewTroopState extends ConsumerState<WidgetNewTroop> {
         // Member slot (index 1)
         Row(
           children: [
-            const Text('Truppmitglied: '),
+            const Text('Truppmann: '),
             if (members[1] != null) ...[
               Text(members[1]!),
               IconButton(
@@ -96,8 +102,15 @@ class _WidgetNewTroopState extends ConsumerState<WidgetNewTroop> {
             ] else ...[
               TextButton(
                 onPressed: () async {
-                  final result = await showSelectCallNumberSheet(context);
+                  final result = await showSelectCallNumberSheet(
+                    context,
+                    callNumbers: devCallNumbers,
+                  ); // pass dev placeholder list
                   if (result != null) {
+                    // persist selected/typed call number only if it's new
+                    if (!devCallNumbers.contains(result)) {
+                      devCallNumbers.add(result);
+                    }
                     setState(() => _selectedCallNumber = result);
                   }
                 },

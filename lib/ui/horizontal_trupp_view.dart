@@ -4,7 +4,7 @@ import 'package:asu/ui/trupp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'core/widget_new_troop.dart';
+import 'core/widget_new_trupp.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
 class HorizontalTruppView extends ConsumerStatefulWidget {
@@ -23,7 +23,7 @@ class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
 
   void _onCreateNew() {
     setState(() {
-      _formPages[_nextTruppNumber] = WidgetNewTroop(
+      _formPages[_nextTruppNumber] = WidgetNewTrupp(
         truppNumber: _nextTruppNumber,
       );
       _nextTruppNumber++;
