@@ -1,6 +1,6 @@
 import 'package:asu/ui/model/trupp/history.dart';
-import 'package:asu/ui/trupp/report.dart';
-import 'package:asu/ui/trupp/end.dart';
+import 'package:asu/ui/trupp/end_handler.dart';
+import 'package:asu/ui/trupp/report_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -10,156 +10,6 @@ class Trupp extends ConsumerWidget {
   final TruppNotifierProvider truppProvider;
 
   const Trupp({super.key, required this.truppProvider});
-
-  //void handleStatus() {
-  // unnecessary, because status is not a button
-  //}
-
-  // -----------------
-  // Enter Reports
-  // -----------------
-  void handleMeldungen(BuildContext context, WidgetRef ref) {
-    final lowestPressure = ref.watch(
-      truppProvider.select((t) => t.lowestPressure),
-    );
-
-    // Show Modal Screen and add history entries
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return Report(
-          onPressureSelected: (selectedPressure, role) {
-            ref
-                .read(truppProvider.notifier)
-                .addHistoryEntry(
-                  PressureHistoryEntry(
-                    date: DateTime.now(),
-                    leaderPressure: selectedPressure,
-                    memberPressure: selectedPressure,
-                  ),
-                );
-          },
-          onStatusSelected: (selectedStatus) {
-            ref
-                .read(truppProvider.notifier)
-                .addHistoryEntry(
-                  StatusHistoryEntry(
-                    date: DateTime.now(),
-                    status: selectedStatus,
-                  ),
-                );
-          },
-          onLocationSelected: (selectedLocation) {
-            ref
-                .read(truppProvider.notifier)
-                .addHistoryEntry(
-                  LocationHistoryEntry(
-                    date: DateTime.now(),
-                    location: selectedLocation,
-                  ),
-                );
-          },
-          lowestPressure: lowestPressure,
-        );
-      },
-    );
-  }
-
-  // ------------------
-  // End Operation
-  // ------------------
-  void handleEinsatzBeenden(BuildContext context, WidgetRef ref) {
-    int? leaderPressure;
-    int? memberPressure;
-    String? selectedType;
-    bool isHeatExposed = false;
-
-    void onPressureSelected(int pressure, String role) {
-      if (role == "Truppführer") {
-        leaderPressure = pressure;
-      } else if (role == "Truppmann") {
-        memberPressure = pressure;
-      }
-    }
-
-    void onTypeSelected(String type) {
-      selectedType = type;
-    }
-
-    void onHeatExposedSelected(bool value) {
-      isHeatExposed = value;
-    }
-
-    // Called when user pressed submit on "end.dart"
-    void onSubmitPressed() {
-      // Pressure
-      if (leaderPressure != null && memberPressure != null) {
-        ref
-            .read(truppProvider.notifier)
-            .addHistoryEntry(
-              PressureHistoryEntry(
-                date: DateTime.now(),
-                leaderPressure: leaderPressure!,
-                memberPressure: memberPressure!,
-              ),
-            );
-      }
-
-      // Type of Operation
-      if (selectedType != null) {
-        // Here I am not sure if we write that in the History
-        // Maybe we need another history entry for that
-        ref
-            .read(truppProvider.notifier)
-            .addHistoryEntry(
-              StatusHistoryEntry(date: DateTime.now(), status: selectedType!),
-            );
-      }
-
-      // Hitzebeaufschlagt
-      ref
-          .read(truppProvider.notifier)
-          .addHistoryEntry(
-            // Same here
-            StatusHistoryEntry(
-              date: DateTime.now(),
-              status: "Hitzebeaufschlagt: ${isHeatExposed ? "Ja" : "Nein"}",
-            ),
-          );
-
-      // Add end of operation to history
-      ref
-        .read(truppProvider.notifier)
-        .addHistoryEntry(
-          StatusHistoryEntry(date: DateTime.now(), status: "Einsatz beendet"),
-        );
-
-      Navigator.pop(context);
-    }
-
-    // Show Modal-Screen
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) {
-        return End(
-          operationTime: ref.watch(truppProvider.select((t) => t.sinceStart)),
-          lowestPressure: ref.watch(
-            truppProvider.select((t) => t.lowestPressure),
-          ),
-          onPressureSelected: onPressureSelected,
-          onTypeSelected: onTypeSelected,
-          onHeatExposedSelected: onHeatExposedSelected,
-          isHeatExposed: isHeatExposed,
-          onSubmitPressed: onSubmitPressed,
-        );
-      },
-    );
-
-    // TODO: End operation for this troup
-  }
-
 
   // Used to display latest location and status on screen
   String getLatestLocation(List<HistoryEntry> history) {
@@ -191,7 +41,7 @@ class Trupp extends ConsumerWidget {
     final truppfuehrer = ref.watch(truppProvider.select((t) => t.leaderName));
     final truppmann = ref.watch(truppProvider.select((t) => t.memberName));
     final funkrufname = ref.watch(truppProvider.select((t) => t.callName));
-    final truppnumer = ref.watch(truppProvider.select((t) => t.number));
+    final truppnumber = ref.watch(truppProvider.select((t) => t.number));
     final history = ref.watch(truppProvider.select((t) => t.history));
 
     final elapsedTime = ref
@@ -219,7 +69,7 @@ class Trupp extends ConsumerWidget {
           Row(
             children: [
               Text(
-                "Trupp $truppnumer",
+                "Trupp $truppnumber",
                 style: const TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -281,9 +131,18 @@ class Trupp extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           OperationButtons(
-            //  onStatusPressed: handleStatus,
-            onMeldungenPressed: () => handleMeldungen(context, ref),
-            onEinsatzBeendenPressed: () => handleEinsatzBeenden(context, ref),
+            onMeldungenPressed: () {
+              showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) => ReportHandler(truppProvider: truppProvider));
+            },
+            onEinsatzBeendenPressed: () {
+              showModalBottomSheet(
+                context: context, 
+                isScrollControlled: true, 
+                builder: (context) => EndHandler(truppProvider: truppProvider, operationTime: Duration(seconds: elapsedTime)));
+            },
             latestLocation: latestLocation,
             latestStatus: latestStatus,
           ),
@@ -426,7 +285,6 @@ class OperationInfo extends StatelessWidget {
 // Operation Buttons
 // ----------------------
 class OperationButtons extends StatelessWidget {
-  //  final VoidCallback onStatusPressed;
   final VoidCallback onMeldungenPressed;
   final VoidCallback onEinsatzBeendenPressed;
   final String latestLocation;
@@ -434,7 +292,6 @@ class OperationButtons extends StatelessWidget {
 
   const OperationButtons({
     super.key,
-    //    required this.onStatusPressed,
     required this.onMeldungenPressed,
     required this.onEinsatzBeendenPressed,
     required this.latestLocation,
@@ -447,10 +304,6 @@ class OperationButtons extends StatelessWidget {
       children: [
         Row(
           children: [
-            //            ElevatedButton(
-            //              onPressed: onStatusPressed,
-            //              child: const Text("Status:"),
-            //            ),
             const Text(
               "Status",
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

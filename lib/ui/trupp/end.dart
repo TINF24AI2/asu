@@ -92,7 +92,7 @@ class End extends StatelessWidget {
               width: MediaQuery.of(context).size.width * 0.5,
               child: ElevatedButton.icon(
                 onPressed: () {
-                  // uncommented when we need more than 'Brandeinsatz'
+                  // uncomment when we need more than 'Brandeinsatz'
                   // onTypeSelected
                 },
                 icon: const Icon(Icons.bookmark_rounded, size: 18),
@@ -108,7 +108,6 @@ class End extends StatelessWidget {
 
           // Button to enter 'Hitzebeaufschlagt'
           // Here look that user see wheter yes or no is activated
-          // Button to toggle 'Hitzebeaufschlagt'
           Center(
             child: SizedBox(
               width: MediaQuery.of(context).size.width * 0.5,
@@ -123,15 +122,15 @@ class End extends StatelessWidget {
                         actions: [
                           TextButton(
                             onPressed: () {
-                              onHeatExposedSelected(true); // "Ja" übergeben
-                              Navigator.of(context).pop(); // Dialog schließen
+                              onHeatExposedSelected(true);
+                              Navigator.of(context).pop();
                             },
                             child: const Text("Ja"),
                           ),
                           TextButton(
                             onPressed: () {
-                              onHeatExposedSelected(false); // "Nein" übergeben
-                              Navigator.of(context).pop(); // Dialog schließen
+                              onHeatExposedSelected(false);
+                              Navigator.of(context).pop();
                             },
                             child: const Text("Nein"),
                           ),
@@ -140,7 +139,7 @@ class End extends StatelessWidget {
                     },
                   );
                 },
-                icon: const Icon(Icons.fireplace, size: 18),
+                icon: const Icon(Icons.local_fire_department, size: 18),
                 label: Text(
                   "Hitzebeaufschlagt",
                   style: const TextStyle(fontSize: 18),
