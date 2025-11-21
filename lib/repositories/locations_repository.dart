@@ -1,41 +1,40 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:asu/firebase/firestore_service.dart';
 import 'package:asu/firebase/firestore_provider.dart';
+import 'package:asu/firebase/firebase_auth_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:asu/ui/model/settings/location.dart';
 
 // Repository class for managing Location data in Firestore.
 class LocationsRepository {
   final FirestoreService _service;
-  final String collectionPath = 'locations';
+  final String userId;
 
-  // Optional ID generator can be injected for tests to avoid accessing
-  // FirebaseFirestore.instance during id creation.
+  String get collectionPath => 'users/$userId/locations';
+
+  // Optional ID generator function for creating new document IDs.
   final String Function()? _idGenerator;
 
-  LocationsRepository(this._service, {String Function()? idGenerator})
-    : _idGenerator = idGenerator;
+  LocationsRepository(
+    this._service, {
+    required this.userId,
+    String Function()? idGenerator,
+  }) : _idGenerator = idGenerator;
 
   // Stream all Location documents as a list of Location models.
   Stream<List<LocationModel>> streamAll() {
-    final col = FirebaseFirestore.instance
-        .collection(collectionPath)
-        .orderBy('name')
-        .withConverter<LocationModel>(
-          fromFirestore: (snap, _) => LocationModel.fromFirestoreDoc(snap),
-          toFirestore: (model, _) => model.toFirestore(),
-        );
-    return col.snapshots().map(
-      (snap) => snap.docs.map((d) => d.data()).toList(growable: false),
+    return _service.collectionStreamTyped<LocationModel>(
+      collectionPath: collectionPath,
+      fromFirestore: (snap, _) => LocationModel.fromFirestoreDoc(snap),
+      toFirestore: (model, _) => model.toFirestore(),
+      orderBy: 'name',
     );
   }
 
   // Add a new Location document with the given name.
   Future<void> add(String name) async {
     final cleaned = name.trim();
-    final id =
-        _idGenerator?.call() ??
-        FirebaseFirestore.instance.collection(collectionPath).doc().id;
+    final id = _idGenerator?.call() ?? _service.generateId();
     final model = LocationModel(id: id, name: cleaned, createdAt: null);
     final data = model.toFirestore();
     data['createdAt'] = FieldValue.serverTimestamp();
@@ -48,9 +47,9 @@ class LocationsRepository {
 
   // Update an existing Location document with the given data.
   Future<void> update(String id, Map<String, dynamic> data) async {
-    final docRef = FirebaseFirestore.instance.collection(collectionPath).doc(id);
-    final snap = await docRef.get();
-    final existing = snap.data() ?? <String, dynamic>{};
+    final existing =
+        await _service.getData(collectionPath: collectionPath, docId: id) ??
+        <String, dynamic>{};
     final merged = {...existing, ...data};
     merged['updatedAt'] = FieldValue.serverTimestamp();
     await _service.setData(
@@ -59,10 +58,17 @@ class LocationsRepository {
       data: merged,
     );
   }
+
+  // Delete a Location document.
+  Future<void> delete(String id) async {
+    await _service.deleteData(collectionPath: collectionPath, docId: id);
+  }
 }
 
 // Provider for LocationsRepository to be used with Riverpod.
 final locationsRepositoryProvider = Provider<LocationsRepository>((ref) {
   final service = ref.read(firestoreServiceProvider);
-  return LocationsRepository(service);
+  final authService = ref.read(firebaseAuthServiceProvider);
+  final userId = authService.currentUser?.uid ?? '';
+  return LocationsRepository(service, userId: userId);
 });
