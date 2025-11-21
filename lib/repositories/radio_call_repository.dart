@@ -1,41 +1,40 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:asu/firebase/firestore_service.dart';
 import 'package:asu/firebase/firestore_provider.dart';
+import 'package:asu/firebase/firebase_auth_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:asu/ui/model/settings/radio_call.dart';
 
 // Repository class for managing Radio Call data in Firestore.
 class RadioCallRepository {
   final FirestoreService _service;
-  final String collectionPath = 'radio_calls';
+  final String userId;
 
-  // Optional ID generator can be injected for tests to avoid accessing
-  // FirebaseFirestore.instance during id creation.
+  String get collectionPath => 'users/$userId/radio_calls';
+
+  // Optional ID generator function for creating new document IDs.
   final String Function()? _idGenerator;
 
-  RadioCallRepository(this._service, {String Function()? idGenerator})
-    : _idGenerator = idGenerator;
+  RadioCallRepository(
+    this._service, {
+    required this.userId,
+    String Function()? idGenerator,
+  }) : _idGenerator = idGenerator;
 
   // Stream all Radio Call documents as a list of RadioCall models.
   Stream<List<RadioCallModel>> streamAll() {
-    final col = FirebaseFirestore.instance
-        .collection(collectionPath)
-        .orderBy('name')
-        .withConverter<RadioCallModel>(
-          fromFirestore: (snap, _) => RadioCallModel.fromFirestoreDoc(snap),
-          toFirestore: (model, _) => model.toFirestore(),
-        );
-    return col.snapshots().map(
-      (snap) => snap.docs.map((d) => d.data()).toList(growable: false),
+    return _service.collectionStreamTyped<RadioCallModel>(
+      collectionPath: collectionPath,
+      fromFirestore: (snap, _) => RadioCallModel.fromFirestoreDoc(snap),
+      toFirestore: (model, _) => model.toFirestore(),
+      orderBy: 'name',
     );
   }
 
   // Add a new Radio Call document with the given name.
   Future<void> add(String name) async {
     final cleaned = name.trim();
-    final id =
-        _idGenerator?.call() ??
-        FirebaseFirestore.instance.collection(collectionPath).doc().id;
+    final id = _idGenerator?.call() ?? _service.generateId();
     final model = RadioCallModel(id: id, name: cleaned, createdAt: null);
     final data = model.toFirestore();
     data['createdAt'] = FieldValue.serverTimestamp();
@@ -48,9 +47,9 @@ class RadioCallRepository {
 
   // Update an existing Radio Call document with the given data.
   Future<void> update(String id, Map<String, dynamic> data) async {
-    final docRef = FirebaseFirestore.instance.collection(collectionPath).doc(id);
-    final snap = await docRef.get();
-    final existing = snap.data() ?? <String, dynamic>{};
+    final existing =
+        await _service.getData(collectionPath: collectionPath, docId: id) ??
+        <String, dynamic>{};
     final merged = {...existing, ...data};
     merged['updatedAt'] = FieldValue.serverTimestamp();
     await _service.setData(
@@ -59,10 +58,17 @@ class RadioCallRepository {
       data: merged,
     );
   }
+
+  // Delete a Radio Call document.
+  Future<void> delete(String id) async {
+    await _service.deleteData(collectionPath: collectionPath, docId: id);
+  }
 }
 
 // Provider for RadioCallRepository to be used with Riverpod.
 final radioCallRepositoryProvider = Provider<RadioCallRepository>((ref) {
   final service = ref.read(firestoreServiceProvider);
-  return RadioCallRepository(service);
+  final authService = ref.read(firebaseAuthServiceProvider);
+  final userId = authService.currentUser?.uid ?? '';
+  return RadioCallRepository(service, userId: userId);
 });
