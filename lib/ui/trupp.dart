@@ -1,3 +1,6 @@
+import 'package:asu/ui/model/trupp/history.dart';
+import 'package:asu/ui/trupp/end_handler.dart';
+import 'package:asu/ui/trupp/report_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -8,16 +11,29 @@ class Trupp extends ConsumerWidget {
 
   const Trupp({super.key, required this.truppProvider});
 
-  void handleStatus() {
-    // TODO: Add logic for status
+  // Used to display latest location and status on screen
+  String getLatestLocation(List<HistoryEntry> history) {
+    final locationEntry =
+        history.lastWhere(
+              (entry) => entry is LocationHistoryEntry,
+              orElse: () => LocationHistoryEntry(
+                date: DateTime.now(),
+                location: "Unbekannt",
+              ),
+            )
+            as LocationHistoryEntry;
+    return locationEntry.location;
   }
 
-  void handleMeldungen() {
-    // TODO: Add logic for "Meldungen"
-  }
-
-  void handleEinsatzBeenden() {
-    // TODO: Add logic for "Einsatz beenden"
+  String getLatestStatus(List<HistoryEntry> history) {
+    final statusEntry =
+        history.lastWhere(
+              (entry) => entry is StatusHistoryEntry,
+              orElse: () =>
+                  StatusHistoryEntry(date: DateTime.now(), status: "Unbekannt"),
+            )
+            as StatusHistoryEntry;
+    return statusEntry.status;
   }
 
   @override
@@ -25,6 +41,8 @@ class Trupp extends ConsumerWidget {
     final truppfuehrer = ref.watch(truppProvider.select((t) => t.leaderName));
     final truppmann = ref.watch(truppProvider.select((t) => t.memberName));
     final funkrufname = ref.watch(truppProvider.select((t) => t.callName));
+    final truppnumber = ref.watch(truppProvider.select((t) => t.number));
+    final history = ref.watch(truppProvider.select((t) => t.history));
 
     final elapsedTime = ref
         .watch(truppProvider.select((t) => t.sinceStart))
@@ -39,6 +57,9 @@ class Trupp extends ConsumerWidget {
     final pressure = ref.watch(truppProvider.select((t) => t.lowestPressure));
     final maxPressure = ref.watch(truppProvider.select((t) => t.maxPressure));
 
+    final latestLocation = getLatestLocation(history);
+    final latestStatus = getLatestStatus(history);
+
     return Container(
       margin: const EdgeInsets.all(8.0),
       padding: const EdgeInsets.all(8.0),
@@ -47,10 +68,12 @@ class Trupp extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const Text(
-                // Example heading
-                "Trupp 1",
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              Text(
+                "Trupp $truppnumber",
+                style: const TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(width: 40),
               Column(
@@ -76,9 +99,7 @@ class Trupp extends ConsumerWidget {
                       ),
                     ],
                   ),
-                  const SizedBox(
-                    height: 8,
-                  ), // Abstand zwischen Kreisen und Funkrufname
+                  const SizedBox(height: 8),
                   Container(
                     padding: const EdgeInsets.symmetric(
                       horizontal: 8.0,
@@ -110,9 +131,58 @@ class Trupp extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           OperationButtons(
-            onStatusPressed: handleStatus,
-            onMeldungenPressed: handleMeldungen,
-            onEinsatzBeendenPressed: handleEinsatzBeenden,
+            onMeldungenPressed: () {
+              showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              builder: (context) => ReportHandler(truppProvider: truppProvider));
+            },
+            onEinsatzBeendenPressed: () {
+              showModalBottomSheet(
+                context: context, 
+                isScrollControlled: true, 
+                builder: (context) => EndHandler(truppProvider: truppProvider, operationTime: Duration(seconds: elapsedTime)));
+            },
+            latestLocation: latestLocation,
+            latestStatus: latestStatus,
+          ),
+
+          const SizedBox(height: 10),
+
+          const Text(
+            "Historie",
+            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          ),
+          Expanded(
+            child: ListView.builder(
+              itemCount: history.length > 5 ? 5 : history.length,
+              itemBuilder: (context, index) {
+                final entry = history.reversed.toList()[index];
+                if (entry is StatusHistoryEntry) {
+                  return ListTile(
+                    title: Text("Status: ${entry.status}"),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                } else if (entry is PressureHistoryEntry) {
+                  return ListTile(
+                    title: Text(
+                      "Druck: ${entry.leaderPressure}/${entry.memberPressure}",
+                    ),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                } else if (entry is LocationHistoryEntry) {
+                  return ListTile(
+                    title: Text("Standort: ${entry.location}"),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                } else {
+                  return ListTile(
+                    title: Text("Unbekannter Eintrag"),
+                    subtitle: Text("Datum: ${entry.date}"),
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),
@@ -215,15 +285,17 @@ class OperationInfo extends StatelessWidget {
 // Operation Buttons
 // ----------------------
 class OperationButtons extends StatelessWidget {
-  final VoidCallback onStatusPressed;
   final VoidCallback onMeldungenPressed;
   final VoidCallback onEinsatzBeendenPressed;
+  final String latestLocation;
+  final String latestStatus;
 
   const OperationButtons({
     super.key,
-    required this.onStatusPressed,
     required this.onMeldungenPressed,
     required this.onEinsatzBeendenPressed,
+    required this.latestLocation,
+    required this.latestStatus,
   });
 
   @override
@@ -232,15 +304,21 @@ class OperationButtons extends StatelessWidget {
       children: [
         Row(
           children: [
-            ElevatedButton(
-              onPressed: onStatusPressed,
-              child: const Text("Status:"),
+            const Text(
+              "Status",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
-            const SizedBox(width: 8),
-            const Text("Placeholder"),
           ],
         ),
         const SizedBox(height: 8),
+        Column(
+          children: [
+            Row(children: [Icon(Icons.location_pin), Text(" $latestLocation")]),
+            SizedBox(height: 5),
+            Row(children: [Icon(Icons.info), Text(" $latestStatus")]),
+          ],
+        ),
+        const SizedBox(height: 10),
         Row(
           children: [
             ElevatedButton(
