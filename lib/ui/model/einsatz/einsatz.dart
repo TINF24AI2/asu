@@ -1,45 +1,69 @@
-import 'package:asu/ui/model/trupp/trupp.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-part 'einsatz.g.dart';
+import '../history/history.dart';
+import '../trupp/trupp.dart';
 
-@riverpod
+part 'einsatz.g.dart';
+part 'einsatz.freezed.dart';
+
+@Riverpod(keepAlive: true)
 class EinsatzNotifier extends _$EinsatzNotifier {
   @override
-  TruppList build() {
-    return TruppList({});
+  Einsatz build() {
+    return Einsatz();
   }
 
-  void addTrupp(
-    int number,
-    String callName,
-    String leaderName,
-    String memberName,
-    DateTime start,
-    int leaderPressure,
-    int memberPressure,
-    int maxPressure,
-    Duration theoreticalDuration,
-  ) {
-    final newTrupp = truppProvider.call(
-      number,
-      callName,
-      leaderName,
-      memberName,
-      start,
-      leaderPressure,
-      memberPressure,
-      maxPressure,
-      theoreticalDuration,
-    );
-    final map = state.trupps;
-    map[number] = newTrupp;
-    state = TruppList(map);
+  void endTrupp(int number) {
+    //TODO new state handling
+  }
+
+  void activateTrupp(int number) {
+    //TODO new state handling
+  }
+
+  void addTrupp(int number) {
+    //TODO new state handling
+  }
+
+  void addHistoryEntryToTrupp(int truppNumber, HistoryEntry entry) {
+    //TODO new state handling
+  }
+
+  void ackSoundingAlarm(int truppNumber, AlarmReason alarm) {
+    //TODO new state handling
+  }
+
+  void setLeaderName(int truppNumber, String? name) {
+    //TODO new state handling
+  }
+  void setMemberName(int truppNumber, String? name) {
+    //TODO new state handling
+  }
+  void setCallName(int truppNumber, String? name) {
+    //TODO new state handling
+  }
+  void setLeaderPressure(int truppNumber, int? pressure) {
+    //TODO new state handling
+  }
+  void setMemberPressure(int truppNumber, int? pressure) {
+    //TODO new state handling
+  }
+  void setTheoreticalDuration(int truppNumber, Duration? duration) {
+    //TODO new state handling
   }
 }
 
-class TruppList {
-  final Map<int, TruppNotifierProvider> _trupps;
-  Map<int, TruppNotifierProvider> get trupps => _trupps;
-  TruppList(this._trupps);
+enum AlarmReason { checkPressure, lowPressure, retreat }
+
+enum AlarmType { sound, visual }
+
+typedef Alarm = ({AlarmType type, AlarmReason reason});
+
+@freezed
+abstract class Einsatz with _$Einsatz {
+  const factory Einsatz({
+    @Default({}) Map<int, Trupp> trupps,
+    @Default({}) Map<int, List<Alarm>> alarms,
+  }) = _Einsatz;
 }
