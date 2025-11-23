@@ -1,13 +1,13 @@
 import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../settings/settings.dart'
-    show devCallNumbers, devTruppMembers; // DB placeholders
+import 'package:asu/repositories/firefighters_repository.dart';
+import 'package:asu/repositories/radio_call_repository.dart';
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
 
-// minimal functional implementation of widget_new_trupp
+// Functional implementation of widget_new_trupp using Firestore repositories
 
 class WidgetNewTrupp extends ConsumerStatefulWidget {
   final int truppNumber;
@@ -18,13 +18,17 @@ class WidgetNewTrupp extends ConsumerStatefulWidget {
 }
 
 class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
-  // two-slot storage -> index 0 = leader, index 1 = other member
   final List<String?> members = [null, null];
   int? _selectedMinutes;
   String? _selectedCallNumber;
   // open dialog and put the returned name into the selected slot
   Future<void> _addToSlot(int index) async {
-    final result = await showAddPersonDialog(context);
+    // Get current firefighters list from the stream
+    final firefightersAsync = ref.read(firefightersStreamProvider);
+    final firefightersList = firefightersAsync.asData?.value ?? [];
+    final candidates = firefightersList.map((f) => f.name).toList();
+
+    final result = await showAddPersonDialog(context, candidates: candidates);
     if (result == null) return;
     final trimmed = result.trim();
     if (trimmed.isEmpty) return;
@@ -33,9 +37,17 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
     final otherIndex = index == 0 ? 1 : 0;
     if (members[otherIndex] != null && members[otherIndex] == trimmed) return;
 
-    // persist to dev placeholder list only if the name is new
-    if (!devTruppMembers.contains(trimmed)) {
-      devTruppMembers.add(trimmed);
+    // Add to repository if the name is new
+    if (!firefightersList.any((f) => f.name == trimmed)) {
+      try {
+        await ref.read(firefightersRepositoryProvider).add(trimmed);
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Fehler beim Hinzufügen: $e')));
+        }
+      }
     }
     setState(() {
       members[index] = trimmed;
@@ -48,7 +60,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Trupp 1'), // ToDo: make dynamic later
+        Text('Trupp ${widget.truppNumber}'),
         // Leader slot (index 0)
         Row(
           children: [
@@ -102,14 +114,30 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
             ] else ...[
               TextButton(
                 onPressed: () async {
+                  // Get current radio calls list from the stream
+                  final radioCallsAsync = ref.read(radioCallsStreamProvider);
+                  final radioCallsList = radioCallsAsync.asData?.value ?? [];
+                  final candidates = radioCallsList.map((r) => r.name).toList();
+
                   final result = await showSelectCallNumberSheet(
                     context,
-                    callNumbers: devCallNumbers,
-                  ); // pass dev placeholder list
+                    callNumbers: candidates,
+                  );
+
                   if (result != null) {
-                    // persist selected/typed call number only if it's new
-                    if (!devCallNumbers.contains(result)) {
-                      devCallNumbers.add(result);
+                    // Add to repository if the call number is new
+                    if (!radioCallsList.any((r) => r.name == result)) {
+                      try {
+                        await ref.read(radioCallRepositoryProvider).add(result);
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('Fehler beim Hinzufügen: $e'),
+                            ),
+                          );
+                        }
+                      }
                     }
                     setState(() => _selectedCallNumber = result);
                   }

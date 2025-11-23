@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import '../settings/settings.dart'
-    show devCallNumbers; // mutable dev placeholder
 import 'modal_choice_sheet.dart';
 
 // normalize the typed call number string
@@ -10,15 +8,15 @@ String? normalizeCallNumber(String input) {
   return s;
 }
 
-/* show a dialog to pick a call number from the shared list or per text input
-  -> 'callNumbers' can override the source and returns the selected/typed value or null */
+/* Show a dialog to pick a call number from the provided list or via text input
+  -> 'callNumbers' contains the available radio call numbers from Firestore
+  -> Returns the selected/typed value or null */
 Future<String?> showSelectCallNumberDialog(
   BuildContext context, {
   List<String>? callNumbers,
 }) {
-  // use the provided override or fall back to dev placeholder values.
-  // ToDo: wire this to the repository / DB later.
-  final list = callNumbers ?? devCallNumbers;
+  // Use the provided list (typically from radio calls stream provider)
+  final list = callNumbers ?? [];
 
   // Use the shared bottom-sheet helper; callers may pass an empty list to
   // show only the text input (useful for Settings).
@@ -39,7 +37,7 @@ Future<String?> showSelectCallNumberSheet(
   BuildContext context, {
   List<String>? callNumbers,
 }) {
-  final list = callNumbers ?? devCallNumbers;
+  final list = callNumbers ?? [];
   return showHorizontalChoiceSheet<String, String>(
     context,
     title: 'Rufnummer auswählen',
