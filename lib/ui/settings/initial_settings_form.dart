@@ -81,18 +81,23 @@ class _InitialSettingsFormState extends State<InitialSettingsForm> {
         ),
         const Padding(padding: EdgeInsets.only(top: 15.0)),
         ElevatedButton(
-          onPressed: () async {
-            if (widget.onSubmit == null) return;
+          onPressed: _loading
+              ? null
+              : () async {
+                  if (widget.onSubmit == null) return;
 
-            setState(() {
-              _loading = true;
-            });
-            await widget.onSubmit!(_defaultPressure, _theoreticalDuration);
-            if (!mounted) return;
-            setState(() {
-              _loading = false;
-            });
-          },
+                  setState(() {
+                    _loading = true;
+                  });
+                  await widget.onSubmit!(
+                    _defaultPressure,
+                    _theoreticalDuration,
+                  );
+                  if (!mounted) return;
+                  setState(() {
+                    _loading = false;
+                  });
+                },
           child: const Text("Weiter"),
         ),
         if (_loading) ...[
