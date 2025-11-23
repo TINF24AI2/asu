@@ -41,6 +41,11 @@ GoRouter goRouter(Ref ref) {
         name: 'register',
         builder: (context, state) => RegisterScreen(),
       ),
+      GoRoute(
+        path: "/post_register",
+        name: 'post_register',
+        builder: (context, state) => PostRegisterScreen(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           final name = state.topRoute?.name;
