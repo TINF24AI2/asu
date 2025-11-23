@@ -51,7 +51,7 @@ class SettingsPage extends ConsumerWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(
                 context,
-              ).showSnackBar(SnackBar(content: Text('\"$name\" hinzugefügt')));
+              ).showSnackBar(SnackBar(content: Text('"$name" hinzugefügt')));
             }
           } catch (e) {
             if (context.mounted) {
@@ -80,7 +80,7 @@ class SettingsPage extends ConsumerWidget {
             if (context.mounted) {
               ScaffoldMessenger.of(
                 context,
-              ).showSnackBar(SnackBar(content: Text('\"$name\" gelöscht')));
+              ).showSnackBar(SnackBar(content: Text('"$name" gelöscht')));
             }
           } catch (e) {
             if (context.mounted) {
