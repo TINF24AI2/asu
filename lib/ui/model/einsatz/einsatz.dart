@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:math' as math;
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
@@ -9,49 +12,220 @@ part 'einsatz.freezed.dart';
 
 @Riverpod(keepAlive: true)
 class EinsatzNotifier extends _$EinsatzNotifier {
+  static const _oneSec = Duration(seconds: 1);
+  final Stream<void> _ticker = Stream.periodic(_oneSec);
+  final Map<int, StreamSubscription<void>> _truppSubscriptions = {};
+  final Map<int, PressureTrend> _currentPressureTrends = {};
+
   @override
   Einsatz build() {
     return Einsatz();
   }
 
-  void endTrupp(int number) {
-    //TODO new state handling
+  Future<void> endTrupp(int number) async {
+    assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
+    var trupp = state.trupps[number];
+    assert(trupp is TruppAction, 'Trupp $number is not in action state');
+    trupp = trupp as TruppAction;
+    await _truppSubscriptions[number]?.cancel();
+    _truppSubscriptions.remove(number);
+    _currentPressureTrends.remove(number);
+    final endedTrupp = Trupp.end(
+      number: number,
+      history: trupp.history,
+      callName: trupp.callName,
+      leaderName: trupp.leaderName,
+      memberName: trupp.memberName,
+      inAction: trupp.sinceStart,
+    );
+    state = state.copyWith(trupps: {...state.trupps, number: endedTrupp});
   }
 
   void activateTrupp(int number) {
-    //TODO new state handling
+    assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
+    var trupp = state.trupps[number];
+    assert(trupp is TruppForm, 'Trupp $number is not in form state');
+    trupp = trupp as TruppForm;
+    final lowestPressure = math.min(
+      trupp.leaderPressure!,
+      trupp.memberPressure!,
+    );
+    final checkDuration = trupp.theoreticalDuration! > Duration(minutes: 24)
+        ? Duration(minutes: 8)
+        : Duration(minutes: 6);
+    _currentPressureTrends[number] = (m: 0, b: lowestPressure.toDouble());
+    final activeTrupp = Trupp.action(
+      number: number,
+      callName: trupp.callName!,
+      leaderName: trupp.leaderName!,
+      memberName: trupp.memberName!,
+      sinceStart: Duration.zero,
+      theoreticalEnd: trupp.theoreticalDuration!,
+      nextCheck: Duration(milliseconds: checkDuration.inMilliseconds),
+      checkInterval: checkDuration,
+      lowestPressure: lowestPressure,
+      lowestStartPressure: lowestPressure,
+      maxPressure: trupp.maxPressure!,
+      potentialEnd: trupp.theoreticalDuration!,
+      history: [
+        HistoryEntry.pressure(
+          date: DateTime.now(),
+          leaderPressure: trupp.leaderPressure!,
+          memberPressure: trupp.memberPressure!,
+        ),
+        HistoryEntry.status(date: DateTime.now(), status: "Geräte angelegt"),
+      ],
+    );
+    state = state.copyWith(trupps: {...state.trupps, number: activeTrupp});
+    _truppSubscriptions[number] = _ticker.listen((_) {
+      _onTruppTick(number);
+    });
+  }
+
+  void _onTruppTick(int number) {
+    final trupp = state.trupps[number]! as TruppAction;
+    var newPotentialEnd = trupp.potentialEnd;
+    if (trupp.potentialEnd > Duration.zero) {
+      newPotentialEnd = trupp.potentialEnd - _oneSec;
+    }
+
+    final newNextCheck = trupp.nextCheck - _oneSec;
+
+    var newTheoreticalEnd = trupp.theoreticalEnd;
+    if (trupp.theoreticalEnd > Duration.zero) {
+      newTheoreticalEnd = trupp.theoreticalEnd - _oneSec;
+    }
+
+    final newSinceStart = trupp.sinceStart + _oneSec;
+
+    final newLowestPressure =
+        (_currentPressureTrends[number]!.m *
+                    (DateTime.now().millisecondsSinceEpoch / 1000) +
+                _currentPressureTrends[number]!.b)
+            .round();
+
+    // TODO alarm checks
+
+    final newTrupp = trupp.copyWith(
+      potentialEnd: newPotentialEnd,
+      nextCheck: newNextCheck,
+      theoreticalEnd: newTheoreticalEnd,
+      sinceStart: newSinceStart,
+      lowestPressure: newLowestPressure,
+    );
+    state = state.copyWith(trupps: {...state.trupps, number: newTrupp});
   }
 
   void addTrupp(int number) {
-    //TODO new state handling
+    assert(!state.trupps.containsKey(number), 'Trupp $number already exists');
+
+    state = state.copyWith(
+      trupps: {
+        ...state.trupps,
+        number: Trupp.form(number: number),
+      },
+    );
   }
 
   void addHistoryEntryToTrupp(int truppNumber, HistoryEntry entry) {
-    //TODO new state handling
+    assert(
+      state.trupps.containsKey(truppNumber),
+      'Trupp $truppNumber does not exist',
+    );
+    final trupp = state.trupps[truppNumber]!;
+    if (trupp is! TruppAction) {
+      throw StateError("Trupp $truppNumber is not in action state");
+    }
+
+    var newLowestPressure = trupp.lowestPressure;
+    var pressureUpdated = false;
+
+    if (entry is PressureHistoryEntry) {
+      pressureUpdated = true;
+      final min = math.min(entry.leaderPressure, entry.memberPressure);
+      newLowestPressure = min;
+      // Update pressure trend
+      final lastPressure = trupp.history
+          .whereType<PressureHistoryEntry>()
+          .firstOrNull;
+      assert(lastPressure != null, 'No previous pressure entry found');
+      final lastMin = math.min(
+        lastPressure!.leaderPressure,
+        lastPressure.memberPressure,
+      );
+      final lastDate = lastPressure.date.millisecondsSinceEpoch / 1000;
+      final currentDate = entry.date.millisecondsSinceEpoch / 1000;
+
+      final m = (min - lastMin) / (currentDate - lastDate);
+      final b = min - m * currentDate;
+      _currentPressureTrends[truppNumber] = (m: m, b: b);
+      entry = entry.copyWith(date: DateTime.now());
+    }
+
+    final newHistory = [entry, ...trupp.history];
+    final newTrupp = trupp.copyWith(
+      history: newHistory,
+      lowestPressure: newLowestPressure,
+      nextCheck: pressureUpdated
+          ? Duration(milliseconds: trupp.checkInterval.inMilliseconds)
+          : trupp.nextCheck,
+    );
+    state = state.copyWith(trupps: {...state.trupps, truppNumber: newTrupp});
   }
 
   void ackSoundingAlarm(int truppNumber, AlarmReason alarm) {
     //TODO new state handling
   }
 
-  void setLeaderName(int truppNumber, String? name) {
-    //TODO new state handling
+  void _updateFormTrupp(
+    int truppNumber,
+    TruppForm Function(TruppForm trupp) update,
+  ) {
+    assert(
+      state.trupps.containsKey(truppNumber),
+      'Trupp $truppNumber does not exist',
+    );
+    if (state.trupps[truppNumber] is! TruppForm) {
+      throw StateError("Trupp $truppNumber is not in form state");
+    }
+    final trupp = state.trupps[truppNumber] as TruppForm;
+    final newTrupp = update(trupp);
+    state = state.copyWith(trupps: {...state.trupps, truppNumber: newTrupp});
   }
-  void setMemberName(int truppNumber, String? name) {
-    //TODO new state handling
-  }
-  void setCallName(int truppNumber, String? name) {
-    //TODO new state handling
-  }
-  void setLeaderPressure(int truppNumber, int? pressure) {
-    //TODO new state handling
-  }
-  void setMemberPressure(int truppNumber, int? pressure) {
-    //TODO new state handling
-  }
-  void setTheoreticalDuration(int truppNumber, Duration? duration) {
-    //TODO new state handling
-  }
+
+  void setLeaderName(int truppNumber, String? name) => _updateFormTrupp(
+    truppNumber,
+    (trupp) => trupp.copyWith(leaderName: name),
+  );
+
+  void setMemberName(int truppNumber, String? name) => _updateFormTrupp(
+    truppNumber,
+    (trupp) => trupp.copyWith(memberName: name),
+  );
+
+  void setCallName(int truppNumber, String? name) =>
+      _updateFormTrupp(truppNumber, (trupp) => trupp.copyWith(callName: name));
+
+  void setLeaderPressure(int truppNumber, int? pressure) => _updateFormTrupp(
+    truppNumber,
+    (trupp) => trupp.copyWith(leaderPressure: pressure),
+  );
+
+  void setMemberPressure(int truppNumber, int? pressure) => _updateFormTrupp(
+    truppNumber,
+    (trupp) => trupp.copyWith(memberPressure: pressure),
+  );
+
+  void setTheoreticalDuration(int truppNumber, Duration? duration) =>
+      _updateFormTrupp(
+        truppNumber,
+        (trupp) => trupp.copyWith(theoreticalDuration: duration),
+      );
+
+  void setMaxPressure(int truppNumber, int? pressure) => _updateFormTrupp(
+    truppNumber,
+    (trupp) => trupp.copyWith(maxPressure: pressure),
+  );
 }
 
 enum AlarmReason { checkPressure, lowPressure, retreat }
@@ -67,3 +241,6 @@ abstract class Einsatz with _$Einsatz {
     @Default({}) Map<int, List<Alarm>> alarms,
   }) = _Einsatz;
 }
+
+// A linear trend line represented by y = m*x + b
+typedef PressureTrend = ({double m, double b});
