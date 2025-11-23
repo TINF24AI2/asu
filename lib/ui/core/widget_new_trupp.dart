@@ -1,3 +1,4 @@
+
 import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -28,6 +29,9 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
     final firefightersList = firefightersAsync.asData?.value ?? [];
     final candidates = firefightersList.map((f) => f.name).toList();
 
+    // Store messenger before any async operations
+    final messenger = ScaffoldMessenger.of(context);
+
     final result = await showAddPersonDialog(context, candidates: candidates);
     if (result == null) return;
     final trimmed = result.trim();
@@ -43,15 +47,15 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
         await ref.read(firefightersRepositoryProvider).add(trimmed);
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(
-            context,
-          ).showSnackBar(SnackBar(content: Text('Fehler beim Hinzufügen: $e')));
+          messenger.showSnackBar(SnackBar(content: Text('Fehler beim Hinzufügen: $e')));
         }
       }
     }
-    setState(() {
-      members[index] = trimmed;
-    });
+    if (mounted) {
+      setState(() {
+        members[index] = trimmed;
+      });
+    }
   }
 
   @override
@@ -119,6 +123,9 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                   final radioCallsList = radioCallsAsync.asData?.value ?? [];
                   final candidates = radioCallsList.map((r) => r.name).toList();
 
+                  // Store messenger before async gap
+                  final messenger = ScaffoldMessenger.of(context);
+
                   final result = await showSelectCallNumberSheet(
                     context,
                     callNumbers: candidates,
@@ -131,7 +138,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                         await ref.read(radioCallRepositoryProvider).add(result);
                       } catch (e) {
                         if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
+                          messenger.showSnackBar(
                             SnackBar(
                               content: Text('Fehler beim Hinzufügen: $e'),
                             ),
@@ -139,7 +146,9 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                         }
                       }
                     }
-                    setState(() => _selectedCallNumber = result);
+                    if (mounted) {
+                      setState(() => _selectedCallNumber = result);
+                    }
                   }
                 },
                 child: const Text('Nummer wählen'),
