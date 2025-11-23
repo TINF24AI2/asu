@@ -66,9 +66,18 @@ class RadioCallRepository {
 }
 
 // Provider for RadioCallRepository to be used with Riverpod.
-final radioCallRepositoryProvider = Provider<RadioCallRepository>((ref) {
-  final service = ref.read(firestoreServiceProvider);
-  final authService = ref.read(firebaseAuthServiceProvider);
-  final userId = authService.currentUser?.uid ?? '';
+// Watches auth state to ensure repository updates when user changes
+final radioCallRepositoryProvider = Provider.autoDispose<RadioCallRepository>((
+  ref,
+) {
+  final service = ref.watch(firestoreServiceProvider);
+  final authState = ref.watch(authStateChangesProvider);
+  final userId = authState.value!.uid;
   return RadioCallRepository(service, userId: userId);
+});
+
+// Stream provider for all radio calls.
+final radioCallsStreamProvider = StreamProvider<List<RadioCallModel>>((ref) {
+  final repository = ref.watch(radioCallRepositoryProvider);
+  return repository.streamAll();
 });

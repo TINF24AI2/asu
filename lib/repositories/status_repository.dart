@@ -66,9 +66,16 @@ class StatusRepository {
 }
 
 // Provider for StatusRepository to be used with Riverpod.
-final statusRepositoryProvider = Provider<StatusRepository>((ref) {
-  final service = ref.read(firestoreServiceProvider);
-  final authService = ref.read(firebaseAuthServiceProvider);
-  final userId = authService.currentUser?.uid ?? '';
+// Watches auth state to ensure repository updates when user changes
+final statusRepositoryProvider = Provider.autoDispose<StatusRepository>((ref) {
+  final service = ref.watch(firestoreServiceProvider);
+  final authState = ref.watch(authStateChangesProvider);
+  final userId = authState.value!.uid;
   return StatusRepository(service, userId: userId);
+});
+
+// Stream provider for all statuses.
+final statusStreamProvider = StreamProvider<List<StatusModel>>((ref) {
+  final repository = ref.watch(statusRepositoryProvider);
+  return repository.streamAll();
 });

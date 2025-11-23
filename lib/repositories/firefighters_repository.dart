@@ -66,9 +66,19 @@ class FirefightersRepository {
 }
 
 // Provider for FirefightersRepository to be used with Riverpod.
-final firefightersRepositoryProvider = Provider<FirefightersRepository>((ref) {
-  final service = ref.read(firestoreServiceProvider);
-  final authService = ref.read(firebaseAuthServiceProvider);
-  final userId = authService.currentUser?.uid ?? '';
-  return FirefightersRepository(service, userId: userId);
+// Watches auth state to ensure repository updates when user changes
+final firefightersRepositoryProvider =
+    Provider.autoDispose<FirefightersRepository>((ref) {
+      final service = ref.watch(firestoreServiceProvider);
+      final authState = ref.watch(authStateChangesProvider);
+      final userId = authState.value!.uid;
+      return FirefightersRepository(service, userId: userId);
+    });
+
+// Stream provider for all firefighters.
+final firefightersStreamProvider = StreamProvider<List<FirefighterModel>>((
+  ref,
+) {
+  final repository = ref.watch(firefightersRepositoryProvider);
+  return repository.streamAll();
 });
