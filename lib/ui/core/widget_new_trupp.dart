@@ -6,6 +6,7 @@ import '../settings/settings.dart'
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
+import 'package:asu/ui/trupp/pressure.dart';
 
 // minimal functional implementation of widget_new_trupp
 
@@ -22,6 +23,8 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
   final List<String?> members = [null, null];
   int? _selectedMinutes;
   String? _selectedCallNumber;
+  int? _leaderPressure;
+  int? _memberPressure;
   // open dialog and put the returned name into the selected slot
   Future<void> _addToSlot(int index) async {
     final result = await showAddPersonDialog(context);
@@ -42,13 +45,18 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
     });
   }
 
+  // pressure input uses the shared 'Pressure' modal (same behaviour as in 'trupp.dart')
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text('Trupp 1'), // ToDo: make dynamic later
+        Container(margin: const EdgeInsets.only(top: 30)),
+        Text(
+          "Trupp ${widget.truppNumber}",
+          style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         // Leader slot (index 0)
         Row(
           children: [
@@ -59,6 +67,11 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                 icon: const Icon(Icons.delete),
                 onPressed: () => setState(() => members[0] = null),
               ),
+              if (_leaderPressure != null) ...[
+                const SizedBox(width: 6),
+                Text('($_leaderPressure bar)'),
+              ],
+              const SizedBox(width: 8),
             ] else ...[
               TextButton(
                 onPressed: () => _addToSlot(0),
@@ -78,6 +91,11 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                 icon: const Icon(Icons.delete),
                 onPressed: () => setState(() => members[1] = null),
               ),
+              if (_memberPressure != null) ...[
+                const SizedBox(width: 6),
+                Text('($_memberPressure bar)'),
+              ],
+              const SizedBox(width: 8),
             ] else ...[
               TextButton(
                 onPressed: () => _addToSlot(1),
@@ -135,8 +153,8 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                       members[0] ?? "",
                       members[1] ?? "",
                       DateTime.now(),
-                      280,
-                      270,
+                      _leaderPressure ?? 280,
+                      _memberPressure ?? 270,
                       300,
                       Duration(minutes: _selectedMinutes ?? 30),
                     );
@@ -154,6 +172,33 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                     ? '${_selectedMinutes!} Minuten'
                     : 'Zeit wählen',
               ),
+            ),
+            // button for pressure input
+            const SizedBox(width: 8),
+            ElevatedButton(
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return Pressure(
+                      onPressureSelected: (selectedPressure, role) {
+                        setState(() {
+                          if (role == 'Truppführer') {
+                            _leaderPressure = selectedPressure;
+                          } else {
+                            _memberPressure = selectedPressure;
+                          }
+                        });
+                      },
+                      lowestPressure:
+                          (_leaderPressure ?? _memberPressure) ??
+                          280, //fallback
+                    );
+                  },
+                );
+              },
+              child: const Text('Druck eintragen'),
             ),
           ],
         ),
