@@ -1,19 +1,18 @@
 import 'package:flutter/material.dart';
-import '../settings/settings.dart'
-    show devTruppMembers; // mutable dev placeholder
 import 'modal_choice_sheet.dart';
 
-// show a bottom-sheet dialog that lets the user pick a name or enter a custom name
+// Show a bottom-sheet dialog that lets the user pick a name or enter a custom name
+// Uses the firefighters from Firestore via the repository
 
 Future<String?> showAddPersonDialog(
   BuildContext context, {
   List<String>? candidates,
 }) {
-  // use the provided candidates or fall back to the dev placeholder list
-  // ToDo: replace this with a repository or DB call later
-  final list = candidates ?? devTruppMembers;
+  // Use the provided candidates list (for displaying available firefighters)
+  // Candidates are typically passed from a stream provider watching firefighters
+  final list = candidates ?? [];
 
-  // use the shared bottom-sheet helper
+  // Use the shared bottom-sheet helper
   return showHorizontalChoiceSheet<String, String>(
     context,
     title: 'Person hinzufügen',

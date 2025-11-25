@@ -6,6 +6,7 @@ import '../../firebase/firebase_auth_provider.dart';
 import '../auth/auth.dart';
 import '../core/core.dart';
 import '../horizontal_trupp_view.dart';
+import '../settings/settings.dart';
 
 part 'router.g.dart';
 
@@ -70,7 +71,7 @@ GoRouter goRouter(Ref ref) {
           ),
           GoRoute(
             path: '/settings',
-            builder: (context, state) => const Placeholder(),
+            builder: (context, state) => const SettingsPage(),
             name: 'settings',
           ),
         ],
