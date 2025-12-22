@@ -1,9 +1,9 @@
-
 import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:asu/repositories/firefighters_repository.dart';
 import 'package:asu/repositories/radio_call_repository.dart';
+import 'package:asu/repositories/initial_settings_repository.dart';
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
@@ -25,6 +25,32 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
   String? _selectedCallNumber;
   int? _leaderPressure;
   int? _memberPressure;
+  // fallback values - overridden by settings if available
+  int _defaultPressure = 300;
+  int _theoreticalDurationMinutes = 30;
+
+  // load initial settings from repository
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialSettings();
+  }
+
+  Future<void> _loadInitialSettings() async {
+    try {
+      final repository = ref.read(initialSettingsRepositoryProvider);
+      final settings = await repository.get();
+      if (settings != null && mounted) {
+        setState(() {
+          _defaultPressure = settings.defaultPressure;
+          _theoreticalDurationMinutes = settings.theoreticalDurationMinutes;
+        });
+      }
+    } catch (e) {
+      // use default values if loading fails
+    }
+  }
+
   // open dialog and put the returned name into the selected slot
   Future<void> _addToSlot(int index) async {
     // Get current firefighters list from the stream
@@ -50,7 +76,9 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
         await ref.read(firefightersRepositoryProvider).add(trimmed);
       } catch (e) {
         if (mounted) {
-          messenger.showSnackBar(SnackBar(content: Text('Fehler beim Hinzufügen: $e')));
+          messenger.showSnackBar(
+            SnackBar(content: Text('Fehler beim Hinzufügen: $e')),
+          );
         }
       }
     }
@@ -190,10 +218,13 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                       members[0] ?? "",
                       members[1] ?? "",
                       DateTime.now(),
-                      _leaderPressure ?? 280,
-                      _memberPressure ?? 270,
-                      300,
-                      Duration(minutes: _selectedMinutes ?? 30),
+                      _leaderPressure ?? (_defaultPressure - 20),
+                      _memberPressure ?? (_defaultPressure - 30),
+                      _defaultPressure,
+                      Duration(
+                        minutes:
+                            _selectedMinutes ?? _theoreticalDurationMinutes,
+                      ),
                     );
               },
               child: const Text('Start'),
@@ -230,7 +261,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                       },
                       lowestPressure:
                           (_leaderPressure ?? _memberPressure) ??
-                          280, //fallback
+                          (_defaultPressure - 20), // fallback from settings
                     );
                   },
                 );
