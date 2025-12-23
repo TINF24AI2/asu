@@ -13,7 +13,7 @@ part 'einsatz.freezed.dart';
 @Riverpod(keepAlive: true)
 class EinsatzNotifier extends _$EinsatzNotifier {
   static const _oneSec = Duration(seconds: 1);
-  final Stream<void> _ticker = Stream.periodic(_oneSec);
+  final Stream<void> _ticker = Stream.periodic(_oneSec).asBroadcastStream();
   final Map<int, StreamSubscription<void>> _truppSubscriptions = {};
   final Map<int, PressureTrend> _currentPressureTrends = {};
 

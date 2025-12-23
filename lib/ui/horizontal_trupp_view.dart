@@ -1,5 +1,5 @@
 import 'package:asu/ui/model/einsatz/einsatz.dart';
-import 'package:asu/ui/model/trupp/trupp.dart';
+import 'package:asu/ui/model/trupp/trupp.dart' as model;
 import 'package:asu/ui/trupp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -30,11 +30,11 @@ class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
     });
   }
 
-  List<Widget> _assembleWidgetsToList(Map<int, TruppNotifierProvider> trupps) {
+  List<Widget> _assembleWidgetsToList(Map<int, model.Trupp> trupps) {
     List<Widget> pages = [];
     for (var i = 1; i < _nextTruppNumber; i++) {
       if (trupps.containsKey(i)) {
-        pages.add(Trupp(truppProvider: trupps[i]!));
+        pages.add(Trupp(truppNumber: i));
       } else if (_formPages.containsKey(i)) {
         pages.add(_formPages[i]!);
       } else {
