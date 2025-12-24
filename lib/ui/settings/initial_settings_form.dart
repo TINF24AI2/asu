@@ -1,17 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:asu/repositories/initial_settings_repository.dart';
 
-class InitialSettingsForm extends StatefulWidget {
+class InitialSettingsForm extends ConsumerStatefulWidget {
   final Future<void> Function(int pressure, Duration duration)? onSubmit;
   const InitialSettingsForm({super.key, this.onSubmit});
 
   @override
-  State<InitialSettingsForm> createState() => _InitialSettingsFormState();
+  ConsumerState<InitialSettingsForm> createState() =>
+      _InitialSettingsFormState();
 }
 
-class _InitialSettingsFormState extends State<InitialSettingsForm> {
+class _InitialSettingsFormState extends ConsumerState<InitialSettingsForm> {
   int _defaultPressure = 300;
   Duration _theoreticalDuration = Duration(minutes: 30);
   bool _loading = false;
+  bool _initialized = false;
+
+  // Load initial settings from repository once when dependencies change
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _loadInitialSettings();
+      _initialized = true;
+    }
+  }
+
+  // load initial settings from repository
+  Future<void> _loadInitialSettings() async {
+    try {
+      final repository = ref.read(initialSettingsRepositoryProvider);
+      final settings = await repository.get();
+      if (settings != null && mounted) {
+        setState(() {
+          _defaultPressure = settings.defaultPressure;
+          _theoreticalDuration = Duration(
+            minutes: settings.theoreticalDurationMinutes,
+          );
+        });
+      }
+    } catch (e) {
+      // use default values if loading fails
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
