@@ -210,6 +210,62 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
           children: [
             ElevatedButton(
               onPressed: () {
+                // validations before starting
+                // trupp members
+                if (members[0] == null || members[0]!.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Truppführer muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+
+                if (members[1] == null || members[1]!.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Truppmann muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+                // radio call number
+                if (_selectedCallNumber == null ||
+                    _selectedCallNumber!.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Die Rufnummer muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+                // pressure level
+                if (_leaderPressure == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Druck vom Truppführer fehlt'),
+                    ),
+                  );
+                  return;
+                }
+                if (_memberPressure == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Druck vom Truppmann fehlt'),
+                    ),
+                  );
+                  return;
+                }
+                // deployment duration
+                if (_selectedMinutes == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Die Einsatzdauer muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+
                 ref
                     .read(einsatzProvider.notifier)
                     .addTrupp(
