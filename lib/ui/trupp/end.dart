@@ -1,5 +1,6 @@
-import 'package:asu/ui/trupp/pressure.dart';
 import 'package:flutter/material.dart';
+
+import 'pressure.dart';
 
 class End extends StatelessWidget {
   final Function(int, String) onPressureSelected;

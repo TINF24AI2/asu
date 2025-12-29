@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:asu/ui/trupp/report.dart';
-import 'package:asu/ui/model/trupp/history.dart';
-import 'package:asu/ui/model/trupp/trupp.dart';
+
+import 'report.dart';
+import '../model/trupp/history.dart';
+import '../model/trupp/trupp.dart';
 
 class ReportHandler extends ConsumerWidget {
   final TruppNotifierProvider truppProvider;
@@ -11,11 +12,15 @@ class ReportHandler extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lowestPressure = ref.read(truppProvider.select((t) => t.lowestPressure));
+    final lowestPressure = ref.read(
+      truppProvider.select((t) => t.lowestPressure),
+    );
 
     return Report(
       onPressureSelected: (selectedPressure, role) {
-        ref.read(truppProvider.notifier).addHistoryEntry(
+        ref
+            .read(truppProvider.notifier)
+            .addHistoryEntry(
               PressureHistoryEntry(
                 date: DateTime.now(),
                 leaderPressure: selectedPressure,
@@ -24,15 +29,16 @@ class ReportHandler extends ConsumerWidget {
             );
       },
       onStatusSelected: (selectedStatus) {
-        ref.read(truppProvider.notifier).addHistoryEntry(
-              StatusHistoryEntry(
-                date: DateTime.now(),
-                status: selectedStatus,
-              ),
+        ref
+            .read(truppProvider.notifier)
+            .addHistoryEntry(
+              StatusHistoryEntry(date: DateTime.now(), status: selectedStatus),
             );
       },
       onLocationSelected: (selectedLocation) {
-        ref.read(truppProvider.notifier).addHistoryEntry(
+        ref
+            .read(truppProvider.notifier)
+            .addHistoryEntry(
               LocationHistoryEntry(
                 date: DateTime.now(),
                 location: selectedLocation,

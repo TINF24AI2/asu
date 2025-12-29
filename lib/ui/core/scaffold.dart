@@ -1,6 +1,7 @@
-import 'package:asu/pubspec.g.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../pubspec.g.dart';
 
 class AsuScaffold extends StatelessWidget {
   final String? topRouteName;

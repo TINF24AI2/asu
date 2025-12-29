@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:asu/firebase/firestore_service.dart';
-import 'package:asu/firebase/firestore_provider.dart';
-import 'package:asu/firebase/firebase_auth_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:asu/ui/model/settings/status.dart';
+
+import '../firebase/firestore_service.dart';
+import '../firebase/firestore_provider.dart';
+import '../firebase/firebase_auth_provider.dart';
+import '../ui/model/settings/status.dart';
 
 // Repository class for managing Status data in Firestore.
 class StatusRepository {
