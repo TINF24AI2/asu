@@ -1,7 +1,8 @@
-import 'package:asu/ui/trupp/location.dart';
-import 'package:asu/ui/trupp/pressure.dart';
-import 'package:asu/ui/trupp/status.dart';
 import 'package:flutter/material.dart';
+
+import 'location.dart';
+import 'pressure.dart';
+import 'status.dart';
 
 class Report extends StatelessWidget {
   final Function(int, String) onPressureSelected;

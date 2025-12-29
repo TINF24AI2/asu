@@ -1,5 +1,6 @@
-import 'package:asu/ui/model/trupp/trupp.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '../trupp/trupp.dart';
 
 part 'einsatz.g.dart';
 

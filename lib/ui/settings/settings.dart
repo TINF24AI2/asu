@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // for ConsumerWidget
+
 import 'settings_list_editor.dart';
-import 'package:asu/repositories/firefighters_repository.dart';
-import 'package:asu/repositories/radio_call_repository.dart';
-import 'package:asu/repositories/locations_repository.dart';
-import 'package:asu/repositories/status_repository.dart';
+import '../../repositories/firefighters_repository.dart';
+import '../../repositories/radio_call_repository.dart';
+import '../../repositories/locations_repository.dart';
+import '../../repositories/status_repository.dart';
 
 enum SettingsKey {
   // stable keys for the editable lists

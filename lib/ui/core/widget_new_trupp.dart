@@ -1,13 +1,14 @@
-import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:asu/repositories/firefighters_repository.dart';
-import 'package:asu/repositories/radio_call_repository.dart';
-import 'package:asu/repositories/initial_settings_repository.dart';
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
-import 'package:asu/ui/trupp/pressure.dart';
+
+import '../../repositories/firefighters_repository.dart';
+import '../../repositories/radio_call_repository.dart';
+import '../../repositories/initial_settings_repository.dart';
+import '../model/einsatz/einsatz.dart';
+import '../trupp/pressure.dart';
 
 // Functional implementation of widget_new_trupp using Firestore repositories
 

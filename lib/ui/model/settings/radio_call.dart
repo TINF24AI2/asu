@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:asu/ui/model/settings/setting_item.dart';
+
+import 'setting_item.dart';
 
 // Plain class model for a radio call setting item.
 class RadioCallModel extends SettingItem {

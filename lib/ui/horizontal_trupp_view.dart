@@ -1,10 +1,10 @@
-import 'package:asu/ui/model/einsatz/einsatz.dart';
-import 'package:asu/ui/model/trupp/trupp.dart';
-import 'package:asu/ui/trupp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/widget_new_trupp.dart';
+import 'model/einsatz/einsatz.dart';
+import 'model/trupp/trupp.dart';
+import 'trupp.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
 class HorizontalTruppView extends ConsumerStatefulWidget {

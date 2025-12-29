@@ -1,10 +1,10 @@
-import 'package:asu/ui/model/trupp/history.dart';
-import 'package:asu/ui/trupp/end_handler.dart';
-import 'package:asu/ui/trupp/report_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'model/trupp/trupp.dart';
+import 'model/trupp/history.dart';
+import 'trupp/end_handler.dart';
+import 'trupp/report_handler.dart';
 
 class Trupp extends ConsumerWidget {
   final TruppNotifierProvider truppProvider;
@@ -133,15 +133,21 @@ class Trupp extends ConsumerWidget {
           OperationButtons(
             onMeldungenPressed: () {
               showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              builder: (context) => ReportHandler(truppProvider: truppProvider));
+                context: context,
+                isScrollControlled: true,
+                builder: (context) =>
+                    ReportHandler(truppProvider: truppProvider),
+              );
             },
             onEinsatzBeendenPressed: () {
               showModalBottomSheet(
-                context: context, 
-                isScrollControlled: true, 
-                builder: (context) => EndHandler(truppProvider: truppProvider, operationTime: Duration(seconds: elapsedTime)));
+                context: context,
+                isScrollControlled: true,
+                builder: (context) => EndHandler(
+                  truppProvider: truppProvider,
+                  operationTime: Duration(seconds: elapsedTime),
+                ),
+              );
             },
             latestLocation: latestLocation,
             latestStatus: latestStatus,
