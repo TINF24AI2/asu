@@ -1,8 +1,9 @@
-import 'package:asu/firebase/firebase_auth_provider.dart';
-import 'package:asu/ui/auth/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../firebase/firebase_auth_provider.dart';
+import 'scaffold.dart';
 
 class LoginScreen extends StatelessWidget {
   const LoginScreen({super.key});

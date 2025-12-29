@@ -13,17 +13,15 @@ class ReportHandler extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final trupp = ref.watch(
-      einsatzProvider.select((e) => e.trupps[truppNumber])
+      einsatzProvider.select((e) => e.trupps[truppNumber]),
     );
 
     if (trupp == null) {
       return const Center(child: Text('Trupp existiert nicht.'));
     }
     if (trupp is! TruppAction) {
-      return Center(
-        child: Text('Trupp ${trupp.number + 1} ist nicht aktiv.'),
-      );
-    }    
+      return Center(child: Text('Trupp ${trupp.number + 1} ist nicht aktiv.'));
+    }
 
     final lowestPressure = trupp.lowestPressure;
     final notifier = ref.read(einsatzProvider.notifier);
@@ -42,10 +40,7 @@ class ReportHandler extends ConsumerWidget {
       onStatusSelected: (selectedStatus) {
         notifier.addHistoryEntryToTrupp(
           truppNumber,
-          StatusHistoryEntry(
-            date: DateTime.now(),
-            status: selectedStatus,
-          ),
+          StatusHistoryEntry(date: DateTime.now(), status: selectedStatus),
         );
       },
       onLocationSelected: (selectedLocation) {

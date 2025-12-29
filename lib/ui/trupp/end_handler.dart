@@ -98,6 +98,5 @@ class EndHandler extends ConsumerWidget {
       isHeatExposed: isHeatExposed,
       onSubmitPressed: onSubmitPressed,
     );
-
   }
 }

@@ -1,8 +1,9 @@
-import 'package:asu/firebase/firebase_auth_provider.dart';
-import 'package:asu/ui/auth/scaffold.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import '../../firebase/firebase_auth_provider.dart';
+import 'scaffold.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
@@ -146,9 +147,9 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
                 _loading = false;
               });
               if (!context.mounted) return;
-              context.goNamed('operation');
+              context.goNamed('post_register');
             },
-            child: Text('Login'),
+            child: Text('Registrieren'),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 

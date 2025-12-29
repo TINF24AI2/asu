@@ -1,5 +1,6 @@
-import 'package:asu/pubspec.g.dart';
 import 'package:flutter/material.dart';
+
+import '../../pubspec.g.dart';
 
 class AuthScaffold extends StatelessWidget {
   final Widget? body;
