@@ -21,7 +21,7 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
 //avoid scanning QR-Code multiple times
 bool _hasScanned = false;
 
-void _handleBarcode(BarcodeCapture capture) {
+void _handleBarcode(BarcodeCapture capture) async {
   if (_hasScanned) return;
 
   final barcode = capture.barcodes.firstOrNull;
@@ -29,9 +29,39 @@ void _handleBarcode(BarcodeCapture capture) {
 
   if (value == null) return;
 
+  //QR-Code should only contain a name
+  final isValid = RegExp(r'^[A-Za-zÄÖÜaöüß]{2,}$').hasMatch(value);
+
+  
+  if (!isValid) {
+    _hasScanned = true;
+    
+
+     await showDialog(
+      context: context,
+      useRootNavigator: true,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Ungültiger QR-Code'),
+        content: const Text('Der QR-Code entält keinen gültigen Namen.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(ctx, rootNavigator: true).pop();   //close dialogue
+              Navigator.of(context, rootNavigator: true).pop(); //return to main page
+            },
+            child: const Text('OK'),
+          )
+        ]
+      )
+     );
+     _hasScanned = false;
+     await controller.stop();
+     return;
+  }
+
   _hasScanned = true;
 
-  controller.stop();
+  await controller.stop();
   Navigator.of(context).pop(value);
   }
 
