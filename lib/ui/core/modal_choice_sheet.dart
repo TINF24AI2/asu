@@ -1,3 +1,4 @@
+import 'package:asu/ui/core/qr_scanner.dart';
 import 'package:flutter/material.dart';
 
 /* reusable bottom sheet that shows horizontal choice chips with a free-text input field
@@ -14,6 +15,7 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
   required T? Function(String) normalizeTyped, // validates/converts typed input
   String textFieldLabel = '', // label for the text field
   TextInputType keyboardType = TextInputType.text,
+  bool enableQrScan = false,
 }) {
   return showModalBottomSheet<T>(
     context: context,
@@ -66,6 +68,24 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
                     keyboardType: keyboardType,
                     onChanged: (v) => typed = v,
                   ),
+
+                  //Button for QR-Scanning
+                  if (enableQrScan) ...[
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                    icon: const Icon(Icons.qr_code_scanner),
+                    label: const Text('QR-Code scannen'),
+                    onPressed: () async {
+                      final scannedName = await Navigator.of(context).push<String>(
+                        MaterialPageRoute(builder: (_) => const QrScanner()),
+                      );
+                      if (scannedName != null && scannedName.isNotEmpty) {
+                        Navigator.of(context, rootNavigator: true).pop(scannedName as T);
+                      }
+                    }
+                   ),
+                  ],
+
                   const SizedBox(height: 12),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.end,

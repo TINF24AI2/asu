@@ -1,4 +1,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!--Camera Permission-->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:label="asu"
         android:name="${applicationName}"
