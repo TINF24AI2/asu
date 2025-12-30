@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/widget_new_trupp.dart';
 import 'model/einsatz/einsatz.dart';
-import 'model/trupp/trupp.dart';
+import 'model/trupp/trupp.dart' as model;
 import 'trupp.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
@@ -18,31 +18,27 @@ class HorizontalTruppView extends ConsumerStatefulWidget {
 class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
   late final PageController _pageController;
 
-  final Map<int, Widget> _formPages = {};
   int _nextTruppNumber = 1;
 
   void _onCreateNew() {
-    setState(() {
-      _formPages[_nextTruppNumber] = WidgetNewTrupp(
-        truppNumber: _nextTruppNumber,
-      );
-      _nextTruppNumber++;
-    });
+    ref.read(einsatzProvider.notifier).addTrupp(_nextTruppNumber);
+    _nextTruppNumber++;
   }
 
-  List<Widget> _assembleWidgetsToList(Map<int, TruppNotifierProvider> trupps) {
-    List<Widget> pages = [];
-    for (var i = 1; i < _nextTruppNumber; i++) {
-      if (trupps.containsKey(i)) {
-        pages.add(Trupp(truppProvider: trupps[i]!));
-      } else if (_formPages.containsKey(i)) {
-        pages.add(_formPages[i]!);
-      } else {
-        throw StateError(
-          "Inconsistent state: missing trupp or form for trupp number $i",
-        );
+  List<Widget> _assembleWidgetsToList(Map<int, model.Trupp> trupps) {
+    final List<Widget> pages = [];
+    trupps.forEach((number, trupp) {
+      if (trupp is model.TruppForm) {
+        pages.add(WidgetNewTrupp(truppNumber: number));
       }
-    }
+      if (trupp is model.TruppAction) {
+        pages.add(Trupp(truppNumber: number));
+      }
+      if (trupp is model.TruppEnd) {
+        //TODO remove placeholder and add End widget
+        pages.add(const Placeholder());
+      }
+    });
     return pages;
   }
 
@@ -105,14 +101,14 @@ class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
     if (index == items.length) {
       child = InkWell(
         onTap: _onCreateNew,
-        child: SizedBox.expand(
+        child: const SizedBox.expand(
           child: Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Icon(Icons.add, size: 48, color: Colors.black54),
-                const SizedBox(height: 8),
-                const Text('Neuer Trupp', style: TextStyle(fontSize: 18)),
+                Icon(Icons.add, size: 48, color: Colors.black54),
+                SizedBox(height: 8),
+                Text('Neuer Trupp', style: TextStyle(fontSize: 18)),
               ],
             ),
           ),

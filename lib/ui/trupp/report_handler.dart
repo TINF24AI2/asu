@@ -1,49 +1,56 @@
+import 'package:asu/ui/model/einsatz/einsatz.dart';
+import 'package:asu/ui/model/trupp/trupp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'report.dart';
-import '../model/trupp/history.dart';
-import '../model/trupp/trupp.dart';
+import 'package:asu/ui/trupp/report.dart';
+import 'package:asu/ui/model/history/history.dart';
 
 class ReportHandler extends ConsumerWidget {
-  final TruppNotifierProvider truppProvider;
+  final int truppNumber;
 
-  const ReportHandler({super.key, required this.truppProvider});
+  const ReportHandler({super.key, required this.truppNumber});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lowestPressure = ref.read(
-      truppProvider.select((t) => t.lowestPressure),
+    final trupp = ref.watch(
+      einsatzProvider.select((e) => e.trupps[truppNumber]),
     );
+
+    if (trupp == null) {
+      return const Center(child: Text('Trupp existiert nicht.'));
+    }
+    if (trupp is! TruppAction) {
+      return Center(child: Text('Trupp ${trupp.number + 1} ist nicht aktiv.'));
+    }
+
+    final lowestPressure = trupp.lowestPressure;
+    final notifier = ref.read(einsatzProvider.notifier);
 
     return Report(
       onPressureSelected: (selectedPressure, role) {
-        ref
-            .read(truppProvider.notifier)
-            .addHistoryEntry(
-              PressureHistoryEntry(
-                date: DateTime.now(),
-                leaderPressure: selectedPressure,
-                memberPressure: selectedPressure,
-              ),
-            );
+        notifier.addHistoryEntryToTrupp(
+          truppNumber,
+          PressureHistoryEntry(
+            date: DateTime.now(),
+            leaderPressure: selectedPressure,
+            memberPressure: selectedPressure,
+          ),
+        );
       },
       onStatusSelected: (selectedStatus) {
-        ref
-            .read(truppProvider.notifier)
-            .addHistoryEntry(
-              StatusHistoryEntry(date: DateTime.now(), status: selectedStatus),
-            );
+        notifier.addHistoryEntryToTrupp(
+          truppNumber,
+          StatusHistoryEntry(date: DateTime.now(), status: selectedStatus),
+        );
       },
       onLocationSelected: (selectedLocation) {
-        ref
-            .read(truppProvider.notifier)
-            .addHistoryEntry(
-              LocationHistoryEntry(
-                date: DateTime.now(),
-                location: selectedLocation,
-              ),
-            );
+        notifier.addHistoryEntryToTrupp(
+          truppNumber,
+          LocationHistoryEntry(
+            date: DateTime.now(),
+            location: selectedLocation,
+          ),
+        );
       },
       lowestPressure: lowestPressure,
     );
