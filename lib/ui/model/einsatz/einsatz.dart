@@ -157,13 +157,21 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     return state.alarms[truppNumber]!.any((alarm) => alarm.reason == reason);
   }
 
-  void addTrupp(int number) {
+  Future<void> addTrupp(int number) async {
     assert(!state.trupps.containsKey(number), 'Trupp $number already exists');
+
+    final settings = await ref.read(initialSettingsRepositoryProvider).get();
 
     state = state.copyWith(
       trupps: {
         ...state.trupps,
-        number: Trupp.form(number: number),
+        number: Trupp.form(
+          number: number,
+          maxPressure: settings?.defaultPressure,
+          theoreticalDuration: settings != null
+              ? Duration(minutes: settings.theoreticalDurationMinutes)
+              : null,
+        ),
       },
     );
   }
