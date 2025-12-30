@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // for ConsumerWidget
+import 'package:go_router/go_router.dart';
 
 import 'settings_list_editor.dart';
 import '../../repositories/firefighters_repository.dart';
@@ -104,7 +105,17 @@ class SettingsPage extends ConsumerWidget {
     final statusAsync = ref.watch(statusStreamProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Einstellungen')),
+      appBar: AppBar(
+        title: const Text('Einstellungen'),
+        actions: [
+          IconButton(
+          onPressed: () {
+              context.goNamed('operation');
+            },
+            icon: const Icon(Icons.close)
+          ),
+        ],
+      ),
       body: ListView(
         children: [
           // Firefighters (Truppmitglieder)
