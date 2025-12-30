@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'pressure.dart';
 
 class End extends StatelessWidget {
-  final Function(int, String) onPressureSelected;
+  final Function(int leaderPressure, int memberPressure) onPressureSelected;
   final Function(String) onTypeSelected;
   final Function() onSubmitPressed;
   final Function(bool) onHeatExposedSelected;
@@ -22,7 +22,7 @@ class End extends StatelessWidget {
     required this.isHeatExposed,
   }) {
     // only one type for now
-    onTypeSelected("Brandeinsatz");
+    onTypeSelected('Brandeinsatz');
   }
 
   @override
@@ -32,14 +32,11 @@ class End extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
-          Row(
+          const Row(
             children: [
               Text(
-                "Einsatz-Ende",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Einsatz-Ende',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -47,10 +44,10 @@ class End extends StatelessWidget {
 
           Row(
             children: [
-              Icon(Icons.timer),
+              const Icon(Icons.timer),
               Text(
                 " Einsatz-Zeit: ${operationTime.inMinutes}:${(operationTime.inSeconds % 60).toString().padLeft(2, '0')}",
-                style: TextStyle(fontSize: 18),
+                style: const TextStyle(fontSize: 18),
               ),
             ],
           ),
@@ -68,8 +65,8 @@ class End extends StatelessWidget {
                     isScrollControlled: true,
                     builder: (context) {
                       return Pressure(
-                        onPressureSelected: (selectedPressure, role) {
-                          onPressureSelected(selectedPressure, role);
+                        onPressureSelected: (leaderPressure, memberPressure) {
+                          onPressureSelected(leaderPressure, memberPressure);
                         },
                         lowestPressure: lowestPressure,
                       );
@@ -78,7 +75,7 @@ class End extends StatelessWidget {
                 },
                 icon: const Icon(Icons.speed, size: 18),
                 label: const Text(
-                  "Druck eintragen",
+                  'Druck eintragen',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
@@ -98,7 +95,7 @@ class End extends StatelessWidget {
                 },
                 icon: const Icon(Icons.bookmark_rounded, size: 18),
                 label: const Text(
-                  "Art des Einsatzes - Brandeinsatz",
+                  'Art des Einsatzes - Brandeinsatz',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
@@ -119,21 +116,21 @@ class End extends StatelessWidget {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text("Hitzebeaufschlagt?"),
+                        title: const Text('Hitzebeaufschlagt?'),
                         actions: [
                           TextButton(
                             onPressed: () {
                               onHeatExposedSelected(true);
                               Navigator.of(context).pop();
                             },
-                            child: const Text("Ja"),
+                            child: const Text('Ja'),
                           ),
                           TextButton(
                             onPressed: () {
                               onHeatExposedSelected(false);
                               Navigator.of(context).pop();
                             },
-                            child: const Text("Nein"),
+                            child: const Text('Nein'),
                           ),
                         ],
                       );
@@ -141,9 +138,9 @@ class End extends StatelessWidget {
                   );
                 },
                 icon: const Icon(Icons.local_fire_department, size: 18),
-                label: Text(
-                  "Hitzebeaufschlagt",
-                  style: const TextStyle(fontSize: 18),
+                label: const Text(
+                  'Hitzebeaufschlagt',
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
             ),
@@ -155,7 +152,7 @@ class End extends StatelessWidget {
           Center(
             child: ElevatedButton(
               onPressed: onSubmitPressed,
-              child: const Text("Speichern"),
+              child: const Text('Speichern'),
             ),
           ),
         ],

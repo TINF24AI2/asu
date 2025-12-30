@@ -36,12 +36,10 @@ class EndHandler extends ConsumerWidget {
     final lowestPressure = trupp.lowestPressure;
     final notifier = ref.read(einsatzProvider.notifier);
 
-    void onPressureSelected(int pressure, String role) {
-      if (role == "Truppführer") {
-        leaderPressure = pressure;
-      } else if (role == "Truppmann") {
-        memberPressure = pressure;
-      }
+    void onPressureSelected(int leaderPressure, int memberPressure) {
+      // TODO this doesnt work as intended, needs to converted to stateful widget.
+      //this.leaderPressure = leaderPressure;
+      //this.memberPressure = memberPressure;
     }
 
     void onTypeSelected(String type) {
