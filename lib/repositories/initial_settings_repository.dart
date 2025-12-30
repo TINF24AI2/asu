@@ -10,14 +10,21 @@ import '../ui/model/settings/initial_settings.dart';
 // Note: Initial settings are stored as a single document, not a collection.
 class InitialSettingsRepository {
   final FirestoreService _service;
-  final String userId;
+  final String? userId;
 
-  InitialSettingsRepository(this._service, {required this.userId});
+  InitialSettingsRepository(this._service, {this.userId});
+
+  void _authGuard() {
+    if (userId == null) {
+      throw StateError('User is not authenticated');
+    }
+  }
 
   // Stream the initial settings document.
   // Note: Uses FirebaseFirestore directly since FirestoreService only provides
   // collection streams, but initial settings is a single document.
   Stream<InitialSettingsModel?> stream() {
+    _authGuard();
     return FirebaseFirestore.instance
         .collection('users/$userId/settings')
         .doc('initial')
@@ -30,6 +37,7 @@ class InitialSettingsRepository {
 
   // Get the initial settings document once.
   Future<InitialSettingsModel?> get() async {
+    _authGuard();
     final data = await _service.getData(
       collectionPath: 'users/$userId/settings',
       docId: 'initial',
@@ -50,6 +58,7 @@ class InitialSettingsRepository {
     required int defaultPressure,
     required int theoreticalDurationMinutes,
   }) async {
+    _authGuard();
     final existing = await get();
 
     final model = InitialSettingsModel(
@@ -80,7 +89,7 @@ final initialSettingsRepositoryProvider =
     Provider.autoDispose<InitialSettingsRepository>((ref) {
       final service = ref.watch(firestoreServiceProvider);
       final authState = ref.watch(authStateChangesProvider);
-      final userId = authState.value!.uid;
+      final userId = authState.value?.uid;
       return InitialSettingsRepository(service, userId: userId);
     });
 
