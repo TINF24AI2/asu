@@ -1,16 +1,13 @@
-import 'package:asu/ui/model/einsatz/einsatz.dart';
-import 'package:asu/ui/model/history/history.dart';
-import 'package:asu/ui/trupp/end_handler.dart';
-import 'package:asu/ui/trupp/report_handler.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'model/trupp/trupp.dart';
 import 'trupp/end_handler.dart';
 import 'trupp/report_handler.dart';
+import 'model/einsatz/einsatz.dart';
+import 'model/history/history.dart';
 
 class Trupp extends ConsumerWidget {
-
   final int truppNumber;
   const Trupp({super.key, required this.truppNumber});
 
@@ -28,7 +25,7 @@ class Trupp extends ConsumerWidget {
               (entry) => entry is LocationHistoryEntry,
               orElse: () => LocationHistoryEntry(
                 date: DateTime.now(),
-                location: "Unbekannt",
+                location: 'Unbekannt',
               ),
             )
             as LocationHistoryEntry;
@@ -40,7 +37,7 @@ class Trupp extends ConsumerWidget {
         history.firstWhere(
               (entry) => entry is StatusHistoryEntry,
               orElse: () =>
-                  StatusHistoryEntry(date: DateTime.now(), status: "Unbekannt"),
+                  StatusHistoryEntry(date: DateTime.now(), status: 'Unbekannt'),
             )
             as StatusHistoryEntry;
     return statusEntry.status;
@@ -48,14 +45,16 @@ class Trupp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final trupp = ref.watch(einsatzProvider.select((e) => e.trupps[truppNumber]));
+    final trupp = ref.watch(
+      einsatzProvider.select((e) => e.trupps[truppNumber]),
+    );
 
     if (trupp == null) {
       return ListTile(
         title: Text('Trupp $truppNumber'),
         subtitle: const Text('Noch nicht angelegt'),
       );
-    }    
+    }
 
     return trupp.map(
       form: (t) => ListTile(
@@ -90,7 +89,7 @@ class Trupp extends ConsumerWidget {
               Row(
                 children: [
                   Text(
-                    "Trupp ${t.number}",
+                    'Trupp ${t.number}',
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -106,7 +105,10 @@ class Trupp extends ConsumerWidget {
                             backgroundColor: Colors.black,
                             child: Text(
                               getInitials(t.leaderName),
-                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 8),
@@ -115,14 +117,20 @@ class Trupp extends ConsumerWidget {
                             backgroundColor: Colors.grey,
                             child: Text(
                               getInitials(t.memberName),
-                              style: const TextStyle(color: Colors.white, fontSize: 12),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
                             ),
                           ),
                         ],
                       ),
                       const SizedBox(height: 8),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8.0,
+                          vertical: 4.0,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.amber,
                           borderRadius: BorderRadius.circular(4.0),
@@ -153,7 +161,8 @@ class Trupp extends ConsumerWidget {
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-                    builder: (context) => ReportHandler(truppNumber: truppNumber),
+                    builder: (context) =>
+                        ReportHandler(truppNumber: truppNumber),
                   );
                 },
                 onEinsatzBeendenPressed: () {
@@ -171,7 +180,7 @@ class Trupp extends ConsumerWidget {
               ),
               const SizedBox(height: 10),
               const Text(
-                "Historie",
+                'Historie',
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Expanded(
@@ -181,23 +190,94 @@ class Trupp extends ConsumerWidget {
                     final entry = history.toList()[index];
                     if (entry is StatusHistoryEntry) {
                       return ListTile(
-                        title: Text("Status: ${entry.status}"),
-                        subtitle: Text("Datum: ${entry.date}"),
+                        title: Text('Status: ${entry.status}'),
+                        subtitle: Text('Datum: ${entry.date}'),
                       );
                     } else if (entry is PressureHistoryEntry) {
                       return ListTile(
-                        title: Text("Druck: ${entry.leaderPressure}/${entry.memberPressure}"),
-                        subtitle: Text("Datum: ${entry.date}"),
+                        title: Text(
+                          'Druck: ${entry.leaderPressure}/${entry.memberPressure}',
+                        ),
+                        subtitle: Text('Datum: ${entry.date}'),
                       );
                     } else if (entry is LocationHistoryEntry) {
                       return ListTile(
-                        title: Text("Standort: ${entry.location}"),
-                        subtitle: Text("Datum: ${entry.date}"),
+                        title: Text('Standort: ${entry.location}'),
+                        subtitle: Text('Datum: ${entry.date}'),
                       );
                     } else {
                       return ListTile(
-                        title: const Text("Unbekannter Eintrag"),
-                        subtitle: Text("Datum: ${entry.date}"),
+                        title: const Text('Unbekannter Eintrag'),
+                        subtitle: Text('Datum: ${entry.date}'),
+                      );
+                    }
+                  },
+                ),
+              ),
+              const SizedBox(height: 20),
+              PressureReading(pressure: pressure, maxPressure: maxPressure),
+              const SizedBox(height: 20),
+              OperationInfo(
+                elapsedTime: elapsedTime,
+                remainingTime: remainingTime,
+                nextQueryTime: nextQueryTime,
+              ),
+              const SizedBox(height: 20),
+              OperationButtons(
+                onMeldungenPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) =>
+                        ReportHandler(truppNumber: truppNumber),
+                  );
+                },
+                onEinsatzBeendenPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    builder: (context) => EndHandler(
+                      truppNumber: truppNumber,
+                      operationTime: Duration(seconds: elapsedTime),
+                    ),
+                  );
+                },
+                latestLocation: latestLocation,
+                latestStatus: latestStatus,
+              ),
+
+              const SizedBox(height: 10),
+
+              const Text(
+                'Historie',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              Expanded(
+                child: ListView.builder(
+                  itemCount: history.length > 5 ? 5 : history.length,
+                  itemBuilder: (context, index) {
+                    final entry = history.reversed.toList()[index];
+                    if (entry is StatusHistoryEntry) {
+                      return ListTile(
+                        title: Text('Status: ${entry.status}'),
+                        subtitle: Text('Datum: ${entry.date}'),
+                      );
+                    } else if (entry is PressureHistoryEntry) {
+                      return ListTile(
+                        title: Text(
+                          'Druck: ${entry.leaderPressure}/${entry.memberPressure}',
+                        ),
+                        subtitle: Text('Datum: ${entry.date}'),
+                      );
+                    } else if (entry is LocationHistoryEntry) {
+                      return ListTile(
+                        title: Text('Standort: ${entry.location}'),
+                        subtitle: Text('Datum: ${entry.date}'),
+                      );
+                    } else {
+                      return ListTile(
+                        title: const Text('Unbekannter Eintrag'),
+                        subtitle: Text('Datum: ${entry.date}'),
                       );
                     }
                   },
@@ -205,77 +285,8 @@ class Trupp extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 20),
-          PressureReading(pressure: pressure, maxPressure: maxPressure),
-          const SizedBox(height: 20),
-          OperationInfo(
-            elapsedTime: elapsedTime,
-            remainingTime: remainingTime,
-            nextQueryTime: nextQueryTime,
-          ),
-          const SizedBox(height: 20),
-          OperationButtons(
-            onMeldungenPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (context) =>
-                    ReportHandler(truppProvider: truppProvider),
-              );
-            },
-            onEinsatzBeendenPressed: () {
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                builder: (context) => EndHandler(
-                  truppProvider: truppProvider,
-                  operationTime: Duration(seconds: elapsedTime),
-                ),
-              );
-            },
-            latestLocation: latestLocation,
-            latestStatus: latestStatus,
-          ),
-
-          const SizedBox(height: 10),
-
-          const Text(
-            "Historie",
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: history.length > 5 ? 5 : history.length,
-              itemBuilder: (context, index) {
-                final entry = history.reversed.toList()[index];
-                if (entry is StatusHistoryEntry) {
-                  return ListTile(
-                    title: Text("Status: ${entry.status}"),
-                    subtitle: Text("Datum: ${entry.date}"),
-                  );
-                } else if (entry is PressureHistoryEntry) {
-                  return ListTile(
-                    title: Text(
-                      "Druck: ${entry.leaderPressure}/${entry.memberPressure}",
-                    ),
-                    subtitle: Text("Datum: ${entry.date}"),
-                  );
-                } else if (entry is LocationHistoryEntry) {
-                  return ListTile(
-                    title: Text("Standort: ${entry.location}"),
-                    subtitle: Text("Datum: ${entry.date}"),
-                  );
-                } else {
-                  return ListTile(
-                    title: Text("Unbekannter Eintrag"),
-                    subtitle: Text("Datum: ${entry.date}"),
-                  );
-                }
-              },
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -295,12 +306,12 @@ class PressureReading extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    double pressurePercentage = pressure / maxPressure;
+    final double pressurePercentage = pressure / maxPressure;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text("Niedrigster Druck:", style: TextStyle(fontSize: 16)),
+        const Text('Niedrigster Druck:', style: TextStyle(fontSize: 16)),
         const SizedBox(height: 8),
         LinearProgressIndicator(
           value: pressurePercentage.clamp(0.0, 1.0),
@@ -311,7 +322,7 @@ class PressureReading extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          "$pressure bar / $maxPressure bar",
+          '$pressure bar / $maxPressure bar',
           style: const TextStyle(fontSize: 14),
         ),
       ],
@@ -346,12 +357,12 @@ class OperationInfo extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          "Einsatzdauer: ${formatTime(elapsedTime)}",
+          'Einsatzdauer: ${formatTime(elapsedTime)}',
           style: const TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 8),
         Text(
-          "Einsatzende in: ${formatTime(remainingTime)}",
+          'Einsatzende in: ${formatTime(remainingTime)}',
           style: const TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 8),
@@ -362,7 +373,7 @@ class OperationInfo extends StatelessWidget {
             borderRadius: BorderRadius.circular(4.0),
           ),
           child: Text(
-            "Nächste Abfrage in: ${formatTime(nextQueryTime)}",
+            'Nächste Abfrage in: ${formatTime(nextQueryTime)}',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
           ),
         ),
@@ -392,10 +403,10 @@ class OperationButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Row(
+        const Row(
           children: [
-            const Text(
-              "Status",
+            Text(
+              'Status',
               style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ],
@@ -403,9 +414,14 @@ class OperationButtons extends StatelessWidget {
         const SizedBox(height: 8),
         Column(
           children: [
-            Row(children: [Icon(Icons.location_pin), Text(" $latestLocation")]),
-            SizedBox(height: 5),
-            Row(children: [Icon(Icons.info), Text(" $latestStatus")]),
+            Row(
+              children: [
+                const Icon(Icons.location_pin),
+                Text(' $latestLocation'),
+              ],
+            ),
+            const SizedBox(height: 5),
+            Row(children: [const Icon(Icons.info), Text(' $latestStatus')]),
           ],
         ),
         const SizedBox(height: 10),
@@ -413,12 +429,12 @@ class OperationButtons extends StatelessWidget {
           children: [
             ElevatedButton(
               onPressed: onMeldungenPressed,
-              child: const Text("Meldungen"),
+              child: const Text('Meldungen'),
             ),
             const SizedBox(width: 8),
             ElevatedButton(
               onPressed: onEinsatzBeendenPressed,
-              child: const Text("Einsatz beenden"),
+              child: const Text('Einsatz beenden'),
             ),
           ],
         ),
