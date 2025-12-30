@@ -469,4 +469,264 @@ as Duration,
 
 }
 
+/// @nodoc
+mixin _$TruppDates {
+
+ DateTime get start; DateTime get theoreticalEnd; DateTime get potentialEnd; DateTime get nextCheck;
+/// Create a copy of TruppDates
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$TruppDatesCopyWith<TruppDates> get copyWith => _$TruppDatesCopyWithImpl<TruppDates>(this as TruppDates, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is TruppDates&&(identical(other.start, start) || other.start == start)&&(identical(other.theoreticalEnd, theoreticalEnd) || other.theoreticalEnd == theoreticalEnd)&&(identical(other.potentialEnd, potentialEnd) || other.potentialEnd == potentialEnd)&&(identical(other.nextCheck, nextCheck) || other.nextCheck == nextCheck));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,start,theoreticalEnd,potentialEnd,nextCheck);
+
+@override
+String toString() {
+  return 'TruppDates(start: $start, theoreticalEnd: $theoreticalEnd, potentialEnd: $potentialEnd, nextCheck: $nextCheck)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $TruppDatesCopyWith<$Res>  {
+  factory $TruppDatesCopyWith(TruppDates value, $Res Function(TruppDates) _then) = _$TruppDatesCopyWithImpl;
+@useResult
+$Res call({
+ DateTime start, DateTime theoreticalEnd, DateTime potentialEnd, DateTime nextCheck
+});
+
+
+
+
+}
+/// @nodoc
+class _$TruppDatesCopyWithImpl<$Res>
+    implements $TruppDatesCopyWith<$Res> {
+  _$TruppDatesCopyWithImpl(this._self, this._then);
+
+  final TruppDates _self;
+  final $Res Function(TruppDates) _then;
+
+/// Create a copy of TruppDates
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? start = null,Object? theoreticalEnd = null,Object? potentialEnd = null,Object? nextCheck = null,}) {
+  return _then(_self.copyWith(
+start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as DateTime,theoreticalEnd: null == theoreticalEnd ? _self.theoreticalEnd : theoreticalEnd // ignore: cast_nullable_to_non_nullable
+as DateTime,potentialEnd: null == potentialEnd ? _self.potentialEnd : potentialEnd // ignore: cast_nullable_to_non_nullable
+as DateTime,nextCheck: null == nextCheck ? _self.nextCheck : nextCheck // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [TruppDates].
+extension TruppDatesPatterns on TruppDates {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _TruppDates value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _TruppDates() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _TruppDates value)  $default,){
+final _that = this;
+switch (_that) {
+case _TruppDates():
+return $default(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _TruppDates value)?  $default,){
+final _that = this;
+switch (_that) {
+case _TruppDates() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( DateTime start,  DateTime theoreticalEnd,  DateTime potentialEnd,  DateTime nextCheck)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _TruppDates() when $default != null:
+return $default(_that.start,_that.theoreticalEnd,_that.potentialEnd,_that.nextCheck);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( DateTime start,  DateTime theoreticalEnd,  DateTime potentialEnd,  DateTime nextCheck)  $default,) {final _that = this;
+switch (_that) {
+case _TruppDates():
+return $default(_that.start,_that.theoreticalEnd,_that.potentialEnd,_that.nextCheck);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( DateTime start,  DateTime theoreticalEnd,  DateTime potentialEnd,  DateTime nextCheck)?  $default,) {final _that = this;
+switch (_that) {
+case _TruppDates() when $default != null:
+return $default(_that.start,_that.theoreticalEnd,_that.potentialEnd,_that.nextCheck);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+
+
+class _TruppDates implements TruppDates {
+  const _TruppDates({required this.start, required this.theoreticalEnd, required this.potentialEnd, required this.nextCheck});
+  
+
+@override final  DateTime start;
+@override final  DateTime theoreticalEnd;
+@override final  DateTime potentialEnd;
+@override final  DateTime nextCheck;
+
+/// Create a copy of TruppDates
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$TruppDatesCopyWith<_TruppDates> get copyWith => __$TruppDatesCopyWithImpl<_TruppDates>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _TruppDates&&(identical(other.start, start) || other.start == start)&&(identical(other.theoreticalEnd, theoreticalEnd) || other.theoreticalEnd == theoreticalEnd)&&(identical(other.potentialEnd, potentialEnd) || other.potentialEnd == potentialEnd)&&(identical(other.nextCheck, nextCheck) || other.nextCheck == nextCheck));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,start,theoreticalEnd,potentialEnd,nextCheck);
+
+@override
+String toString() {
+  return 'TruppDates(start: $start, theoreticalEnd: $theoreticalEnd, potentialEnd: $potentialEnd, nextCheck: $nextCheck)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$TruppDatesCopyWith<$Res> implements $TruppDatesCopyWith<$Res> {
+  factory _$TruppDatesCopyWith(_TruppDates value, $Res Function(_TruppDates) _then) = __$TruppDatesCopyWithImpl;
+@override @useResult
+$Res call({
+ DateTime start, DateTime theoreticalEnd, DateTime potentialEnd, DateTime nextCheck
+});
+
+
+
+
+}
+/// @nodoc
+class __$TruppDatesCopyWithImpl<$Res>
+    implements _$TruppDatesCopyWith<$Res> {
+  __$TruppDatesCopyWithImpl(this._self, this._then);
+
+  final _TruppDates _self;
+  final $Res Function(_TruppDates) _then;
+
+/// Create a copy of TruppDates
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? start = null,Object? theoreticalEnd = null,Object? potentialEnd = null,Object? nextCheck = null,}) {
+  return _then(_TruppDates(
+start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as DateTime,theoreticalEnd: null == theoreticalEnd ? _self.theoreticalEnd : theoreticalEnd // ignore: cast_nullable_to_non_nullable
+as DateTime,potentialEnd: null == potentialEnd ? _self.potentialEnd : potentialEnd // ignore: cast_nullable_to_non_nullable
+as DateTime,nextCheck: null == nextCheck ? _self.nextCheck : nextCheck // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+
+}
+
 // dart format on

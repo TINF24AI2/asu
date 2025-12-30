@@ -40,3 +40,13 @@ sealed class Trupp with _$Trupp {
     required Duration inAction,
   }) = TruppEnd;
 }
+
+@freezed
+sealed class TruppDates with _$TruppDates {
+  const factory TruppDates({
+    required DateTime start,
+    required DateTime theoreticalEnd,
+    required DateTime potentialEnd,
+    required DateTime nextCheck,
+  }) = _TruppDates;
+}

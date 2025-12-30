@@ -13,10 +13,12 @@ part 'einsatz.freezed.dart';
 
 @Riverpod(keepAlive: true)
 class EinsatzNotifier extends _$EinsatzNotifier {
-  static const _oneSec = Duration(seconds: 1);
-  final Stream<void> _ticker = Stream.periodic(_oneSec).asBroadcastStream();
+  final Stream<void> _ticker = Stream.periodic(
+    const Duration(seconds: 1),
+  ).asBroadcastStream();
   final Map<int, StreamSubscription<void>> _truppSubscriptions = {};
   final Map<int, PressureTrend> _currentPressureTrends = {};
+  final Map<int, TruppDates> _truppDates = {};
 
   @override
   Einsatz build() {
@@ -31,6 +33,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     await _truppSubscriptions[number]?.cancel();
     _truppSubscriptions.remove(number);
     _currentPressureTrends.remove(number);
+    _truppDates.remove(number);
     final endedTrupp = Trupp.end(
       number: number,
       history: trupp.history,
@@ -78,6 +81,12 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         HistoryEntry.status(date: DateTime.now(), status: 'Geräte angelegt'),
       ],
     );
+    _truppDates[number] = TruppDates(
+      start: DateTime.now(),
+      theoreticalEnd: DateTime.now().add(trupp.theoreticalDuration!),
+      potentialEnd: DateTime.now().add(trupp.theoreticalDuration!),
+      nextCheck: DateTime.now().add(checkDuration),
+    );
     state = state.copyWith(trupps: {...state.trupps, number: activeTrupp});
     _truppSubscriptions[number] = _ticker.listen((_) {
       _onTruppTick(number);
@@ -86,12 +95,13 @@ class EinsatzNotifier extends _$EinsatzNotifier {
 
   void _onTruppTick(int number) {
     final trupp = state.trupps[number]! as TruppAction;
+    final now = DateTime.now();
     var newPotentialEnd = trupp.potentialEnd;
     if (trupp.potentialEnd > Duration.zero) {
-      newPotentialEnd = trupp.potentialEnd - _oneSec;
+      newPotentialEnd = _truppDates[number]!.potentialEnd.difference(now);
     }
 
-    final newNextCheck = trupp.nextCheck - _oneSec;
+    final newNextCheck = _truppDates[number]!.nextCheck.difference(now);
     final newAlarms = state.alarms[number] ?? [];
 
     if (newNextCheck.isNegative) {
@@ -111,10 +121,10 @@ class EinsatzNotifier extends _$EinsatzNotifier {
 
     var newTheoreticalEnd = trupp.theoreticalEnd;
     if (trupp.theoreticalEnd > Duration.zero) {
-      newTheoreticalEnd = trupp.theoreticalEnd - _oneSec;
+      newTheoreticalEnd = _truppDates[number]!.theoreticalEnd.difference(now);
     }
 
-    final newSinceStart = trupp.sinceStart + _oneSec;
+    final newSinceStart = now.difference(_truppDates[number]!.start);
 
     final newLowestPressure =
         (_currentPressureTrends[number]!.m *
@@ -187,11 +197,8 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     }
 
     var newLowestPressure = trupp.lowestPressure;
-    var pressureUpdated = false;
-    var possibleEndSec = 0;
 
     if (entry is PressureHistoryEntry) {
-      pressureUpdated = true;
       final min = math.min(entry.leaderPressure, entry.memberPressure);
       newLowestPressure = min;
       // Update pressure trend
@@ -209,7 +216,12 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       final m = (min - lastMin) / (currentDate - lastDate);
       final b = min - m * currentDate;
 
-      possibleEndSec = ((b / -m) - currentDate).round();
+      _truppDates[truppNumber] = _truppDates[truppNumber]!.copyWith(
+        potentialEnd: DateTime.fromMillisecondsSinceEpoch(
+          ((b / -m) * 1000).round(),
+        ),
+        nextCheck: DateTime.now().add(trupp.checkInterval),
+      );
 
       _currentPressureTrends[truppNumber] = (m: m, b: b);
       entry = entry.copyWith(date: DateTime.now());
@@ -219,12 +231,6 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     final newTrupp = trupp.copyWith(
       history: newHistory,
       lowestPressure: newLowestPressure,
-      nextCheck: pressureUpdated
-          ? Duration(milliseconds: trupp.checkInterval.inMilliseconds)
-          : trupp.nextCheck,
-      potentialEnd: pressureUpdated
-          ? Duration(seconds: (possibleEndSec).clamp(0, 86400))
-          : trupp.potentialEnd,
     );
     state = state.copyWith(trupps: {...state.trupps, truppNumber: newTrupp});
   }
