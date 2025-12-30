@@ -1,9 +1,10 @@
-import 'package:asu/ui/auth/scaffold.dart';
-import 'package:asu/ui/settings/initial_settings_form.dart';
-import 'package:asu/repositories/initial_settings_repository.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
+import 'scaffold.dart';
+import '../settings/initial_settings_form.dart';
+import '../../repositories/initial_settings_repository.dart';
 
 class PostRegisterScreen extends ConsumerWidget {
   const PostRegisterScreen({super.key});

@@ -1,14 +1,19 @@
+import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:asu/ui/trupp/end.dart';
-import 'package:asu/ui/model/trupp/history.dart';
+import 'package:asu/ui/model/history/history.dart';
 import 'package:asu/ui/model/trupp/trupp.dart';
 
 class EndHandler extends ConsumerWidget {
-  final TruppNotifierProvider truppProvider;
+  final int truppNumber;
   final Duration operationTime;
 
-  const EndHandler({super.key, required this.truppProvider, required this.operationTime});
+  const EndHandler({
+    super.key,
+    required this.truppNumber,
+    required this.operationTime,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -16,6 +21,20 @@ class EndHandler extends ConsumerWidget {
     int? memberPressure;
     String? selectedType;
     bool isHeatExposed = false;
+
+    final trupp = ref.watch(
+      einsatzProvider.select((e) => e.trupps[truppNumber]),
+    );
+
+    if (trupp == null) {
+      return const Center(child: Text('Trupp existiert nicht.'));
+    }
+    if (trupp is! TruppAction) {
+      return Center(child: Text('Trupp ${trupp.number + 1} ist nicht aktiv.'));
+    }
+
+    final lowestPressure = trupp.lowestPressure;
+    final notifier = ref.read(einsatzProvider.notifier);
 
     void onPressureSelected(int pressure, String role) {
       if (role == "Truppführer") {
@@ -35,45 +54,49 @@ class EndHandler extends ConsumerWidget {
 
     void onSubmitPressed() {
       if (leaderPressure != null && memberPressure != null) {
-        ref.read(truppProvider.notifier).addHistoryEntry(
-              PressureHistoryEntry(
-                date: DateTime.now(),
-                leaderPressure: leaderPressure!,
-                memberPressure: memberPressure!,
-              ),
-            );
+        notifier.addHistoryEntryToTrupp(
+          truppNumber,
+          PressureHistoryEntry(
+            date: DateTime.now(),
+            leaderPressure: leaderPressure!,
+            memberPressure: memberPressure!,
+          ),
+        );
       }
 
       if (selectedType != null) {
-        ref.read(truppProvider.notifier).addHistoryEntry(
-              StatusHistoryEntry(date: DateTime.now(), status: selectedType!),
-            );
+        notifier.addHistoryEntryToTrupp(
+          truppNumber,
+          StatusHistoryEntry(date: DateTime.now(), status: selectedType!),
+        );
       }
 
-      ref.read(truppProvider.notifier).addHistoryEntry(
-            StatusHistoryEntry(
-              date: DateTime.now(),
-              status: "Hitzebeaufschlagt: ${isHeatExposed ? "Ja" : "Nein"}",
-            ),
-          );
+      notifier.addHistoryEntryToTrupp(
+        truppNumber,
+        StatusHistoryEntry(
+          date: DateTime.now(),
+          status: "Hitzebeaufschlagt: ${isHeatExposed ? "Ja" : "Nein"}",
+        ),
+      );
 
-      ref.read(truppProvider.notifier).addHistoryEntry(
-            StatusHistoryEntry(date: DateTime.now(), status: "Einsatz beendet"),
-          );
+      notifier.addHistoryEntryToTrupp(
+        truppNumber,
+        StatusHistoryEntry(date: DateTime.now(), status: "Einsatz beendet"),
+      );
+
+      notifier.endTrupp(truppNumber);
 
       Navigator.pop(context);
     }
 
     return End(
       operationTime: operationTime,
-      lowestPressure: ref.read(truppProvider.select((t) => t.lowestPressure)),
+      lowestPressure: lowestPressure,
       onPressureSelected: onPressureSelected,
       onTypeSelected: onTypeSelected,
       onHeatExposedSelected: onHeatExposedSelected,
       isHeatExposed: isHeatExposed,
       onSubmitPressed: onSubmitPressed,
     );
-
-    // TODO: End operation for this troup
   }
 }

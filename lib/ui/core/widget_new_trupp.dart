@@ -1,13 +1,15 @@
-import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:asu/repositories/firefighters_repository.dart';
-import 'package:asu/repositories/radio_call_repository.dart';
-import 'package:asu/repositories/initial_settings_repository.dart';
+
+import '../model/trupp/trupp.dart';
+import '../model/einsatz/einsatz.dart';
 import 'add_person.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
-import 'package:asu/ui/trupp/pressure.dart';
+import '../../repositories/firefighters_repository.dart';
+import '../../repositories/radio_call_repository.dart';
+import '../../repositories/initial_settings_repository.dart';
+import '../trupp/pressure.dart';
 
 // Functional implementation of widget_new_trupp using Firestore repositories
 
@@ -20,37 +22,6 @@ class WidgetNewTrupp extends ConsumerStatefulWidget {
 }
 
 class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
-  final List<String?> members = [null, null];
-  int? _selectedMinutes;
-  String? _selectedCallNumber;
-  int? _leaderPressure;
-  int? _memberPressure;
-  // fallback values - overridden by settings if available
-  int _defaultPressure = 300;
-  int _theoreticalDurationMinutes = 30;
-
-  // load initial settings from repository
-  @override
-  void initState() {
-    super.initState();
-    _loadInitialSettings();
-  }
-
-  Future<void> _loadInitialSettings() async {
-    try {
-      final repository = ref.read(initialSettingsRepositoryProvider);
-      final settings = await repository.get();
-      if (settings != null && mounted) {
-        setState(() {
-          _defaultPressure = settings.defaultPressure;
-          _theoreticalDurationMinutes = settings.theoreticalDurationMinutes;
-        });
-      }
-    } catch (e) {
-      // use default values if loading fails
-    }
-  }
-
   // open dialog and put the returned name into the selected slot
   Future<void> _addToSlot(int index) async {
     // Get current firefighters list from the stream
@@ -67,8 +38,12 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
     if (trimmed.isEmpty) return;
 
     // Avoid duplicates -> if the name already exists in the other slot, ignore it
-    final otherIndex = index == 0 ? 1 : 0;
-    if (members[otherIndex] != null && members[otherIndex] == trimmed) return;
+    final trupp = ref.read(
+      einsatzProvider.select((e) => e.trupps[widget.truppNumber]),
+    )!;
+    final otherMember = index == 0 ? trupp.memberName : trupp.leaderName;
+
+    if (otherMember != null && otherMember == trimmed) return;
 
     // Add to repository if the name is new
     if (!firefightersList.any((f) => f.name == trimmed)) {
@@ -83,37 +58,50 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
       }
     }
     if (mounted) {
-      setState(() {
-        members[index] = trimmed;
-      });
+      if (index == 0) {
+        ref
+            .read(einsatzProvider.notifier)
+            .setLeaderName(widget.truppNumber, trimmed);
+      } else {
+        ref
+            .read(einsatzProvider.notifier)
+            .setMemberName(widget.truppNumber, trimmed);
+      }
     }
   }
 
   // pressure input uses the shared 'Pressure' modal (same behaviour as in 'trupp.dart')
   @override
   Widget build(BuildContext context) {
+    final TruppForm trupp =
+        ref.watch(einsatzProvider.select((e) => e.trupps[widget.truppNumber]))
+            as TruppForm;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(margin: const EdgeInsets.only(top: 30)),
         Text(
-          "Trupp ${widget.truppNumber}",
+          'Trupp ${widget.truppNumber}',
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
         // Leader slot (index 0)
         Row(
           children: [
             const Text('Truppführer: '),
-            if (members[0] != null) ...[
-              Text(members[0]!),
+            if (trupp.leaderName != null) ...[
+              Text(trupp.leaderName!),
               IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => setState(() => members[0] = null),
+                onPressed: () {
+                  ref
+                      .read(einsatzProvider.notifier)
+                      .setLeaderName(widget.truppNumber, null);
+                },
               ),
-              if (_leaderPressure != null) ...[
+              if (trupp.leaderPressure != null) ...[
                 const SizedBox(width: 6),
-                Text('($_leaderPressure bar)'),
+                Text('(${trupp.leaderPressure} bar)'),
               ],
               const SizedBox(width: 8),
             ] else ...[
@@ -129,15 +117,19 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
         Row(
           children: [
             const Text('Truppmann: '),
-            if (members[1] != null) ...[
-              Text(members[1]!),
+            if (trupp.memberName != null) ...[
+              Text(trupp.memberName!),
               IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => setState(() => members[1] = null),
+                onPressed: () {
+                  ref
+                      .read(einsatzProvider.notifier)
+                      .setMemberName(widget.truppNumber, null);
+                },
               ),
-              if (_memberPressure != null) ...[
+              if (trupp.memberPressure != null) ...[
                 const SizedBox(width: 6),
-                Text('($_memberPressure bar)'),
+                Text('(${trupp.memberPressure} bar)'),
               ],
               const SizedBox(width: 8),
             ] else ...[
@@ -155,11 +147,15 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
         Row(
           children: [
             const Text('Rufnummer: '),
-            if (_selectedCallNumber != null) ...[
-              Text(_selectedCallNumber!),
+            if (trupp.callName != null) ...[
+              Text(trupp.callName!),
               IconButton(
                 icon: const Icon(Icons.delete),
-                onPressed: () => setState(() => _selectedCallNumber = null),
+                onPressed: () {
+                  ref
+                      .read(einsatzProvider.notifier)
+                      .setCallName(widget.truppNumber, null);
+                },
               ),
             ] else ...[
               TextButton(
@@ -193,7 +189,9 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                       }
                     }
                     if (mounted) {
-                      setState(() => _selectedCallNumber = result);
+                      ref
+                          .read(einsatzProvider.notifier)
+                          .setCallName(widget.truppNumber, result);
                     }
                   }
                 },
@@ -210,22 +208,71 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
           children: [
             ElevatedButton(
               onPressed: () {
+                final trupp =
+                    ref.read(
+                          einsatzProvider.select(
+                            (e) => e.trupps[widget.truppNumber],
+                          ),
+                        )
+                        as TruppForm;
+                // validations before starting
+                // trupp members
+                if (trupp.leaderName == null || trupp.leaderName!.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Truppführer muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+
+                if (trupp.memberName == null || trupp.memberName!.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Truppmann muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+                // radio call number
+                if (trupp.callName == null || trupp.callName!.isEmpty) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Die Rufnummer muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+                // pressure level
+                if (trupp.leaderPressure == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Druck vom Truppführer fehlt'),
+                    ),
+                  );
+                  return;
+                }
+                if (trupp.memberPressure == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Der Druck vom Truppmann fehlt'),
+                    ),
+                  );
+                  return;
+                }
+                // deployment duration
+                if (trupp.theoreticalDuration == null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Die Einsatzdauer muss ausgewählt werden'),
+                    ),
+                  );
+                  return;
+                }
+
                 ref
                     .read(einsatzProvider.notifier)
-                    .addTrupp(
-                      widget.truppNumber,
-                      _selectedCallNumber ?? "",
-                      members[0] ?? "",
-                      members[1] ?? "",
-                      DateTime.now(),
-                      _leaderPressure ?? (_defaultPressure - 20),
-                      _memberPressure ?? (_defaultPressure - 30),
-                      _defaultPressure,
-                      Duration(
-                        minutes:
-                            _selectedMinutes ?? _theoreticalDurationMinutes,
-                      ),
-                    );
+                    .activateTrupp(widget.truppNumber);
               },
               child: const Text('Start'),
             ),
@@ -233,11 +280,18 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
             ElevatedButton(
               onPressed: () async {
                 final result = await showSelectDurationSheet(context);
-                if (result != null) setState(() => _selectedMinutes = result);
+                if (result != null) {
+                  ref
+                      .read(einsatzProvider.notifier)
+                      .setTheoreticalDuration(
+                        widget.truppNumber,
+                        Duration(minutes: result),
+                      );
+                }
               },
               child: Text(
-                _selectedMinutes != null
-                    ? '${_selectedMinutes!} Minuten'
+                trupp.theoreticalDuration != null
+                    ? trupp.theoreticalDuration!.toString()
                     : 'Zeit wählen',
               ),
             ),
@@ -249,19 +303,38 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                   context: context,
                   isScrollControlled: true,
                   builder: (context) {
+                    final initialSettings = ref
+                        .watch(initialSettingsStreamProvider)
+                        .value;
+                    final trupp =
+                        ref.watch(
+                              einsatzProvider.select(
+                                (e) => e.trupps[widget.truppNumber],
+                              ),
+                            )
+                            as TruppForm;
                     return Pressure(
                       onPressureSelected: (selectedPressure, role) {
-                        setState(() {
-                          if (role == 'Truppführer') {
-                            _leaderPressure = selectedPressure;
-                          } else {
-                            _memberPressure = selectedPressure;
-                          }
-                        });
+                        if (role == 'Truppführer') {
+                          ref
+                              .read(einsatzProvider.notifier)
+                              .setLeaderPressure(
+                                widget.truppNumber,
+                                selectedPressure,
+                              );
+                        } else {
+                          ref
+                              .read(einsatzProvider.notifier)
+                              .setMemberPressure(
+                                widget.truppNumber,
+                                selectedPressure,
+                              );
+                        }
                       },
                       lowestPressure:
-                          (_leaderPressure ?? _memberPressure) ??
-                          (_defaultPressure - 20), // fallback from settings
+                          // Why only from 270 bar upwards?
+                          (trupp.leaderPressure ?? trupp.memberPressure) ??
+                          ((initialSettings?.defaultPressure ?? 300) + 20),
                     );
                   },
                 );

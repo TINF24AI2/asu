@@ -13,14 +13,14 @@ part of 'einsatz.dart';
 const einsatzProvider = EinsatzNotifierProvider._();
 
 final class EinsatzNotifierProvider
-    extends $NotifierProvider<EinsatzNotifier, TruppList> {
+    extends $NotifierProvider<EinsatzNotifier, Einsatz> {
   const EinsatzNotifierProvider._()
     : super(
         from: null,
         argument: null,
         retry: null,
         name: r'einsatzProvider',
-        isAutoDispose: true,
+        isAutoDispose: false,
         dependencies: null,
         $allTransitiveDependencies: null,
       );
@@ -33,28 +33,28 @@ final class EinsatzNotifierProvider
   EinsatzNotifier create() => EinsatzNotifier();
 
   /// {@macro riverpod.override_with_value}
-  Override overrideWithValue(TruppList value) {
+  Override overrideWithValue(Einsatz value) {
     return $ProviderOverride(
       origin: this,
-      providerOverride: $SyncValueProvider<TruppList>(value),
+      providerOverride: $SyncValueProvider<Einsatz>(value),
     );
   }
 }
 
-String _$einsatzNotifierHash() => r'2f21ec13a4f1661649f445043484696b75a3c590';
+String _$einsatzNotifierHash() => r'4a303a8dd6cb23505a6e326f3a7b599d1981adc3';
 
-abstract class _$EinsatzNotifier extends $Notifier<TruppList> {
-  TruppList build();
+abstract class _$EinsatzNotifier extends $Notifier<Einsatz> {
+  Einsatz build();
   @$mustCallSuper
   @override
   void runBuild() {
     final created = build();
-    final ref = this.ref as $Ref<TruppList, TruppList>;
+    final ref = this.ref as $Ref<Einsatz, Einsatz>;
     final element =
         ref.element
             as $ClassProviderElement<
-              AnyNotifier<TruppList, TruppList>,
-              TruppList,
+              AnyNotifier<Einsatz, Einsatz>,
+              Einsatz,
               Object?,
               Object?
             >;
