@@ -1,16 +1,117 @@
-# asu
+# 📱 ASU - Atemschutzüberwachung
+ASU is a mobile application for monitoring respiratory protection  during firefighting operations. The app was developed as a graded course project for the module **Entwicklung mobiler Applikationen** (Mobile Application Development) at **DHBW Mannheim** in winter semester 2024/2025.
 
-A new Flutter project.
+## 🎯 Application Purpose
+ASU offers digital support for firefighters respiratory protection monitoring and enables real-time monitoring of:
+- **Trupp** information and status
+- **Firefighter** management
+- **Location** tracking during operations
+- **Pressure** monitoring
+- **Radio call numbers**
+- **Operation history**
 
-## Getting Started
+The application replaces traditional paper-based monitoring systems with a modern, Firebase-backed mobile solution.
 
-This project is a starting point for a Flutter application.
+## ✨ Features
+### 👤 Authentication
+- User registration and login
+- Firebase Authentication integration
+- Secure session management
 
-A few resources to get you started if this is your first Flutter project:
+### 🚒 Trupp Management
+- Create and manage firefighter trupps
+- Track trupp status and location
+- Monitor air pressure levels
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### 📋 Settings & Configuration
+- Manage firefighter personnel list
+- Configure locations
+- Setup radio call numbers
+- Define operation statuses
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+### 📊 Operation Tracking
+- Start and end operations
+- Record operation history
+- View historical data
+
+## 🛠️ Technologies Used
+| Technology            | Description                                 |
+| --------------------- | ------------------------------------------- |
+| **Flutter**           | Cross-platform mobile development framework |
+| **Dart**              | Programming language                        |
+| **Firebase Core**     | Firebase SDK integration                    |
+| **Firebase Auth**     | Authentication service                      |
+| **Cloud Firestore**   | NoSQL cloud database                        |
+| **Riverpod**          | State management solution                   |
+| **Go Router**         | Declarative routing                         |
+| **Freezed**           | Code generation for immutable classes       |
+
+## 📁 Project Structure
+```
+asu/
+├── lib/
+│   ├── firebase/              # Firebase configuration and services
+│   │   ├── firebase_auth_provider.dart
+│   │   ├── firebase_auth_service.dart
+│   │   ├── firestore_provider.dart
+│   │   └── firestore_service.dart
+│   ├── repositories/          # Data layer repositories
+│   │   ├── firefighters_repository.dart
+│   │   ├── initial_settings_repository.dart
+│   │   ├── locations_repository.dart
+│   │   ├── radio_call_repository.dart
+│   │   └── status_repository.dart
+│   ├── ui/                    # User interface layer
+│   │   ├── auth/              # Authentication screens
+│   │   ├── core/              # Core UI components
+│   │   ├── model/             # Data models (operations, settings, trupp)
+│   │   │   ├── einsatz/       # Operation data models
+│   │   │   ├── settings/      # Configuration and settings models
+│   │   │   └── trupp/         # Trupp data models
+│   │   ├── router/            # Navigation routing
+│   │   ├── settings/          # Settings screens
+│   │   └── trupp/             # Trupp management screens
+│   ├── firebase_options.dart  # Firebase configuration
+│   └── main.dart              # Application entry point
+├── android/                   # Android-specific configuration
+├── build/                     # Build artifacts (generated)
+├── analysis_options.yaml      # Dart analyzer configuration
+├── firebase.json              # Firebase project configuration
+├── firestore.rules            # Firestore security rules
+├── pubspec.yaml               # Dependencies and project metadata
+└── README.md                  # Project documentation
+```
+
+## 📲 How to Run the App
+### Prerequisites
+Ensure the following tools are installed:
+- **Flutter SDK** (version 3.9.2 or higher)
+- **Dart SDK** (version 3.9.2 or higher)
+- **Android Studio** or **Visual Studio Code** with Flutter extensions
+- **Android Emulator** or physical Android/iOS device
+
+### Installation Steps
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/TINF24AI2/asu.git
+   cd asu
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   flutter pub get
+   ```
+
+3. **Generate code (optional, if generated files are missing):**
+   ```bash
+   flutter pub run build_runner build --delete-conflicting-outputs
+   ```
+   > Note: This step regenerates Freezed, Riverpod, and Go Router files. Skip if all `.g.dart` and `.freezed.dart` files are already present and up-to-date.
+
+4. **Run the application:**
+   ```bash
+   flutter run
+   ```
+
+## 📄 License
+This project is submitted as an academic assignment for DHBW Mannheim.
