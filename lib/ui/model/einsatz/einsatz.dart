@@ -224,7 +224,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       _truppDates[truppNumber] = _truppDates[truppNumber]!.copyWith(
         potentialEnd: m != 0
             ? DateTime.fromMillisecondsSinceEpoch(((b / -m) * 1000).round())
-            : _truppDates[truppNumber]!.potentialEnd,
+            : _truppDates[truppNumber]!.theoreticalEnd,
         nextCheck: DateTime.now().add(trupp.checkInterval),
       );
 
