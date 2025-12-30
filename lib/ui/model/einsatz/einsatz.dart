@@ -19,6 +19,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   final Map<int, StreamSubscription<void>> _truppSubscriptions = {};
   final Map<int, PressureTrend> _currentPressureTrends = {};
   final Map<int, TruppDates> _truppDates = {};
+  int _nextTruppNumber = 1;
 
   @override
   Einsatz build() {
@@ -167,16 +168,14 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     return state.alarms[truppNumber]!.any((alarm) => alarm.reason == reason);
   }
 
-  Future<void> addTrupp(int number) async {
-    assert(!state.trupps.containsKey(number), 'Trupp $number already exists');
-
+  Future<void> addTrupp() async {
     final settings = await ref.read(initialSettingsRepositoryProvider).get();
 
     state = state.copyWith(
       trupps: {
         ...state.trupps,
-        number: Trupp.form(
-          number: number,
+        _nextTruppNumber: Trupp.form(
+          number: _nextTruppNumber,
           maxPressure: settings?.defaultPressure,
           theoreticalDuration: settings != null
               ? Duration(minutes: settings.theoreticalDurationMinutes)
@@ -184,6 +183,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         ),
       },
     );
+    _nextTruppNumber++;
   }
 
   void addHistoryEntryToTrupp(int truppNumber, HistoryEntry entry) {
