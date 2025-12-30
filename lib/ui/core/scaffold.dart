@@ -17,28 +17,18 @@ class AsuScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    String title = 'Atemschutzüberwachung';
-    int selectedIndex = -1;
-    switch (topRouteName) {
-      case 'operation':
-        title = 'Einsatz - Atemschutzüberwachung';
-        selectedIndex = 0;
-        break;
-      case 'protocols':
-        title = 'Protokolle - Atemschutzüberwachung';
-        selectedIndex = 1;
-        break;
-      case 'settings':
-        title = 'Einstellungen - Atemschutzüberwachung';
-        selectedIndex = 2;
-        break;
-      default:
-    }
+    const String title = 'Atemschutzüberwachung';
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: const Text(title),
         actions: [
+          IconButton( 
+            onPressed: () {
+              context.goNamed('settings');
+            },
+            icon: const Icon(Icons.settings),
+          ),
           IconButton(
             onPressed: () {
               showAboutDialog(
@@ -46,7 +36,7 @@ class AsuScaffold extends StatelessWidget {
                 applicationName: Pubspec.name,
                 applicationVersion: Pubspec.versionFull,
                 applicationLegalese: '© 2024',
-                children: [Text(Pubspec.description)],
+                children: [const Text(Pubspec.description)],
               );
             },
             icon: const Icon(Icons.info_outline),
@@ -59,38 +49,7 @@ class AsuScaffold extends StatelessWidget {
                 context.goNamed('login');
               }
             },
-            icon: Icon(Icons.logout),
-          ),
-        ],
-      ),
-      drawer: NavigationDrawer(
-        selectedIndex: selectedIndex,
-        onDestinationSelected: (value) {
-          switch (value) {
-            case 0:
-              context.goNamed('operation');
-              break;
-            case 1:
-              context.goNamed('protocols');
-              break;
-            case 2:
-              context.goNamed('settings');
-              break;
-            default:
-          }
-        },
-        children: [
-          NavigationDrawerDestination(
-            icon: const Icon(Icons.local_fire_department),
-            label: const Text("Einsatz"),
-          ),
-          NavigationDrawerDestination(
-            icon: const Icon(Icons.description),
-            label: const Text("Protokolle"),
-          ),
-          NavigationDrawerDestination(
-            icon: const Icon(Icons.settings),
-            label: const Text("Einstellungen"),
+            icon: const Icon(Icons.logout),
           ),
         ],
       ),
