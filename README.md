@@ -1,5 +1,5 @@
 # 📱 ASU - Atemschutzüberwachung
-ASU is a mobile application for monitoring respiratory protection  during firefighting operations. The app was developed as a graded course project for the module **Entwicklung mobiler Applikationen** (Mobile Application Development) at **DHBW Mannheim** in winter semester 2024/2025.
+ASU is a mobile application for monitoring respiratory protection  during firefighting operations. The app was developed as a graded course project for the module **Entwicklung mobiler Applikationen** (Mobile Application Development) at **DHBW Mannheim** in winter semester 2025/2026.
 
 ## 🎯 Application Purpose
 ASU offers digital support for firefighters respiratory protection monitoring and enables real-time monitoring of:
