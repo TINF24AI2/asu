@@ -4,6 +4,7 @@ import 'dart:math' as math;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
+import '../../../repositories/initial_settings_repository.dart';
 import '../history/history.dart';
 import '../trupp/trupp.dart';
 
@@ -19,7 +20,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
 
   @override
   Einsatz build() {
-    return Einsatz();
+    return const Einsatz();
   }
 
   Future<void> endTrupp(int number) async {
@@ -50,9 +51,10 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       trupp.leaderPressure!,
       trupp.memberPressure!,
     );
-    final checkDuration = trupp.theoreticalDuration! > Duration(minutes: 24)
-        ? Duration(minutes: 8)
-        : Duration(minutes: 6);
+    final checkDuration =
+        trupp.theoreticalDuration! > const Duration(minutes: 24)
+        ? const Duration(minutes: 8)
+        : const Duration(minutes: 6);
     _currentPressureTrends[number] = (m: 0, b: lowestPressure.toDouble());
     final activeTrupp = Trupp.action(
       number: number,
@@ -73,7 +75,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
           leaderPressure: trupp.leaderPressure!,
           memberPressure: trupp.memberPressure!,
         ),
-        HistoryEntry.status(date: DateTime.now(), status: "Geräte angelegt"),
+        HistoryEntry.status(date: DateTime.now(), status: 'Geräte angelegt'),
       ],
     );
     state = state.copyWith(trupps: {...state.trupps, number: activeTrupp});
@@ -90,6 +92,22 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     }
 
     final newNextCheck = trupp.nextCheck - _oneSec;
+    final newAlarms = state.alarms[number] ?? [];
+
+    if (newNextCheck.isNegative) {
+      if (!_alarmAlreadyExists(number, AlarmReason.checkPressure)) {
+        newAlarms.add((
+          type: AlarmType.sound,
+          reason: AlarmReason.checkPressure,
+        ));
+      }
+    } else {
+      if (_alarmAlreadyExists(number, AlarmReason.checkPressure)) {
+        newAlarms.removeWhere(
+          (alarm) => alarm.reason == AlarmReason.checkPressure,
+        );
+      }
+    }
 
     var newTheoreticalEnd = trupp.theoreticalEnd;
     if (trupp.theoreticalEnd > Duration.zero) {
@@ -104,7 +122,19 @@ class EinsatzNotifier extends _$EinsatzNotifier {
                 _currentPressureTrends[number]!.b)
             .round();
 
-    // TODO alarm checks
+    if (newLowestPressure < 60) {
+      if (!_alarmAlreadyExists(number, AlarmReason.lowPressure)) {
+        newAlarms.add((type: AlarmType.sound, reason: AlarmReason.lowPressure));
+      }
+    } else {
+      if (_alarmAlreadyExists(number, AlarmReason.lowPressure)) {
+        newAlarms.removeWhere(
+          (alarm) => alarm.reason == AlarmReason.lowPressure,
+        );
+      }
+    }
+
+    // TODO retreat alarm check
 
     final newTrupp = trupp.copyWith(
       potentialEnd: newPotentialEnd,
@@ -113,7 +143,18 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       sinceStart: newSinceStart,
       lowestPressure: newLowestPressure,
     );
-    state = state.copyWith(trupps: {...state.trupps, number: newTrupp});
+
+    state = state.copyWith(
+      trupps: {...state.trupps, number: newTrupp},
+      alarms: {...state.alarms, number: newAlarms},
+    );
+  }
+
+  bool _alarmAlreadyExists(int truppNumber, AlarmReason reason) {
+    if (!state.alarms.containsKey(truppNumber)) {
+      return false;
+    }
+    return state.alarms[truppNumber]!.any((alarm) => alarm.reason == reason);
   }
 
   void addTrupp(int number) {
@@ -134,7 +175,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     );
     final trupp = state.trupps[truppNumber]!;
     if (trupp is! TruppAction) {
-      throw StateError("Trupp $truppNumber is not in action state");
+      throw StateError('Trupp $truppNumber is not in action state');
     }
 
     var newLowestPressure = trupp.lowestPressure;
@@ -174,7 +215,14 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   }
 
   void ackSoundingAlarm(int truppNumber, AlarmReason alarm) {
-    //TODO new state handling
+    if (!state.alarms.containsKey(truppNumber)) {
+      return;
+    }
+    final newAlarms = state.alarms[truppNumber]!
+        .where((a) => a.reason != alarm)
+        .toList();
+    newAlarms.add((type: AlarmType.visual, reason: alarm));
+    state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
   }
 
   void _updateFormTrupp(
@@ -186,7 +234,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       'Trupp $truppNumber does not exist',
     );
     if (state.trupps[truppNumber] is! TruppForm) {
-      throw StateError("Trupp $truppNumber is not in form state");
+      throw StateError('Trupp $truppNumber is not in form state');
     }
     final trupp = state.trupps[truppNumber] as TruppForm;
     final newTrupp = update(trupp);
