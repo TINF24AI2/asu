@@ -180,6 +180,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
 
     var newLowestPressure = trupp.lowestPressure;
     var pressureUpdated = false;
+    var possibleEndSec = 0;
 
     if (entry is PressureHistoryEntry) {
       pressureUpdated = true;
@@ -199,6 +200,9 @@ class EinsatzNotifier extends _$EinsatzNotifier {
 
       final m = (min - lastMin) / (currentDate - lastDate);
       final b = min - m * currentDate;
+
+      possibleEndSec = ((b / -m) - currentDate).round();
+
       _currentPressureTrends[truppNumber] = (m: m, b: b);
       entry = entry.copyWith(date: DateTime.now());
     }
@@ -210,6 +214,9 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       nextCheck: pressureUpdated
           ? Duration(milliseconds: trupp.checkInterval.inMilliseconds)
           : trupp.nextCheck,
+      potentialEnd: pressureUpdated
+          ? Duration(seconds: (possibleEndSec).clamp(0, 86400))
+          : trupp.potentialEnd,
     );
     state = state.copyWith(trupps: {...state.trupps, truppNumber: newTrupp});
   }
