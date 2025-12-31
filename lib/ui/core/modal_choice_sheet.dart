@@ -79,8 +79,12 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
                       final scannedName = await Navigator.of(context).push<String>(
                         MaterialPageRoute(builder: (_) => const QrScanner()),
                       );
-                      if (scannedName != null && scannedName.isNotEmpty) {
-                        Navigator.of(context, rootNavigator: true).pop(scannedName as T);
+                      if (scannedName == null) return;
+                      
+                      final norm = normalizeTyped(scannedName);
+
+                      if (norm != null) {
+                        Navigator.of(context, rootNavigator: true).pop(norm);
                       }
                     }
                    ),
