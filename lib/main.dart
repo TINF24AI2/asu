@@ -8,7 +8,7 @@ import 'ui/app.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(ProviderScope(child: const AsuApp()));
+  runApp(const ProviderScope(child: AsuApp()));
 }
 
 // Dev Alternative Main

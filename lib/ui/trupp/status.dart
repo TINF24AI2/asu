@@ -13,18 +13,18 @@ class Status extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Text(
-                "Status eintragen",
-                style: const TextStyle(
+                'Status eintragen',
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ],
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
 
           // Only for testing
           // TODO: Connect to settings
@@ -33,24 +33,24 @@ class Status extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  onStatusSelected("am Einsatzort");
+                  onStatusSelected('am Einsatzort');
                   Navigator.pop(context);
                 },
-                child: const Text("am Einsatzort"),
+                child: const Text('am Einsatzort'),
               ),
               ElevatedButton(
                 onPressed: () {
-                  onStatusSelected("Erkundung");
+                  onStatusSelected('Erkundung');
                   Navigator.pop(context);
                 },
-                child: const Text("Erkundung"),
+                child: const Text('Erkundung'),
               ),
               ElevatedButton(
                 onPressed: () {
-                  onStatusSelected("Menschenrettung");
+                  onStatusSelected('Menschenrettung');
                   Navigator.pop(context);
                 },
-                child: const Text("Menschenrettung"),
+                child: const Text('Menschenrettung'),
               ),
             ],
           ),
