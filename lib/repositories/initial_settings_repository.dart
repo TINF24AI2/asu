@@ -8,23 +8,17 @@ import '../ui/model/settings/initial_settings.dart';
 
 // Repository class for managing Initial Settings data in Firestore.
 // Note: Initial settings are stored as a single document, not a collection.
+// userId is guaranteed non-null - validation happens at provider level.
 class InitialSettingsRepository {
   final FirestoreService _service;
-  final String? userId;
+  final String userId;
 
-  InitialSettingsRepository(this._service, {this.userId});
-
-  void _authGuard() {
-    if (userId == null) {
-      throw StateError('User is not authenticated');
-    }
-  }
+  InitialSettingsRepository(this._service, {required this.userId});
 
   // Stream the initial settings document.
   // Note: Uses FirebaseFirestore directly since FirestoreService only provides
   // collection streams, but initial settings is a single document.
   Stream<InitialSettingsModel?> stream() {
-    _authGuard();
     return FirebaseFirestore.instance
         .collection('users/$userId/settings')
         .doc('initial')
@@ -37,7 +31,6 @@ class InitialSettingsRepository {
 
   // Get the initial settings document once.
   Future<InitialSettingsModel?> get() async {
-    _authGuard();
     final data = await _service.getData(
       collectionPath: 'users/$userId/settings',
       docId: 'initial',
@@ -58,7 +51,6 @@ class InitialSettingsRepository {
     required int defaultPressure,
     required int theoreticalDurationMinutes,
   }) async {
-    _authGuard();
     final existing = await get();
 
     final model = InitialSettingsModel(
@@ -83,20 +75,36 @@ class InitialSettingsRepository {
   }
 }
 
-// Provider for InitialSettingsRepository to be used with Riverpod.
-// Watches auth state to ensure repository updates when user changes.
+// Provider for InitialSettingsRepository.
+// Returns null when user is not authenticated (before login or after logout).
+// Automatically updates when auth state changes.
 final initialSettingsRepositoryProvider =
-    Provider.autoDispose<InitialSettingsRepository>((ref) {
+    Provider.autoDispose<InitialSettingsRepository?>((ref) {
       final service = ref.watch(firestoreServiceProvider);
       final authState = ref.watch(authStateChangesProvider);
-      final userId = authState.value?.uid;
+      // Try to get userId from auth stream or fallback to currentUser
+      final userId = authState.maybeWhen(
+        data: (user) => user?.uid,
+        orElse: () => ref.watch(firebaseAuthServiceProvider).currentUser?.uid,
+      );
+      // Return null instead of throwing to avoid crashes when not authenticated
+      if (userId == null) {
+        return null;
+      }
       return InitialSettingsRepository(service, userId: userId);
     });
 
-// Stream provider for initial settings.
+// Stream provider for initial settings from Firestore.
+// Emits null when:
+//  - User is not authenticated
+//  - Settings document doesn't exist yet
+// Use this provider for reactive updates when settings change.
 final initialSettingsStreamProvider = StreamProvider<InitialSettingsModel?>((
   ref,
 ) {
   final repository = ref.watch(initialSettingsRepositoryProvider);
+  if (repository == null) {
+    return Stream.value(null);
+  }
   return repository.stream();
 });

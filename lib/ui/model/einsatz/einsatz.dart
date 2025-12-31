@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../repositories/initial_settings_repository.dart';
+import '../../../ui/model/settings/initial_settings.dart';
 import '../history/history.dart';
 import '../trupp/trupp.dart';
 
@@ -168,18 +169,28 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     return state.alarms[truppNumber]!.any((alarm) => alarm.reason == reason);
   }
 
-  Future<void> addTrupp() async {
-    final settings = await ref.read(initialSettingsRepositoryProvider).get();
+  // Adds a new Trupp in form state.
+  // Loads default values from InitialSettings if available.
+  // Uses fallback defaults (300 bar, 30 min) if settings unavailable.
+  // Reason: App should remain functional even if user skipped post-registration setup or Firestore connection fails.
+  void addTrupp() {
+    final settingsAsync = ref.read(initialSettingsStreamProvider);
+    final settings = settingsAsync.asData?.value;
 
     state = state.copyWith(
       trupps: {
         ...state.trupps,
         _nextTruppNumber: Trupp.form(
           number: _nextTruppNumber,
-          maxPressure: settings?.defaultPressure,
+          maxPressure:
+              settings?.defaultPressure ??
+              InitialSettingsModel.kStandardMaxPressure,
           theoreticalDuration: settings != null
               ? Duration(minutes: settings.theoreticalDurationMinutes)
-              : null,
+              : const Duration(
+                  minutes:
+                      InitialSettingsModel.kStandardTheoreticalDurationMinutes,
+                ),
         ),
       },
     );

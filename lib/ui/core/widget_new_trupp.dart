@@ -14,6 +14,9 @@ class WidgetNewTrupp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch stream to keep it active and preload data
+    ref.watch(radioCallsStreamProvider);
+
     final TruppForm trupp =
         ref.watch(einsatzProvider.select((e) => e.trupps[truppNumber]))
             as TruppForm;
@@ -83,9 +86,12 @@ class WidgetNewTrupp extends ConsumerWidget {
                       // Add to repository if the call number is new
                       if (!radioCallsList.any((r) => r.name == result)) {
                         try {
-                          await ref
-                              .read(radioCallRepositoryProvider)
-                              .add(result);
+                          final repository = ref.read(
+                            radioCallRepositoryProvider,
+                          );
+                          if (repository != null) {
+                            await repository.add(result);
+                          }
                         } catch (e) {
                           if (context.mounted) {
                             messenger.showSnackBar(
@@ -179,7 +185,8 @@ class WidgetNewTrupp extends ConsumerWidget {
                     );
                     return;
                   }
-
+                  // Note: maxPressure and theoreticalDuration need fallback defaults, because they shouldn't be null.
+                  // But user can skip post register settings, which might lead to null values here.
                   ref.read(einsatzProvider.notifier).activateTrupp(truppNumber);
                 },
                 child: const Text('Start'),

@@ -38,16 +38,20 @@ class SettingsPage extends ConsumerWidget {
           try {
             switch (key) {
               case SettingsKey.truppMembers:
-                await ref.read(firefightersRepositoryProvider).add(name);
+                final repo = ref.read(firefightersRepositoryProvider);
+                if (repo != null) await repo.add(name);
                 break;
               case SettingsKey.callNumbers:
-                await ref.read(radioCallRepositoryProvider).add(name);
+                final repo = ref.read(radioCallRepositoryProvider);
+                if (repo != null) await repo.add(name);
                 break;
               case SettingsKey.locations:
-                await ref.read(locationsRepositoryProvider).add(name);
+                final repo = ref.read(locationsRepositoryProvider);
+                if (repo != null) await repo.add(name);
                 break;
               case SettingsKey.status:
-                await ref.read(statusRepositoryProvider).add(name);
+                final repo = ref.read(statusRepositoryProvider);
+                if (repo != null) await repo.add(name);
                 break;
             }
             if (context.mounted) {
@@ -67,16 +71,20 @@ class SettingsPage extends ConsumerWidget {
           try {
             switch (key) {
               case SettingsKey.truppMembers:
-                await ref.read(firefightersRepositoryProvider).delete(id);
+                final repo = ref.read(firefightersRepositoryProvider);
+                if (repo != null) await repo.delete(id);
                 break;
               case SettingsKey.callNumbers:
-                await ref.read(radioCallRepositoryProvider).delete(id);
+                final repo = ref.read(radioCallRepositoryProvider);
+                if (repo != null) await repo.delete(id);
                 break;
               case SettingsKey.locations:
-                await ref.read(locationsRepositoryProvider).delete(id);
+                final repo = ref.read(locationsRepositoryProvider);
+                if (repo != null) await repo.delete(id);
                 break;
               case SettingsKey.status:
-                await ref.read(statusRepositoryProvider).delete(id);
+                final repo = ref.read(statusRepositoryProvider);
+                if (repo != null) await repo.delete(id);
                 break;
             }
             if (context.mounted) {
@@ -109,10 +117,10 @@ class SettingsPage extends ConsumerWidget {
         title: const Text('Einstellungen'),
         actions: [
           IconButton(
-          onPressed: () {
+            onPressed: () {
               context.goNamed('operation');
             },
-            icon: const Icon(Icons.close)
+            icon: const Icon(Icons.close),
           ),
         ],
       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../repositories/initial_settings_repository.dart';
+import '../../ui/model/settings/initial_settings.dart';
 
 class InitialSettingsForm extends ConsumerStatefulWidget {
   final Future<void> Function(int pressure, Duration duration)? onSubmit;
@@ -13,8 +14,9 @@ class InitialSettingsForm extends ConsumerStatefulWidget {
 }
 
 class _InitialSettingsFormState extends ConsumerState<InitialSettingsForm> {
-  int _defaultPressure = 300;
-  Duration _theoreticalDuration = Duration(minutes: 30);
+  int _defaultPressure = InitialSettingsModel.kStandardMaxPressure;
+  Duration _theoreticalDuration =
+      const Duration(minutes: InitialSettingsModel.kStandardTheoreticalDurationMinutes);
   bool _loading = false;
   bool _initialized = false;
 
@@ -32,6 +34,9 @@ class _InitialSettingsFormState extends ConsumerState<InitialSettingsForm> {
   Future<void> _loadInitialSettings() async {
     try {
       final repository = ref.read(initialSettingsRepositoryProvider);
+      if (repository == null) {
+        return;
+      }
       final settings = await repository.get();
       if (settings != null && mounted) {
         setState(() {
@@ -54,7 +59,7 @@ class _InitialSettingsFormState extends ConsumerState<InitialSettingsForm> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Text(
-          "Standardeinstellungen",
+          'Standardeinstellungen',
           style: Theme.of(context).textTheme.headlineMedium,
         ),
         const Padding(padding: EdgeInsets.only(top: 15.0)),
@@ -62,7 +67,7 @@ class _InitialSettingsFormState extends ConsumerState<InitialSettingsForm> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Flaschendruck:",
+              'Flaschendruck:',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const Padding(padding: EdgeInsets.only(left: 10.0)),
@@ -87,7 +92,7 @@ class _InitialSettingsFormState extends ConsumerState<InitialSettingsForm> {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              "Rechnerische Einsatzzeit:",
+              'Rechnerische Einsatzzeit:',
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             const Padding(padding: EdgeInsets.only(left: 10.0)),
@@ -131,7 +136,7 @@ class _InitialSettingsFormState extends ConsumerState<InitialSettingsForm> {
                     _loading = false;
                   });
                 },
-          child: const Text("Weiter"),
+          child: const Text('Weiter'),
         ),
         if (_loading) ...[
           const Padding(padding: EdgeInsets.only(top: 15.0)),

@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../firebase/firebase_auth_provider.dart';
+import '../../repositories/initial_settings_repository.dart';
+import '../../ui/model/settings/initial_settings.dart';
 import 'scaffold.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -143,6 +145,20 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
               await ref
                   .read(firebaseAuthServiceProvider)
                   .signUpWithEmailAndPassword(email, password);
+              // Create InitialSettings with safe defaults.
+              // Reason: User might skip post_register screen, but app needs valid pressure/duration values for calculations.
+              final settingsRepo = ref.read(initialSettingsRepositoryProvider);
+              if (settingsRepo != null) {
+                try {
+                  await settingsRepo.save(
+                    defaultPressure: InitialSettingsModel.kStandardMaxPressure,
+                    theoreticalDurationMinutes: InitialSettingsModel
+                        .kStandardTheoreticalDurationMinutes,
+                  );
+                } catch (e) {
+                  debugPrint('Failed to create initial settings: $e');
+                }
+              }
               setState(() {
                 _loading = false;
               });
