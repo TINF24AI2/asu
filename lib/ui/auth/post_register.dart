@@ -24,7 +24,7 @@ class PostRegisterScreen extends ConsumerWidget {
             );
 
             if (!context.mounted) return;
-            context.goNamed("operation");
+            context.goNamed('operation');
           },
         ),
       ),

@@ -14,7 +14,7 @@ class RegisterScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Center(
           child: Container(
-            constraints: BoxConstraints.loose(Size.fromWidth(600)),
+            constraints: BoxConstraints.loose(const Size.fromWidth(600)),
             child: const RegisterForm(),
           ),
         ),
@@ -53,15 +53,15 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "REGISTRIEREN",
+            'REGISTRIEREN',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontSize: 48,
               fontWeight: FontWeight.w300,
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
-          Text(
-            "Registrieren Sie Ihre Feuerwehr, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.",
+          const Text(
+            'Registrieren Sie Ihre Feuerwehr, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.',
           ),
           TextButton(
             onPressed: () {
@@ -73,7 +73,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           TextFormField(
             controller: _emailController,
-            decoration: InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'Email'),
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -89,7 +89,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           TextFormField(
             controller: _passwordController,
-            decoration: InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
             keyboardType: TextInputType.visiblePassword,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -116,7 +116,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           TextFormField(
             controller: _confirmPasswordController,
-            decoration: InputDecoration(labelText: 'Password bestätigen'),
+            decoration: const InputDecoration(labelText: 'Password bestätigen'),
             obscureText: true,
             keyboardType: TextInputType.visiblePassword,
             validator: (value) {
@@ -149,11 +149,11 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
               if (!context.mounted) return;
               context.goNamed('post_register');
             },
-            child: Text('Registrieren'),
+            child: const Text('Registrieren'),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
-          if (_loading) CircularProgressIndicator(),
+          if (_loading) const CircularProgressIndicator(),
         ],
       ),
     );
