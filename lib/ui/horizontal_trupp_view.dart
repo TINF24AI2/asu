@@ -18,11 +18,8 @@ class HorizontalTruppView extends ConsumerStatefulWidget {
 class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
   late final PageController _pageController;
 
-  int _nextTruppNumber = 1;
-
   void _onCreateNew() {
-    ref.read(einsatzProvider.notifier).addTrupp(_nextTruppNumber);
-    _nextTruppNumber++;
+    ref.read(einsatzProvider.notifier).addTrupp();
   }
 
   List<Widget> _assembleWidgetsToList(Map<int, model.Trupp> trupps) {

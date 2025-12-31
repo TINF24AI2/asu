@@ -19,6 +19,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   final Map<int, StreamSubscription<void>> _truppSubscriptions = {};
   final Map<int, PressureTrend> _currentPressureTrends = {};
   final Map<int, TruppDates> _truppDates = {};
+  int _nextTruppNumber = 1;
 
   @override
   Einsatz build() {
@@ -167,16 +168,14 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     return state.alarms[truppNumber]!.any((alarm) => alarm.reason == reason);
   }
 
-  Future<void> addTrupp(int number) async {
-    assert(!state.trupps.containsKey(number), 'Trupp $number already exists');
-
+  Future<void> addTrupp() async {
     final settings = await ref.read(initialSettingsRepositoryProvider).get();
 
     state = state.copyWith(
       trupps: {
         ...state.trupps,
-        number: Trupp.form(
-          number: number,
+        _nextTruppNumber: Trupp.form(
+          number: _nextTruppNumber,
           maxPressure: settings?.defaultPressure,
           theoreticalDuration: settings != null
               ? Duration(minutes: settings.theoreticalDurationMinutes)
@@ -184,6 +183,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         ),
       },
     );
+    _nextTruppNumber++;
   }
 
   void addHistoryEntryToTrupp(int truppNumber, HistoryEntry entry) {
@@ -202,24 +202,29 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       final min = math.min(entry.leaderPressure, entry.memberPressure);
       newLowestPressure = min;
       // Update pressure trend
-      final lastPressure = trupp.history
+      final lastPressures = trupp.history
           .whereType<PressureHistoryEntry>()
-          .firstOrNull;
-      assert(lastPressure != null, 'No previous pressure entry found');
-      final lastMin = math.min(
-        lastPressure!.leaderPressure,
-        lastPressure.memberPressure,
-      );
-      final lastDate = lastPressure.date.millisecondsSinceEpoch / 1000;
+          .toList();
+      double m;
+      double lastDate;
       final currentDate = entry.date.millisecondsSinceEpoch / 1000;
 
-      final m = (min - lastMin) / (currentDate - lastDate);
+      do {
+        final lastPressure = lastPressures.removeAt(0);
+        final lastMin = math.min(
+          lastPressure.leaderPressure,
+          lastPressure.memberPressure,
+        );
+        lastDate = lastPressure.date.millisecondsSinceEpoch / 1000;
+
+        m = (min - lastMin) / (currentDate - lastDate);
+      } while (m > 0 && lastPressures.isNotEmpty);
       final b = min - m * currentDate;
 
       _truppDates[truppNumber] = _truppDates[truppNumber]!.copyWith(
-        potentialEnd: DateTime.fromMillisecondsSinceEpoch(
-          ((b / -m) * 1000).round(),
-        ),
+        potentialEnd: m != 0
+            ? DateTime.fromMillisecondsSinceEpoch(((b / -m) * 1000).round())
+            : _truppDates[truppNumber]!.theoreticalEnd,
         nextCheck: DateTime.now().add(trupp.checkInterval),
       );
 
