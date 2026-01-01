@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'model/trupp/trupp.dart';
+import 'trupp/alarm_view.dart';
 import 'trupp/end_handler.dart';
 import 'trupp/report_handler.dart';
 import 'model/einsatz/einsatz.dart';
@@ -10,6 +11,8 @@ import 'model/history/history.dart';
 class Trupp extends ConsumerWidget {
   final int truppNumber;
   const Trupp({super.key, required this.truppNumber});
+
+  static final Map<int, bool> _alarmOpenFlags = {};
 
   String getInitials(String name, {String fallback = '?'}) {
     final parts = name.trim().split(RegExp(r'\s+'));
@@ -54,6 +57,32 @@ class Trupp extends ConsumerWidget {
         title: Text('Trupp $truppNumber'),
         subtitle: const Text('Noch nicht angelegt'),
       );
+    }
+
+    // Alarms
+    final alarms = ref.watch(
+      einsatzProvider.select((e) => e.alarms[truppNumber] ?? []),
+    );
+
+    // used to disable Alarms because now alarms pop up every second, even if they are acknowledeged
+    const bool enableAlarms = true;
+
+    if (enableAlarms && alarms.isNotEmpty && !(_alarmOpenFlags[truppNumber] ?? false)) {
+      _alarmOpenFlags[truppNumber] = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showModalBottomSheet(
+          context: context,
+          isDismissible: false,
+          backgroundColor: Colors.transparent,
+          builder: (context) => AlarmView(
+            truppNumber: truppNumber,
+            alarms: alarms,
+            onClose: () {
+              _alarmOpenFlags[truppNumber] = false;
+            },
+          ),
+        );
+      });
     }
 
     return trupp.map(
