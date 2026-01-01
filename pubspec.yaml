@@ -41,6 +41,10 @@ dependencies:
   freezed_annotation: ^3.1.0
   firebase_auth: ^6.1.2
   cloud_firestore: ^6.1.0
+  pdf: ^3.11.1
+  printing: ^5.13.4
+  share_plus: ^10.1.2
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:

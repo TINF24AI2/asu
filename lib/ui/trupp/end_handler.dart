@@ -1,11 +1,12 @@
-import 'package:asu/ui/model/einsatz/einsatz.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:asu/ui/trupp/end.dart';
-import 'package:asu/ui/model/history/history.dart';
-import 'package:asu/ui/model/trupp/trupp.dart';
+import '../model/einsatz/einsatz.dart';
+import '../model/history/history.dart';
+import '../model/trupp/trupp.dart';
+import 'end.dart';
 
-class EndHandler extends ConsumerWidget {
+// handler for collecting final trupp data before the ending operation
+class EndHandler extends ConsumerStatefulWidget {
   final int truppNumber;
   final Duration operationTime;
 
@@ -16,14 +17,19 @@ class EndHandler extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    int? leaderPressure;
-    int? memberPressure;
-    String? selectedType;
-    bool isHeatExposed = false;
+  ConsumerState<EndHandler> createState() => _EndHandlerState();
+}
 
+class _EndHandlerState extends ConsumerState<EndHandler> {
+  int? leaderPressure;
+  int? memberPressure;
+  String? selectedType;
+  bool isHeatExposed = false;
+
+  @override
+  Widget build(BuildContext context) {
     final trupp = ref.watch(
-      einsatzProvider.select((e) => e.trupps[truppNumber]),
+      einsatzProvider.select((e) => e.trupps[widget.truppNumber]),
     );
 
     if (trupp == null) {
@@ -33,23 +39,27 @@ class EndHandler extends ConsumerWidget {
       return Center(child: Text('Trupp ${trupp.number + 1} ist nicht aktiv.'));
     }
 
+    final truppNumber = widget.truppNumber;
+    final operationTime = widget.operationTime;
     final lowestPressure = trupp.lowestPressure;
     final notifier = ref.read(einsatzProvider.notifier);
 
     void onPressureSelected(int pressure, String role) {
-      if (role == "Truppführer") {
-        leaderPressure = pressure;
-      } else if (role == "Truppmann") {
-        memberPressure = pressure;
-      }
+      setState(() {
+        if (role == 'Truppführer') {
+          leaderPressure = pressure;
+        } else if (role == 'Truppmann') {
+          memberPressure = pressure;
+        }
+      });
     }
 
     void onTypeSelected(String type) {
-      selectedType = type;
+      setState(() => selectedType = type);
     }
 
     void onHeatExposedSelected(bool value) {
-      isHeatExposed = value;
+      setState(() => isHeatExposed = value);
     }
 
     void onSubmitPressed() {
@@ -75,17 +85,16 @@ class EndHandler extends ConsumerWidget {
         truppNumber,
         StatusHistoryEntry(
           date: DateTime.now(),
-          status: "Hitzebeaufschlagt: ${isHeatExposed ? "Ja" : "Nein"}",
+          status: 'Hitzebeaufschlagt: ${isHeatExposed ? 'Ja' : 'Nein'}',
         ),
       );
 
       notifier.addHistoryEntryToTrupp(
         truppNumber,
-        StatusHistoryEntry(date: DateTime.now(), status: "Einsatz beendet"),
+        StatusHistoryEntry(date: DateTime.now(), status: 'Einsatz beendet'),
       );
 
       notifier.endTrupp(truppNumber);
-
       Navigator.pop(context);
     }
 

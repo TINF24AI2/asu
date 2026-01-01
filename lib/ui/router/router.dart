@@ -7,6 +7,7 @@ import '../auth/auth.dart';
 import '../core/core.dart';
 import '../horizontal_trupp_view.dart';
 import '../settings/settings.dart';
+import '../end_einsatz/einsatz_completed_screen.dart';
 
 part 'router.g.dart';
 
@@ -33,19 +34,19 @@ GoRouter goRouter(Ref ref) {
     },
     routes: [
       GoRoute(
-        path: "/login",
+        path: '/login',
         name: 'login',
-        builder: (context, state) => LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: "/register",
+        path: '/register',
         name: 'register',
-        builder: (context, state) => RegisterScreen(),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
-        path: "/post_register",
+        path: '/post_register',
         name: 'post_register',
-        builder: (context, state) => PostRegisterScreen(),
+        builder: (context, state) => const PostRegisterScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) {
@@ -63,6 +64,11 @@ GoRouter goRouter(Ref ref) {
             path: '/operation',
             builder: (context, state) => HorizontalTruppView(key: einsatzKey),
             name: 'operation',
+          ),
+          GoRoute(
+            path: '/einsatz-completed',
+            name: 'einsatz_completed',
+            builder: (context, state) => const EinsatzCompletedScreen(),
           ),
           GoRoute(
             path: '/protocols',

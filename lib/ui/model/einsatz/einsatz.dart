@@ -26,9 +26,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   }
 
   Future<void> endTrupp(int number) async {
-    assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
     var trupp = state.trupps[number];
-    assert(trupp is TruppAction, 'Trupp $number is not in action state');
     trupp = trupp as TruppAction;
     await _truppSubscriptions[number]?.cancel();
     _truppSubscriptions.remove(number);
@@ -45,10 +43,28 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(trupps: {...state.trupps, number: endedTrupp});
   }
 
-  void activateTrupp(int number) {
-    assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
+  // end a trupp that was never activated
+  void endFormTrupp(int number) {
     var trupp = state.trupps[number];
-    assert(trupp is TruppForm, 'Trupp $number is not in form state');
+    trupp = trupp as TruppForm;
+    final endedTrupp = Trupp.end(
+      number: number,
+      history: [
+        HistoryEntry.status(
+          date: DateTime.now(),
+          status: 'Trupp ohne aktiven Einsatz beendet',
+        ),
+      ],
+      callName: trupp.callName ?? '',
+      leaderName: trupp.leaderName ?? '',
+      memberName: trupp.memberName ?? '',
+      inAction: Duration.zero,
+    );
+    state = state.copyWith(trupps: {...state.trupps, number: endedTrupp});
+  }
+
+  void activateTrupp(int number) {
+    var trupp = state.trupps[number];
     trupp = trupp as TruppForm;
     final lowestPressure = math.min(
       trupp.leaderPressure!,
@@ -168,8 +184,6 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   }
 
   Future<void> addTrupp(int number) async {
-    assert(!state.trupps.containsKey(number), 'Trupp $number already exists');
-
     final settings = await ref.read(initialSettingsRepositoryProvider).get();
 
     state = state.copyWith(
@@ -177,7 +191,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         ...state.trupps,
         number: Trupp.form(
           number: number,
-          maxPressure: settings?.defaultPressure,
+          maxPressure: settings?.defaultPressure ?? 350, //dev
           theoreticalDuration: settings != null
               ? Duration(minutes: settings.theoreticalDurationMinutes)
               : null,
@@ -187,10 +201,6 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   }
 
   void addHistoryEntryToTrupp(int truppNumber, HistoryEntry entry) {
-    assert(
-      state.trupps.containsKey(truppNumber),
-      'Trupp $truppNumber does not exist',
-    );
     final trupp = state.trupps[truppNumber]!;
     if (trupp is! TruppAction) {
       throw StateError('Trupp $truppNumber is not in action state');
@@ -205,7 +215,6 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       final lastPressure = trupp.history
           .whereType<PressureHistoryEntry>()
           .firstOrNull;
-      assert(lastPressure != null, 'No previous pressure entry found');
       final lastMin = math.min(
         lastPressure!.leaderPressure,
         lastPressure.memberPressure,
@@ -246,14 +255,22 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
   }
 
+  // for resetting the einsatz state to start a new one
+  void reset() {
+    // cancel all trupp subscriptions
+    for (final subscription in _truppSubscriptions.values) {
+      subscription.cancel();
+    }
+    _truppSubscriptions.clear();
+    _currentPressureTrends.clear();
+    _truppDates.clear();
+    state = const Einsatz();
+  }
+
   void _updateFormTrupp(
     int truppNumber,
     TruppForm Function(TruppForm trupp) update,
   ) {
-    assert(
-      state.trupps.containsKey(truppNumber),
-      'Trupp $truppNumber does not exist',
-    );
     if (state.trupps[truppNumber] is! TruppForm) {
       throw StateError('Trupp $truppNumber is not in form state');
     }

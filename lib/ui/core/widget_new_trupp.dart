@@ -36,14 +36,34 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
     if (result == null) return;
     final trimmed = result.trim();
     if (trimmed.isEmpty) return;
+    final normalized = trimmed.toLowerCase();
 
-    // Avoid duplicates -> if the name already exists in the other slot, ignore it
-    final trupp = ref.read(
-      einsatzProvider.select((e) => e.trupps[widget.truppNumber]),
-    )!;
-    final otherMember = index == 0 ? trupp.memberName : trupp.leaderName;
+    // blocks reusing a name in any trupp
+    final nameUsed = ref.read(einsatzProvider).trupps.values.any((t) {
+      String? leader;
+      String? member;
+      if (t is TruppForm) {
+        leader = t.leaderName;
+        member = t.memberName;
+      } else if (t is TruppAction) {
+        leader = t.leaderName;
+        member = t.memberName;
+      } else if (t is TruppEnd) {
+        leader = t.leaderName;
+        member = t.memberName;
+      }
+      return leader?.toLowerCase() == normalized ||
+          member?.toLowerCase() == normalized;
+    });
 
-    if (otherMember != null && otherMember == trimmed) return;
+    if (nameUsed) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Dieser Name ist bereits in einem Trupp vergeben'),
+        ),
+      );
+      return;
+    }
 
     // Add to repository if the name is new
     if (!firefightersList.any((f) => f.name == trimmed)) {
@@ -146,7 +166,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
         // radio call number row
         Row(
           children: [
-            const Text('Rufnummer: '),
+            const Text('Funkrufnummer: '),
             if (trupp.callName != null) ...[
               Text(trupp.callName!),
               IconButton(
@@ -174,6 +194,34 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                   );
 
                   if (result != null) {
+                    // check if call number is already used in any trupp
+                    final callNumberUsed = ref
+                        .read(einsatzProvider)
+                        .trupps
+                        .values
+                        .any((t) {
+                          String? callName;
+                          if (t is TruppForm) {
+                            callName = t.callName;
+                          } else if (t is TruppAction) {
+                            callName = t.callName;
+                          } else if (t is TruppEnd) {
+                            callName = t.callName;
+                          }
+                          return callName == result;
+                        });
+
+                    if (callNumberUsed) {
+                      messenger.showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Diese Funkrufnummer ist bereits in einem Trupp vergeben',
+                          ),
+                        ),
+                      );
+                      return;
+                    }
+
                     // Add to repository if the call number is new
                     if (!radioCallsList.any((r) => r.name == result)) {
                       try {
@@ -238,7 +286,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
                 if (trupp.callName == null || trupp.callName!.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
-                      content: Text('Die Rufnummer muss ausgewählt werden'),
+                      content: Text('Die Funkrufnummer muss ausgewählt werden'),
                     ),
                   );
                   return;
@@ -291,7 +339,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
               },
               child: Text(
                 trupp.theoreticalDuration != null
-                    ? trupp.theoreticalDuration!.toString()
+                    ? '${trupp.theoreticalDuration!.inMinutes} min'
                     : 'Zeit wählen',
               ),
             ),
@@ -343,7 +391,40 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
             ),
           ],
         ),
+        // button to end trupp without activation
+        if (_canEndWithoutActivation()) ...[
+          const SizedBox(height: 8),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                ref
+                    .read(einsatzProvider.notifier)
+                    .endFormTrupp(widget.truppNumber);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Trupp ohne Start beendet')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.grey.shade300,
+              ),
+              child: const Text('Verzicht auf Einsatzbeginn'),
+            ),
+          ),
+        ],
       ],
     );
+  }
+
+  bool _canEndWithoutActivation() {
+    final einsatz = ref.watch(einsatzProvider);
+    // check if all trupps with lower numbers are ended
+    for (int i = 1; i < widget.truppNumber; i++) {
+      final trupp = einsatz.trupps[i];
+      if (trupp == null || trupp is! TruppEnd) {
+        return false;
+      }
+    }
+    return widget.truppNumber > 1;
   }
 }
