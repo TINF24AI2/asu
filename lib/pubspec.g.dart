@@ -3,7 +3,7 @@
 // ignore_for_file: public_member_api_docs, constant_identifier_names, avoid_classes_with_only_static_members
 
 mixin Pubspec {
-  static final buildDate = DateTime.utc(2025, 11, 12, 21, 2, 38);
+  static final buildDate = DateTime.utc(2026, 1, 1, 20, 49, 46);
 
   static const name = 'asu';
 
@@ -43,6 +43,10 @@ mixin Pubspec {
     'go_router': '^16.3.0',
     'firebase_core': '^4.2.0',
     'freezed_annotation': '^3.1.0',
+    'firebase_auth': '^6.1.2',
+    'cloud_firestore': '^6.1.0',
+    'mobile_scanner': '^7.1.4',
+    'audioplayers': '^6.5.1',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
@@ -61,6 +65,9 @@ mixin Pubspec {
 
   static const flutter = <dynamic, dynamic>{
     'uses-material-design': true,
+    'assets': <dynamic>[
+      'assets/sounds/alarm.mp3',
+    ],
   };
 
   static const pubspec_extract = <dynamic, dynamic>{

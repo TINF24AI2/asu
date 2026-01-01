@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../audioplayers/sound_service.dart';
 import 'model/trupp/trupp.dart';
 import 'trupp/alarm_view.dart';
 import 'trupp/end_handler.dart';
@@ -64,10 +65,36 @@ class Trupp extends ConsumerWidget {
       einsatzProvider.select((e) => e.alarms[truppNumber] ?? []),
     );
 
-    // used to disable Alarms because now alarms pop up every second, even if they are acknowledeged
-    const bool enableAlarms = true;
+    // Listen to sound alarms - handle both start and stop
+    ref.listen(
+      einsatzProvider.select((e) {
+        final alarms = e.alarms[truppNumber] ?? [];
+        return alarms.any((a) => a.type == AlarmType.sound);
+      }),
+      (previous, current) {
+        final soundService = SoundService();
 
-    if (enableAlarms && alarms.isNotEmpty && !(_alarmOpenFlags[truppNumber] ?? false)) {
+        // Start sound when sound alarm appears
+        if (previous == false && current == true) {
+          soundService.playAlarmSound();
+        }
+
+        // Stop sound when all sound alarms are cleared
+        if (previous == true && current == false) {
+          soundService.stopAlarmSound();
+        }
+      },
+    );
+
+    final popUpAlarms = alarms
+        .where(
+          (a) =>
+              a.reason == AlarmReason.lowPressure ||
+              a.reason == AlarmReason.retreat,
+        )
+        .toList();
+
+    if (popUpAlarms.isNotEmpty && !(_alarmOpenFlags[truppNumber] ?? false)) {
       _alarmOpenFlags[truppNumber] = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         showModalBottomSheet(
@@ -76,7 +103,7 @@ class Trupp extends ConsumerWidget {
           backgroundColor: Colors.transparent,
           builder: (context) => AlarmView(
             truppNumber: truppNumber,
-            alarms: alarms,
+            alarms: popUpAlarms,
             onClose: () {
               _alarmOpenFlags[truppNumber] = false;
             },
@@ -108,6 +135,12 @@ class Trupp extends ConsumerWidget {
 
         final pressure = t.lowestPressure;
         final maxPressure = t.maxPressure;
+
+        final hasPressureCheckSoundAlarm = alarms.any(
+          (a) =>
+              a.reason == AlarmReason.checkPressure &&
+              a.type == AlarmType.sound,
+        );
 
         return Container(
           margin: const EdgeInsets.all(8.0),
@@ -183,6 +216,8 @@ class Trupp extends ConsumerWidget {
                 elapsedTime: elapsedTime,
                 remainingTime: remainingTime,
                 nextQueryTime: nextQueryTime,
+                truppNumber: truppNumber,
+                hasPressureCheckSoundAlarm: hasPressureCheckSoundAlarm,
               ),
               const SizedBox(height: 20),
               OperationButtons(
@@ -293,16 +328,20 @@ class PressureReading extends StatelessWidget {
 // ----------------------
 // Operation Informations
 // ----------------------
-class OperationInfo extends StatelessWidget {
+class OperationInfo extends ConsumerWidget {
   final int elapsedTime;
   final int remainingTime;
   final int nextQueryTime;
+  final int truppNumber;
+  final bool hasPressureCheckSoundAlarm;
 
   const OperationInfo({
     super.key,
     required this.elapsedTime,
     required this.remainingTime,
     required this.nextQueryTime,
+    required this.truppNumber,
+    required this.hasPressureCheckSoundAlarm,
   });
 
   String formatTime(int seconds) {
@@ -312,7 +351,20 @@ class OperationInfo extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final hasVisualAlarm = ref.watch(
+      einsatzProvider.select(
+        (e) => (e.alarms[truppNumber] ?? []).any(
+          (a) =>
+              a.reason == AlarmReason.checkPressure &&
+              a.type == AlarmType.visual,
+        ),
+      ),
+    );
+
+    final hasAnyAlarm = hasPressureCheckSoundAlarm || hasVisualAlarm;
+    final shouldBlink = hasAnyAlarm && (elapsedTime % 2 == 0);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -326,16 +378,57 @@ class OperationInfo extends StatelessWidget {
           style: const TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 8),
-        Container(
-          padding: const EdgeInsets.all(8.0),
-          decoration: BoxDecoration(
-            border: Border.all(color: Colors.grey),
-            borderRadius: BorderRadius.circular(4.0),
-          ),
-          child: Text(
-            'Nächste Abfrage in: ${formatTime(nextQueryTime)}',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
+        Row(
+          children: [
+            Expanded(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                padding: const EdgeInsets.all(8.0),
+                decoration: BoxDecoration(
+                  color: shouldBlink ? Colors.red : null,
+                  border: Border.all(
+                    color: (hasPressureCheckSoundAlarm || hasVisualAlarm)
+                        ? Colors.red
+                        : Colors.grey,
+                    width: (hasPressureCheckSoundAlarm || hasVisualAlarm)
+                        ? 2.0
+                        : 1.0,
+                  ),
+                  borderRadius: BorderRadius.circular(4.0),
+                ),
+                child: Text(
+                  'Nächste Abfrage in: ${formatTime(nextQueryTime)}',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: shouldBlink ? Colors.white : null,
+                  ),
+                ),
+              ),
+            ),
+            if (hasPressureCheckSoundAlarm) ...[
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                onPressed: () async {
+                  final soundService = SoundService();
+                  await soundService.stopAlarmSound();
+                  ref
+                      .read(einsatzProvider.notifier)
+                      .ackSoundingAlarm(truppNumber, AlarmReason.checkPressure);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange.shade700,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0,
+                    vertical: 4.0,
+                  ),
+                ),
+                icon: const Icon(Icons.notifications_off_rounded, size: 20),
+                label: const Text('Ok'),
+              ),
+            ],
+          ],
         ),
       ],
     );

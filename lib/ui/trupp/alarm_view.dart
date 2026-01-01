@@ -9,7 +9,12 @@ class AlarmView extends ConsumerWidget {
   final List<Alarm> alarms;
   final VoidCallback onClose;
 
-  const AlarmView({super.key, required this.truppNumber, required this.alarms, required this.onClose});
+  const AlarmView({
+    super.key,
+    required this.truppNumber,
+    required this.alarms,
+    required this.onClose,
+  });
 
   String _getAlarmText(AlarmReason reason) {
     switch (reason) {
@@ -69,17 +74,19 @@ class AlarmView extends ConsumerWidget {
               onPressed: () async {
                 await soundService.stopAlarmSound();
                 for (var alarm in alarms) {
-                  if (alarm.type == AlarmType.sound) {
-                    ref
-                        .read(einsatzProvider.notifier)
-                        .ackSoundingAlarm(truppNumber, alarm.reason);
-                  }
+                  ref
+                      .read(einsatzProvider.notifier)
+                      .ackVisualAlarm(truppNumber, alarm.reason);
                 }
                 onClose();
                 if (context.mounted) {
                   Navigator.of(context).pop();
                 }
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange.shade700,
+                foregroundColor: Colors.white,
+              ),
               icon: const Icon(Icons.check),
               label: const Text('Bestätigen'),
             ),
