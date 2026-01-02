@@ -120,8 +120,8 @@ class PersonSelector extends ConsumerWidget {
           ),
         ),
         PressureSelectionButton(
-          lowestPressure: trupp.maxPressure ?? 300,
-          maxPressure: trupp.maxPressure ?? 300,
+          lowestPressure: trupp.maxPressure,
+          maxPressure: trupp.maxPressure,
           onPressureSelected: (int pressure) {
             if (index == 0) {
               ref

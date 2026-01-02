@@ -174,19 +174,6 @@ class WidgetNewTrupp extends ConsumerWidget {
                     );
                     return;
                   }
-                  // deployment duration
-                  if (trupp.theoreticalDuration == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Die Einsatzdauer muss ausgewählt werden',
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-                  // Note: maxPressure and theoreticalDuration need fallback defaults, because they shouldn't be null.
-                  // But user can skip post register settings, which might lead to null values here.
                   ref.read(einsatzProvider.notifier).activateTrupp(truppNumber);
                 },
                 child: const Text('Start'),
@@ -205,11 +192,7 @@ class WidgetNewTrupp extends ConsumerWidget {
                   }
                 },
                 icon: const Icon(Icons.timer),
-                label: Text(
-                  trupp.theoreticalDuration != null
-                      ? '${trupp.theoreticalDuration!.inMinutes} Min'
-                      : 'Zeit wählen',
-                ),
+                label: Text('${trupp.theoreticalDuration.inMinutes} Min'),
               ),
             ],
           ),

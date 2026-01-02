@@ -156,7 +156,7 @@ return end(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration sinceStart,  Duration potentialEnd,  Duration theoreticalEnd,  Duration nextCheck,  Duration checkInterval,  int lowestPressure,  int lowestStartPressure,  int maxPressure)?  action,TResult Function( int number,  String? callName,  String? leaderName,  String? memberName,  int? leaderPressure,  int? memberPressure,  Duration? theoreticalDuration,  int? maxPressure)?  form,TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration inAction)?  end,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration sinceStart,  Duration potentialEnd,  Duration theoreticalEnd,  Duration nextCheck,  Duration checkInterval,  int lowestPressure,  int lowestStartPressure,  int maxPressure)?  action,TResult Function( int number,  String? callName,  String? leaderName,  String? memberName,  int? leaderPressure,  int? memberPressure,  Duration theoreticalDuration,  int maxPressure)?  form,TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration inAction)?  end,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case TruppAction() when action != null:
 return action(_that.number,_that.callName,_that.leaderName,_that.memberName,_that.history,_that.sinceStart,_that.potentialEnd,_that.theoreticalEnd,_that.nextCheck,_that.checkInterval,_that.lowestPressure,_that.lowestStartPressure,_that.maxPressure);case TruppForm() when form != null:
@@ -179,7 +179,7 @@ return end(_that.number,_that.callName,_that.leaderName,_that.memberName,_that.h
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration sinceStart,  Duration potentialEnd,  Duration theoreticalEnd,  Duration nextCheck,  Duration checkInterval,  int lowestPressure,  int lowestStartPressure,  int maxPressure)  action,required TResult Function( int number,  String? callName,  String? leaderName,  String? memberName,  int? leaderPressure,  int? memberPressure,  Duration? theoreticalDuration,  int? maxPressure)  form,required TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration inAction)  end,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration sinceStart,  Duration potentialEnd,  Duration theoreticalEnd,  Duration nextCheck,  Duration checkInterval,  int lowestPressure,  int lowestStartPressure,  int maxPressure)  action,required TResult Function( int number,  String? callName,  String? leaderName,  String? memberName,  int? leaderPressure,  int? memberPressure,  Duration theoreticalDuration,  int maxPressure)  form,required TResult Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration inAction)  end,}) {final _that = this;
 switch (_that) {
 case TruppAction():
 return action(_that.number,_that.callName,_that.leaderName,_that.memberName,_that.history,_that.sinceStart,_that.potentialEnd,_that.theoreticalEnd,_that.nextCheck,_that.checkInterval,_that.lowestPressure,_that.lowestStartPressure,_that.maxPressure);case TruppForm():
@@ -198,7 +198,7 @@ return end(_that.number,_that.callName,_that.leaderName,_that.memberName,_that.h
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration sinceStart,  Duration potentialEnd,  Duration theoreticalEnd,  Duration nextCheck,  Duration checkInterval,  int lowestPressure,  int lowestStartPressure,  int maxPressure)?  action,TResult? Function( int number,  String? callName,  String? leaderName,  String? memberName,  int? leaderPressure,  int? memberPressure,  Duration? theoreticalDuration,  int? maxPressure)?  form,TResult? Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration inAction)?  end,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration sinceStart,  Duration potentialEnd,  Duration theoreticalEnd,  Duration nextCheck,  Duration checkInterval,  int lowestPressure,  int lowestStartPressure,  int maxPressure)?  action,TResult? Function( int number,  String? callName,  String? leaderName,  String? memberName,  int? leaderPressure,  int? memberPressure,  Duration theoreticalDuration,  int maxPressure)?  form,TResult? Function( int number,  String callName,  String leaderName,  String memberName,  List<HistoryEntry> history,  Duration inAction)?  end,}) {final _that = this;
 switch (_that) {
 case TruppAction() when action != null:
 return action(_that.number,_that.callName,_that.leaderName,_that.memberName,_that.history,_that.sinceStart,_that.potentialEnd,_that.theoreticalEnd,_that.nextCheck,_that.checkInterval,_that.lowestPressure,_that.lowestStartPressure,_that.maxPressure);case TruppForm() when form != null:
@@ -311,7 +311,7 @@ as int,
 
 
 class TruppForm implements Trupp {
-  const TruppForm({required this.number, this.callName, this.leaderName, this.memberName, this.leaderPressure, this.memberPressure, this.theoreticalDuration, this.maxPressure});
+  const TruppForm({required this.number, this.callName, this.leaderName, this.memberName, this.leaderPressure, this.memberPressure, this.theoreticalDuration = const Duration(minutes: 30), this.maxPressure = 300});
   
 
 @override final  int number;
@@ -320,8 +320,8 @@ class TruppForm implements Trupp {
 @override final  String? memberName;
  final  int? leaderPressure;
  final  int? memberPressure;
- final  Duration? theoreticalDuration;
- final  int? maxPressure;
+@JsonKey() final  Duration theoreticalDuration;
+@JsonKey() final  int maxPressure;
 
 /// Create a copy of Trupp
 /// with the given fields replaced by the non-null parameter values.
@@ -353,7 +353,7 @@ abstract mixin class $TruppFormCopyWith<$Res> implements $TruppCopyWith<$Res> {
   factory $TruppFormCopyWith(TruppForm value, $Res Function(TruppForm) _then) = _$TruppFormCopyWithImpl;
 @override @useResult
 $Res call({
- int number, String? callName, String? leaderName, String? memberName, int? leaderPressure, int? memberPressure, Duration? theoreticalDuration, int? maxPressure
+ int number, String? callName, String? leaderName, String? memberName, int? leaderPressure, int? memberPressure, Duration theoreticalDuration, int maxPressure
 });
 
 
@@ -370,7 +370,7 @@ class _$TruppFormCopyWithImpl<$Res>
 
 /// Create a copy of Trupp
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? number = null,Object? callName = freezed,Object? leaderName = freezed,Object? memberName = freezed,Object? leaderPressure = freezed,Object? memberPressure = freezed,Object? theoreticalDuration = freezed,Object? maxPressure = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? number = null,Object? callName = freezed,Object? leaderName = freezed,Object? memberName = freezed,Object? leaderPressure = freezed,Object? memberPressure = freezed,Object? theoreticalDuration = null,Object? maxPressure = null,}) {
   return _then(TruppForm(
 number: null == number ? _self.number : number // ignore: cast_nullable_to_non_nullable
 as int,callName: freezed == callName ? _self.callName : callName // ignore: cast_nullable_to_non_nullable
@@ -378,9 +378,9 @@ as String?,leaderName: freezed == leaderName ? _self.leaderName : leaderName // 
 as String?,memberName: freezed == memberName ? _self.memberName : memberName // ignore: cast_nullable_to_non_nullable
 as String?,leaderPressure: freezed == leaderPressure ? _self.leaderPressure : leaderPressure // ignore: cast_nullable_to_non_nullable
 as int?,memberPressure: freezed == memberPressure ? _self.memberPressure : memberPressure // ignore: cast_nullable_to_non_nullable
-as int?,theoreticalDuration: freezed == theoreticalDuration ? _self.theoreticalDuration : theoreticalDuration // ignore: cast_nullable_to_non_nullable
-as Duration?,maxPressure: freezed == maxPressure ? _self.maxPressure : maxPressure // ignore: cast_nullable_to_non_nullable
-as int?,
+as int?,theoreticalDuration: null == theoreticalDuration ? _self.theoreticalDuration : theoreticalDuration // ignore: cast_nullable_to_non_nullable
+as Duration,maxPressure: null == maxPressure ? _self.maxPressure : maxPressure // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
