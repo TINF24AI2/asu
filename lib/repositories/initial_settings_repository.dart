@@ -82,10 +82,11 @@ final initialSettingsRepositoryProvider =
     Provider.autoDispose<InitialSettingsRepository?>((ref) {
       final service = ref.watch(firestoreServiceProvider);
       final authState = ref.watch(authStateChangesProvider);
+      final authService = ref.watch(firebaseAuthServiceProvider);
       // Try to get userId from auth stream or fallback to currentUser
       final userId = authState.maybeWhen(
         data: (user) => user?.uid,
-        orElse: () => ref.watch(firebaseAuthServiceProvider).currentUser?.uid,
+        orElse: () => authService.currentUser?.uid,
       );
       // Return null instead of throwing to avoid crashes when not authenticated
       if (userId == null) {

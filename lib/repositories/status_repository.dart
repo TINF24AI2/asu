@@ -72,9 +72,10 @@ class StatusRepository {
 final statusRepositoryProvider = Provider.autoDispose<StatusRepository?>((ref) {
   final service = ref.watch(firestoreServiceProvider);
   final authState = ref.watch(authStateChangesProvider);
+  final authService = ref.watch(firebaseAuthServiceProvider);
   final userId = authState.maybeWhen(
     data: (user) => user?.uid,
-    orElse: () => ref.watch(firebaseAuthServiceProvider).currentUser?.uid,
+    orElse: () => authService.currentUser?.uid,
   );
   if (userId == null) {
     return null;
