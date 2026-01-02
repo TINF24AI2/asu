@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../pubspec.g.dart';
+import 'about_dialog.dart';
 
 class AsuScaffold extends StatelessWidget {
   final String? topRouteName;
@@ -23,7 +23,7 @@ class AsuScaffold extends StatelessWidget {
       appBar: AppBar(
         title: const Text(title),
         actions: [
-          IconButton( 
+          IconButton(
             onPressed: () {
               context.goNamed('settings');
             },
@@ -31,13 +31,7 @@ class AsuScaffold extends StatelessWidget {
           ),
           IconButton(
             onPressed: () {
-              showAboutDialog(
-                context: context,
-                applicationName: Pubspec.name,
-                applicationVersion: Pubspec.versionFull,
-                applicationLegalese: '© 2024',
-                children: [const Text(Pubspec.description)],
-              );
+              showAsuAbout(context: context);
             },
             icon: const Icon(Icons.info_outline),
           ),
