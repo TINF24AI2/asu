@@ -320,13 +320,13 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     (trupp) => trupp.copyWith(memberPressure: pressure),
   );
 
-  void setTheoreticalDuration(int truppNumber, Duration? duration) =>
+  void setTheoreticalDuration(int truppNumber, Duration duration) =>
       _updateFormTrupp(
         truppNumber,
         (trupp) => trupp.copyWith(theoreticalDuration: duration),
       );
 
-  void setMaxPressure(int truppNumber, int? pressure) => _updateFormTrupp(
+  void setMaxPressure(int truppNumber, int pressure) => _updateFormTrupp(
     truppNumber,
     (trupp) => trupp.copyWith(maxPressure: pressure),
   );
