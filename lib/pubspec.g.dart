@@ -47,6 +47,7 @@ mixin Pubspec {
     'firebase_auth': '^6.1.2',
     'cloud_firestore': '^6.1.0',
     'mobile_scanner': '^7.1.4',
+    'audioplayers': '^6.5.1',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
@@ -68,6 +69,7 @@ mixin Pubspec {
     'uses-material-design': true,
     'assets': <dynamic>[
       'assets/icon/asu_logo.png',
+      'assets/sounds/alarm.mp3',
     ],
   };
 
