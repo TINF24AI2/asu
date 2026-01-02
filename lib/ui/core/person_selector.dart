@@ -49,7 +49,10 @@ class PersonSelector extends ConsumerWidget {
     // Add to repository if the name is new
     if (!firefightersList.any((f) => f.name == trimmed)) {
       try {
-        await ref.read(firefightersRepositoryProvider).add(trimmed);
+        final repository = ref.read(firefightersRepositoryProvider);
+        if (repository != null) {
+          await repository.add(trimmed);
+        }
       } catch (e) {
         if (context.mounted) {
           messenger.showSnackBar(
@@ -69,6 +72,9 @@ class PersonSelector extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch stream to keep it active and preload data
+    ref.watch(firefightersStreamProvider);
+    
     final trupp =
         ref.watch(einsatzProvider.select((e) => e.trupps[truppNumber]))
             as TruppForm;
@@ -114,8 +120,8 @@ class PersonSelector extends ConsumerWidget {
           ),
         ),
         PressureSelectionButton(
-          lowestPressure: trupp.maxPressure ?? 300,
-          maxPressure: trupp.maxPressure ?? 300,
+          lowestPressure: trupp.maxPressure,
+          maxPressure: trupp.maxPressure,
           onPressureSelected: (int pressure) {
             if (index == 0) {
               ref

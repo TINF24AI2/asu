@@ -7,7 +7,8 @@ mixin Pubspec {
 
   static const name = 'asu';
 
-  static const description = 'A new Flutter project.';
+  static const description =
+      'Eine App zur Überwachung von Atemschutzgeräteträgern im Feuerwehr-Einsatz. Diese App ist auf die Bedürfnisse von freiwilligen Feuerwehren in Deutschland zugeschnitten.';
 
   static const publish_to = 'none';
 
@@ -46,6 +47,7 @@ mixin Pubspec {
     'firebase_auth': '^6.1.2',
     'cloud_firestore': '^6.1.0',
     'mobile_scanner': '^7.1.4',
+    'audioplayers': '^6.5.1',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
@@ -60,13 +62,40 @@ mixin Pubspec {
     'pubspec_extract': '^2.1.1',
     'freezed': '^3.2.3',
     'freezed_lint': '^0.0.12',
+    'flutter_launcher_icons': '^0.14.4',
   };
 
   static const flutter = <dynamic, dynamic>{
     'uses-material-design': true,
+    'assets': <dynamic>[
+      'assets/icon/asu_logo.png',
+      'assets/sounds/alarm.mp3',
+    ],
   };
 
   static const pubspec_extract = <dynamic, dynamic>{
     'destination': 'lib/pubspec.g.dart',
+  };
+
+  static const app_name = 'Atemschutzüberwachung';
+
+  static const app_legalese = '© 2025-2026 asu project contributors';
+
+  static const app_warning =
+      'Diese App befindet sich noch in der Entwicklung. Die Nutzung erfolgt auf eigene Gefahr.';
+
+  static const flutter_launcher_icons = <dynamic, dynamic>{
+    'android': true,
+    'ios': false,
+    'image_path': 'assets/icon/asu_logo.png',
+    'web': <dynamic, dynamic>{
+      'generate': false,
+    },
+    'windows': <dynamic, dynamic>{
+      'generate': false,
+    },
+    'macos': <dynamic, dynamic>{
+      'generate': false,
+    },
   };
 }

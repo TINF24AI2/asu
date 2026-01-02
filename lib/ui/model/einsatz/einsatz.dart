@@ -5,6 +5,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../repositories/initial_settings_repository.dart';
+import '../../../ui/model/settings/initial_settings.dart';
 import '../history/history.dart';
 import '../trupp/trupp.dart';
 
@@ -19,6 +20,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   final Map<int, StreamSubscription<void>> _truppSubscriptions = {};
   final Map<int, PressureTrend> _currentPressureTrends = {};
   final Map<int, TruppDates> _truppDates = {};
+  final Map<int, Set<AlarmReason>> _acknowledgedAlarms = {};
   int _nextTruppNumber = 1;
 
   @override
@@ -35,6 +37,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     _truppSubscriptions.remove(number);
     _currentPressureTrends.remove(number);
     _truppDates.remove(number);
+    _acknowledgedAlarms.remove(number);
     final endedTrupp = Trupp.end(
       number: number,
       history: trupp.history,
@@ -56,7 +59,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       trupp.memberPressure!,
     );
     final checkDuration =
-        trupp.theoreticalDuration! > const Duration(minutes: 24)
+        trupp.theoreticalDuration > const Duration(minutes: 24)
         ? const Duration(minutes: 8)
         : const Duration(minutes: 6);
     _currentPressureTrends[number] = (m: 0, b: lowestPressure.toDouble());
@@ -66,13 +69,13 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       leaderName: trupp.leaderName!,
       memberName: trupp.memberName!,
       sinceStart: Duration.zero,
-      theoreticalEnd: trupp.theoreticalDuration!,
+      theoreticalEnd: trupp.theoreticalDuration,
       nextCheck: Duration(milliseconds: checkDuration.inMilliseconds),
       checkInterval: checkDuration,
       lowestPressure: lowestPressure,
       lowestStartPressure: lowestPressure,
-      maxPressure: trupp.maxPressure!,
-      potentialEnd: trupp.theoreticalDuration!,
+      maxPressure: trupp.maxPressure,
+      potentialEnd: trupp.theoreticalDuration,
       history: [
         HistoryEntry.pressure(
           date: DateTime.now(),
@@ -84,8 +87,8 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     );
     _truppDates[number] = TruppDates(
       start: DateTime.now(),
-      theoreticalEnd: DateTime.now().add(trupp.theoreticalDuration!),
-      potentialEnd: DateTime.now().add(trupp.theoreticalDuration!),
+      theoreticalEnd: DateTime.now().add(trupp.theoreticalDuration),
+      potentialEnd: DateTime.now().add(trupp.theoreticalDuration),
       nextCheck: DateTime.now().add(checkDuration),
     );
     state = state.copyWith(trupps: {...state.trupps, number: activeTrupp});
@@ -134,7 +137,8 @@ class EinsatzNotifier extends _$EinsatzNotifier {
             .round();
 
     if (newLowestPressure < 60) {
-      if (!_alarmAlreadyExists(number, AlarmReason.lowPressure)) {
+      if (!_alarmAlreadyExists(number, AlarmReason.lowPressure) &&
+          !_isAcknowledged(number, AlarmReason.lowPressure)) {
         newAlarms.add((type: AlarmType.sound, reason: AlarmReason.lowPressure));
       }
     } else {
@@ -143,6 +147,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
           (alarm) => alarm.reason == AlarmReason.lowPressure,
         );
       }
+      _acknowledgedAlarms[number]?.remove(AlarmReason.lowPressure);
     }
 
     // TODO retreat alarm check
@@ -168,18 +173,27 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     return state.alarms[truppNumber]!.any((alarm) => alarm.reason == reason);
   }
 
-  Future<void> addTrupp() async {
-    final settings = await ref.read(initialSettingsRepositoryProvider).get();
+  bool _isAcknowledged(int truppNumber, AlarmReason reason) {
+    return _acknowledgedAlarms[truppNumber]?.contains(reason) ?? false;
+  }
+
+  // Adds a new Trupp in form state.
+  // Loads default values from InitialSettings if available.
+  // Uses fallback defaults (300 bar, 30 min) if settings unavailable.
+  // Reason: App should remain functional even if user skipped post-registration setup or Firestore connection fails.
+  void addTrupp() {
+    final settingsAsync = ref.read(initialSettingsStreamProvider);
+    final settings = settingsAsync.asData?.value;
 
     state = state.copyWith(
       trupps: {
         ...state.trupps,
         _nextTruppNumber: Trupp.form(
           number: _nextTruppNumber,
-          maxPressure: settings?.defaultPressure,
-          theoreticalDuration: settings != null
-              ? Duration(minutes: settings.theoreticalDurationMinutes)
-              : null,
+          maxPressure: settings?.defaultPressure ?? InitialSettingsModel.kStandardMaxPressure,
+          theoreticalDuration: Duration(
+            minutes: settings?.theoreticalDurationMinutes ?? InitialSettingsModel.kStandardTheoreticalDurationMinutes,
+          ),
         ),
       },
     );
@@ -251,6 +265,22 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
   }
 
+  void ackVisualAlarm(int truppNumber, AlarmReason alarm) {
+    if (!state.alarms.containsKey(truppNumber)) {
+      return;
+    }
+
+    if (!_acknowledgedAlarms.containsKey(truppNumber)) {
+      _acknowledgedAlarms[truppNumber] = {};
+    }
+    _acknowledgedAlarms[truppNumber]!.add(alarm);
+
+    final newAlarms = state.alarms[truppNumber]!
+        .where((a) => a.reason != alarm)
+        .toList();
+    state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
+  }
+
   void _updateFormTrupp(
     int truppNumber,
     TruppForm Function(TruppForm trupp) update,
@@ -290,13 +320,13 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     (trupp) => trupp.copyWith(memberPressure: pressure),
   );
 
-  void setTheoreticalDuration(int truppNumber, Duration? duration) =>
+  void setTheoreticalDuration(int truppNumber, Duration duration) =>
       _updateFormTrupp(
         truppNumber,
         (trupp) => trupp.copyWith(theoreticalDuration: duration),
       );
 
-  void setMaxPressure(int truppNumber, int? pressure) => _updateFormTrupp(
+  void setMaxPressure(int truppNumber, int pressure) => _updateFormTrupp(
     truppNumber,
     (trupp) => trupp.copyWith(maxPressure: pressure),
   );

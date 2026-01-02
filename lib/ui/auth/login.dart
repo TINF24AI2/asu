@@ -14,7 +14,7 @@ class LoginScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Center(
           child: Container(
-            constraints: BoxConstraints.loose(Size.fromWidth(600)),
+            constraints: BoxConstraints.loose(const Size.fromWidth(600)),
             child: const LoginForm(),
           ),
         ),
@@ -51,36 +51,36 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "LOGIN",
+            'LOGIN',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontSize: 48,
               fontWeight: FontWeight.w300,
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
-          Text(
-            "Loggen Sie sich ein, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.",
+          const Text(
+            'Loggen Sie sich ein, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.',
           ),
           TextButton(
             onPressed: () {
               context.goNamed('register');
             },
             child: const Text(
-              "Noch keinen Account? Registrieren Sie Ihre Feuerwehr jetzt hier",
+              'Noch keinen Account? Registrieren Sie Ihre Feuerwehr jetzt hier',
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
           TextFormField(
             controller: _emailController,
-            decoration: InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'Email'),
             keyboardType: TextInputType.emailAddress,
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
           TextFormField(
             controller: _passwordController,
-            decoration: InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
             keyboardType: TextInputType.visiblePassword,
           ),
@@ -105,11 +105,11 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               if (!context.mounted) return;
               context.goNamed('operation');
             },
-            child: Text('Login'),
+            child: const Text('Login'),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
-          if (_loading) CircularProgressIndicator(),
+          if (_loading) const CircularProgressIndicator(),
         ],
       ),
     );

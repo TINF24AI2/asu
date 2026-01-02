@@ -11,22 +11,30 @@ class PostRegisterScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final repository = ref.watch(initialSettingsRepositoryProvider);
-
     return AuthScaffold(
       body: Center(
         child: InitialSettingsForm(
-          onSubmit: (pressure, duration) async {
-            // Save the initial settings to Firestore
-            await repository.save(
-              defaultPressure: pressure,
-              theoreticalDurationMinutes: duration.inMinutes,
-            );
-
-            if (!context.mounted) return;
-            context.goNamed("operation");
-          },
-        ),
+              onSubmit: (pressure, duration) async {
+                // Ensure repository is available before saving
+                final repository = ref.read(initialSettingsRepositoryProvider);
+                if (repository == null) {
+                  // Should not happen since user just registered, but guard anyway
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Fehler: Authentifizierung fehlgeschlagen'),
+                    ),
+                  );
+                  return;
+                }
+                await repository.save(
+                  defaultPressure: pressure,
+                  theoreticalDurationMinutes: duration.inMinutes,
+                );
+                if (!context.mounted) return;
+                context.goNamed('operation');
+              },
+            ),
       ),
     );
   }

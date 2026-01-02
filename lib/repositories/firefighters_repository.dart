@@ -67,19 +67,31 @@ class FirefightersRepository {
 }
 
 // Provider for FirefightersRepository to be used with Riverpod.
-// Watches auth state to ensure repository updates when user changes
+// Watches auth state to ensure repository updates when user changes.
+// Returns null when user is not authenticated.
 final firefightersRepositoryProvider =
-    Provider.autoDispose<FirefightersRepository>((ref) {
+    Provider.autoDispose<FirefightersRepository?>((ref) {
       final service = ref.watch(firestoreServiceProvider);
       final authState = ref.watch(authStateChangesProvider);
-      final userId = authState.value!.uid;
+      final authService = ref.watch(firebaseAuthServiceProvider);
+      final userId = authState.maybeWhen(
+        data: (user) => user?.uid,
+        orElse: () => authService.currentUser?.uid,
+      );
+      if (userId == null) {
+        return null;
+      }
       return FirefightersRepository(service, userId: userId);
     });
 
 // Stream provider for all firefighters.
+// Returns empty list when user is not authenticated.
 final firefightersStreamProvider = StreamProvider<List<FirefighterModel>>((
   ref,
 ) {
   final repository = ref.watch(firefightersRepositoryProvider);
+  if (repository == null) {
+    return Stream.value([]);
+  }
   return repository.streamAll();
 });
