@@ -39,19 +39,35 @@ class SettingsPage extends ConsumerWidget {
             switch (key) {
               case SettingsKey.truppMembers:
                 final repo = ref.read(firefightersRepositoryProvider);
-                if (repo != null) await repo.add(name);
+                if (repo != null) {
+                  await repo.add(name);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
               case SettingsKey.callNumbers:
                 final repo = ref.read(radioCallRepositoryProvider);
-                if (repo != null) await repo.add(name);
+                if (repo != null) {
+                  await repo.add(name);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
               case SettingsKey.locations:
                 final repo = ref.read(locationsRepositoryProvider);
-                if (repo != null) await repo.add(name);
+                if (repo != null) {
+                  await repo.add(name);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
               case SettingsKey.status:
                 final repo = ref.read(statusRepositoryProvider);
-                if (repo != null) await repo.add(name);
+                if (repo != null) {
+                  await repo.add(name);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
             }
             if (context.mounted) {
@@ -72,19 +88,35 @@ class SettingsPage extends ConsumerWidget {
             switch (key) {
               case SettingsKey.truppMembers:
                 final repo = ref.read(firefightersRepositoryProvider);
-                if (repo != null) await repo.delete(id);
+                if (repo != null) {
+                  await repo.delete(id);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
               case SettingsKey.callNumbers:
                 final repo = ref.read(radioCallRepositoryProvider);
-                if (repo != null) await repo.delete(id);
+                if (repo != null) {
+                  await repo.delete(id);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
               case SettingsKey.locations:
                 final repo = ref.read(locationsRepositoryProvider);
-                if (repo != null) await repo.delete(id);
+                if (repo != null) {
+                  await repo.delete(id);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
               case SettingsKey.status:
                 final repo = ref.read(statusRepositoryProvider);
-                if (repo != null) await repo.delete(id);
+                if (repo != null) {
+                  await repo.delete(id);
+                } else {
+                  throw Exception('Repository nicht verfügbar');
+                }
                 break;
             }
             if (context.mounted) {
