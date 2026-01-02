@@ -93,9 +93,8 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
   // pressure input uses the shared 'Pressure' modal (same behaviour as in 'trupp.dart')
   @override
   Widget build(BuildContext context) {
-    final TruppForm trupp =
-        ref.watch(einsatzProvider.select((e) => e.trupps[widget.truppNumber]))
-            as TruppForm;
+    final einsatz = ref.watch(einsatzProvider);
+    final TruppForm trupp = einsatz.trupps[widget.truppNumber] as TruppForm;
     return Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -392,7 +391,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
           ],
         ),
         // button to end trupp without activation
-        if (_canEndWithoutActivation()) ...[
+        if (_canEndWithoutActivation(einsatz)) ...[
           const SizedBox(height: 8),
           SizedBox(
             width: double.infinity,
@@ -416,8 +415,7 @@ class _WidgetNewTruppState extends ConsumerState<WidgetNewTrupp> {
     );
   }
 
-  bool _canEndWithoutActivation() {
-    final einsatz = ref.watch(einsatzProvider);
+  bool _canEndWithoutActivation(Einsatz einsatz) {
     // check if all trupps with lower numbers are ended
     for (int i = 1; i < widget.truppNumber; i++) {
       final trupp = einsatz.trupps[i];

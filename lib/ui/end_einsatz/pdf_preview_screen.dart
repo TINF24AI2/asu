@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:path_provider/path_provider.dart';
+import 'package:media_store_plus/media_store_plus.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:device_info_plus/device_info_plus.dart';
 import 'package:go_router/go_router.dart';
 import '../model/einsatz/einsatz.dart';
 
@@ -51,30 +53,66 @@ class PdfPreviewScreen extends ConsumerWidget {
     }
   }
 
-  // saves PDF to device downloads folder
+  // saves PDF directly to Downloads via MediaStore
   Future<void> _downloadPdf(BuildContext context) async {
     try {
-      Directory? directory = Directory('/storage/emulated/0/Download');
-      if (!await directory.exists()) {
-        directory = await getExternalStorageDirectory();
-      }
+      // permission handling -> only for Android 6-9
+      if (Platform.isAndroid) {
+        final deviceInfo = DeviceInfoPlugin();
+        final androidDetails = await deviceInfo.androidInfo;
 
-      if (directory != null) {
-        final fileName =
-            'Einsatzprotokoll_${DateTime.now().millisecondsSinceEpoch}.pdf';
-        final filePath = '${directory.path}/$fileName';
-        final file = File(filePath);
-        await file.writeAsBytes(pdfData);
-
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('PDF im Downloadbereich gespeichert'),
-              duration: Duration(seconds: 3),
-            ),
-          );
+        // Android < 10 (API < 29) -> needs WRITE_EXTERNAL_STORAGE permission
+        // Android >= 10 (API >= 29) permission is automatically granted via MediaStore
+        if (androidDetails.version.sdkInt < 29) {
+          final status = await Permission.storage.request();
+          if (!status.isGranted) {
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Speicherberechtigung erforderlich'),
+                ),
+              );
+            }
+            return;
+          }
         }
       }
+
+      // create temporary file which is required by MediaStore API
+      final fileName =
+          'Einsatzprotokoll_${DateTime.now().millisecondsSinceEpoch}.pdf';
+
+      final tempDir = Directory.systemTemp;
+      final tempFile = File('${tempDir.path}/$fileName');
+      await tempFile.writeAsBytes(pdfData);
+
+      // initialize MediaStore and set app folder
+      await MediaStore.ensureInitialized();
+      MediaStore.appFolder = 'ASU';
+
+      // save PDF to Downloads folder
+      final mediaStore = MediaStore();
+      await mediaStore.saveFile(
+        tempFilePath: tempFile.absolute.path,
+        dirType: DirType.download,
+        dirName: DirName.download,
+      );
+
+      // show success message
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('PDF gespeichert im Downloadbereich: $fileName'),
+          ),
+        );
+      }
+
+      // clean up temp file
+      try {
+        if (await tempFile.exists()) {
+          await tempFile.delete();
+        }
+      } catch (_) {}
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(

@@ -3,7 +3,7 @@
 // ignore_for_file: public_member_api_docs, constant_identifier_names, avoid_classes_with_only_static_members
 
 mixin Pubspec {
-  static final buildDate = DateTime.utc(2025, 11, 12, 21, 2, 38);
+  static final buildDate = DateTime.utc(2026, 1, 2, 19, 8, 25);
 
   static const name = 'asu';
 
@@ -29,26 +29,28 @@ mixin Pubspec {
 
   static const versionIsPreRelease = false;
 
-  static const environment = <dynamic, dynamic>{
-    'sdk': '^3.9.2',
-  };
+  static const environment = <dynamic, dynamic>{'sdk': '^3.9.2'};
 
   static const dependencies = <dynamic, dynamic>{
-    'flutter': <dynamic, dynamic>{
-      'sdk': 'flutter',
-    },
+    'flutter': <dynamic, dynamic>{'sdk': 'flutter'},
     'cupertino_icons': '^1.0.8',
     'flutter_riverpod': '^3.0.3',
     'riverpod_annotation': '^3.0.3',
     'go_router': '^16.3.0',
     'firebase_core': '^4.2.0',
     'freezed_annotation': '^3.1.0',
+    'firebase_auth': '^6.1.2',
+    'cloud_firestore': '^6.1.0',
+    'pdf': '^3.11.1',
+    'printing': '^5.13.4',
+    'share_plus': '^10.1.2',
+    'media_store_plus': '^0.1.3',
+    'permission_handler': '^11.0.0',
+    'device_info_plus': '^10.0.0',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
-    'flutter_test': <dynamic, dynamic>{
-      'sdk': 'flutter',
-    },
+    'flutter_test': <dynamic, dynamic>{'sdk': 'flutter'},
     'flutter_lints': '^6.0.0',
     'riverpod_generator': '^3.0.3',
     'build_runner': '^2.7.1',
@@ -59,9 +61,7 @@ mixin Pubspec {
     'freezed_lint': '^0.0.12',
   };
 
-  static const flutter = <dynamic, dynamic>{
-    'uses-material-design': true,
-  };
+  static const flutter = <dynamic, dynamic>{'uses-material-design': true};
 
   static const pubspec_extract = <dynamic, dynamic>{
     'destination': 'lib/pubspec.g.dart',
