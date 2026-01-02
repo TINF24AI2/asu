@@ -2,7 +2,7 @@
     <!--Camera Permission-->
     <uses-permission android:name="android.permission.CAMERA" />
     <application
-        android:label="asu"
+        android:label="Atemschutzüberwachung"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity
