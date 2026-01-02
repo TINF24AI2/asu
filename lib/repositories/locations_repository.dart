@@ -67,18 +67,30 @@ class LocationsRepository {
 }
 
 // Provider for LocationsRepository to be used with Riverpod.
-// Watches auth state to ensure repository updates when user changes
-final locationsRepositoryProvider = Provider.autoDispose<LocationsRepository>((
+// Watches auth state to ensure repository updates when user changes.
+// Returns null when user is not authenticated.
+final locationsRepositoryProvider = Provider.autoDispose<LocationsRepository?>((
   ref,
 ) {
   final service = ref.watch(firestoreServiceProvider);
   final authState = ref.watch(authStateChangesProvider);
-  final userId = authState.value!.uid;
+  final authService = ref.watch(firebaseAuthServiceProvider);
+  final userId = authState.maybeWhen(
+    data: (user) => user?.uid,
+    orElse: () => authService.currentUser?.uid,
+  );
+  if (userId == null) {
+    return null;
+  }
   return LocationsRepository(service, userId: userId);
 });
 
 // Stream provider for all locations.
+// Returns empty list when user is not authenticated.
 final locationsStreamProvider = StreamProvider<List<LocationModel>>((ref) {
   final repository = ref.watch(locationsRepositoryProvider);
+  if (repository == null) {
+    return Stream.value([]);
+  }
   return repository.streamAll();
 });
