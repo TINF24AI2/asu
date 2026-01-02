@@ -14,6 +14,9 @@ class WidgetNewTrupp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Watch stream to keep it active and preload data
+    ref.watch(radioCallsStreamProvider);
+
     final TruppForm trupp =
         ref.watch(einsatzProvider.select((e) => e.trupps[truppNumber]))
             as TruppForm;
@@ -83,9 +86,12 @@ class WidgetNewTrupp extends ConsumerWidget {
                       // Add to repository if the call number is new
                       if (!radioCallsList.any((r) => r.name == result)) {
                         try {
-                          await ref
-                              .read(radioCallRepositoryProvider)
-                              .add(result);
+                          final repository = ref.read(
+                            radioCallRepositoryProvider,
+                          );
+                          if (repository != null) {
+                            await repository.add(result);
+                          }
                         } catch (e) {
                           if (context.mounted) {
                             messenger.showSnackBar(
@@ -168,18 +174,6 @@ class WidgetNewTrupp extends ConsumerWidget {
                     );
                     return;
                   }
-                  // deployment duration
-                  if (trupp.theoreticalDuration == null) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Die Einsatzdauer muss ausgewählt werden',
-                        ),
-                      ),
-                    );
-                    return;
-                  }
-
                   ref.read(einsatzProvider.notifier).activateTrupp(truppNumber);
                 },
                 child: const Text('Start'),
@@ -198,11 +192,7 @@ class WidgetNewTrupp extends ConsumerWidget {
                   }
                 },
                 icon: const Icon(Icons.timer),
-                label: Text(
-                  trupp.theoreticalDuration != null
-                      ? '${trupp.theoreticalDuration!.inMinutes} Min'
-                      : 'Zeit wählen',
-                ),
+                label: Text('${trupp.theoreticalDuration.inMinutes} Min'),
               ),
             ],
           ),

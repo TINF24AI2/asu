@@ -52,8 +52,8 @@ Stream<List<T>> collectionStreamTyped<T>({
   required Map<String, dynamic> Function(T, SetOptions?) toFirestore,
   String? orderBy,
 }) {
-  var col = _db.collection(collectionPath).withConverter(fromFirestore: fromFirestore, toFirestore: toFirestore);
-  Query<T> query = orderBy != null ? col.orderBy(orderBy) : col;
+  final col = _db.collection(collectionPath).withConverter(fromFirestore: fromFirestore, toFirestore: toFirestore);
+  final Query<T> query = orderBy != null ? col.orderBy(orderBy) : col;
   return query.snapshots().map((snapshot) => snapshot.docs.map((doc) => doc.data()).toList(growable: false));
 }
 }
