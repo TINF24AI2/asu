@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../firebase/firebase_auth_provider.dart';
+import '../../firebase/firebase_auth_service.dart';
 import '../../repositories/initial_settings_repository.dart';
 import '../../ui/model/settings/initial_settings.dart';
 import 'scaffold.dart';
@@ -39,6 +41,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _loading = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -134,6 +137,9 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           ElevatedButton(
             onPressed: () async {
+              setState(() {
+                _error = null;
+              });
               if (_formKey.currentState?.validate() != true) {
                 return;
               }
@@ -142,9 +148,27 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
               setState(() {
                 _loading = true;
               });
-              await ref
-                  .read(firebaseAuthServiceProvider)
-                  .signUpWithEmailAndPassword(email, password);
+              try {
+                await ref
+                    .read(firebaseAuthServiceProvider)
+                    .signUpWithEmailAndPassword(email, password);
+              } on FirebaseAuthException catch (e) {
+                setState(() {
+                  _loading = false;
+                  _error = FirebaseAuthService.errorMessageFromException(
+                    e,
+                    false,
+                  );
+                });
+                return;
+              } catch (e) {
+                setState(() {
+                  _loading = false;
+                  _error =
+                      'Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+                });
+                return;
+              }
               // Create InitialSettings with safe defaults.
               // Reason: User might skip post_register screen, but app needs valid pressure/duration values for calculations.
               final settingsRepo = ref.read(initialSettingsRepositoryProvider);
@@ -168,6 +192,9 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
             child: const Text('Registrieren'),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
+
+          if (_error != null)
+            Text(_error!, style: const TextStyle(color: Colors.red)),
 
           if (_loading) const CircularProgressIndicator(),
         ],

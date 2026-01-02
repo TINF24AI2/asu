@@ -14,27 +14,37 @@ class PostRegisterScreen extends ConsumerWidget {
     return AuthScaffold(
       body: Center(
         child: InitialSettingsForm(
-              onSubmit: (pressure, duration) async {
-                // Ensure repository is available before saving
-                final repository = ref.read(initialSettingsRepositoryProvider);
-                if (repository == null) {
-                  // Should not happen since user just registered, but guard anyway
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Fehler: Authentifizierung fehlgeschlagen'),
-                    ),
-                  );
-                  return;
-                }
-                await repository.save(
-                  defaultPressure: pressure,
-                  theoreticalDurationMinutes: duration.inMinutes,
-                );
-                if (!context.mounted) return;
-                context.goNamed('operation');
-              },
-            ),
+          onSubmit: (pressure, duration) async {
+            // Ensure repository is available before saving
+            final repository = ref.read(initialSettingsRepositoryProvider);
+            if (repository == null) {
+              // Should not happen since user just registered, but guard anyway
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Fehler: Authentifizierung fehlgeschlagen'),
+                ),
+              );
+              return;
+            }
+            try {
+              await repository.save(
+                defaultPressure: pressure,
+                theoreticalDurationMinutes: duration.inMinutes,
+              );
+            } catch (e) {
+              if (!context.mounted) return;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Fehler beim Speichern der Einstellungen: $e'),
+                ),
+              );
+              return;
+            }
+            if (!context.mounted) return;
+            context.goNamed('operation');
+          },
+        ),
       ),
     );
   }

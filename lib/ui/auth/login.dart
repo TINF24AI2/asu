@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../firebase/firebase_auth_provider.dart';
+import '../../firebase/firebase_auth_service.dart';
 import 'scaffold.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -35,6 +37,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _loading = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -75,6 +78,12 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             controller: _emailController,
             decoration: const InputDecoration(labelText: 'Email'),
             keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Bitte geben Sie Ihre Email-Adresse ein.';
+              }
+              return null;
+            },
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
@@ -83,11 +92,20 @@ class _LoginFormState extends ConsumerState<LoginForm> {
             decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
             keyboardType: TextInputType.visiblePassword,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Bitte geben Sie Ihr Passwort ein.';
+              }
+              return null;
+            },
           ),
           const Padding(padding: EdgeInsets.only(top: 32)),
 
           ElevatedButton(
             onPressed: () async {
+              setState(() {
+                _error = null;
+              });
               if (_formKey.currentState?.validate() != true) {
                 return;
               }
@@ -96,18 +114,39 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               setState(() {
                 _loading = true;
               });
-              await ref
-                  .read(firebaseAuthServiceProvider)
-                  .signInWithEmailAndPassword(email, password);
-              setState(() {
-                _loading = false;
-              });
+              try {
+                await ref
+                    .read(firebaseAuthServiceProvider)
+                    .signInWithEmailAndPassword(email, password);
+              } on FirebaseAuthException catch (e) {
+                setState(() {
+                  _error = FirebaseAuthService.errorMessageFromException(
+                    e,
+                    true,
+                  );
+                  _loading = false;
+                });
+                return;
+              } catch (e) {
+                setState(() {
+                  _error =
+                      'Ein unbekannter Fehler ist aufgetreten. Versuchen Sie es später erneut.';
+                });
+                return;
+              } finally {
+                setState(() {
+                  _loading = false;
+                });
+              }
               if (!context.mounted) return;
               context.goNamed('operation');
             },
             child: const Text('Login'),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
+
+          if (_error != null)
+            Text(_error!, style: const TextStyle(color: Colors.red)),
 
           if (_loading) const CircularProgressIndicator(),
         ],
