@@ -33,19 +33,19 @@ GoRouter goRouter(Ref ref) {
     },
     routes: [
       GoRoute(
-        path: "/login",
+        path: '/login',
         name: 'login',
-        builder: (context, state) => LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
-        path: "/register",
+        path: '/register',
         name: 'register',
-        builder: (context, state) => RegisterScreen(),
+        builder: (context, state) => const RegisterScreen(),
       ),
       GoRoute(
-        path: "/post_register",
+        path: '/post_register',
         name: 'post_register',
-        builder: (context, state) => PostRegisterScreen(),
+        builder: (context, state) => const PostRegisterScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) {
@@ -63,11 +63,6 @@ GoRouter goRouter(Ref ref) {
             path: '/operation',
             builder: (context, state) => HorizontalTruppView(key: einsatzKey),
             name: 'operation',
-          ),
-          GoRoute(
-            path: '/protocols',
-            builder: (context, state) => const Placeholder(),
-            name: 'protocols',
           ),
           GoRoute(
             path: '/settings',
