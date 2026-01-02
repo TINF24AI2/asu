@@ -45,6 +45,8 @@ mixin Pubspec {
     'freezed_annotation': '^3.1.0',
     'firebase_auth': '^6.1.2',
     'cloud_firestore': '^6.1.0',
+    'mobile_scanner': '^7.1.4',
+    'audioplayers': '^6.5.1',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
@@ -63,6 +65,9 @@ mixin Pubspec {
 
   static const flutter = <dynamic, dynamic>{
     'uses-material-design': true,
+    'assets': <dynamic>[
+      'assets/sounds/alarm.mp3',
+    ],
   };
 
   static const pubspec_extract = <dynamic, dynamic>{
