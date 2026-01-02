@@ -19,6 +19,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   final Map<int, StreamSubscription<void>> _truppSubscriptions = {};
   final Map<int, PressureTrend> _currentPressureTrends = {};
   final Map<int, TruppDates> _truppDates = {};
+  final Map<int, Set<AlarmReason>> _acknowledgedAlarms = {};
   int _nextTruppNumber = 1;
 
   @override
@@ -35,6 +36,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     _truppSubscriptions.remove(number);
     _currentPressureTrends.remove(number);
     _truppDates.remove(number);
+    _acknowledgedAlarms.remove(number);
     final endedTrupp = Trupp.end(
       number: number,
       history: trupp.history,
@@ -134,7 +136,8 @@ class EinsatzNotifier extends _$EinsatzNotifier {
             .round();
 
     if (newLowestPressure < 60) {
-      if (!_alarmAlreadyExists(number, AlarmReason.lowPressure)) {
+      if (!_alarmAlreadyExists(number, AlarmReason.lowPressure) &&
+          !_isAcknowledged(number, AlarmReason.lowPressure)) {
         newAlarms.add((type: AlarmType.sound, reason: AlarmReason.lowPressure));
       }
     } else {
@@ -143,6 +146,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
           (alarm) => alarm.reason == AlarmReason.lowPressure,
         );
       }
+      _acknowledgedAlarms[number]?.remove(AlarmReason.lowPressure);
     }
 
     // TODO retreat alarm check
@@ -166,6 +170,10 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       return false;
     }
     return state.alarms[truppNumber]!.any((alarm) => alarm.reason == reason);
+  }
+
+  bool _isAcknowledged(int truppNumber, AlarmReason reason) {
+    return _acknowledgedAlarms[truppNumber]?.contains(reason) ?? false;
   }
 
   Future<void> addTrupp() async {
@@ -248,6 +256,22 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         .where((a) => a.reason != alarm)
         .toList();
     newAlarms.add((type: AlarmType.visual, reason: alarm));
+    state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
+  }
+
+  void ackVisualAlarm(int truppNumber, AlarmReason alarm) {
+    if (!state.alarms.containsKey(truppNumber)) {
+      return;
+    }
+
+    if (!_acknowledgedAlarms.containsKey(truppNumber)) {
+      _acknowledgedAlarms[truppNumber] = {};
+    }
+    _acknowledgedAlarms[truppNumber]!.add(alarm);
+
+    final newAlarms = state.alarms[truppNumber]!
+        .where((a) => a.reason != alarm)
+        .toList();
     state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
   }
 
