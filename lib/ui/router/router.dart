@@ -65,11 +65,6 @@ GoRouter goRouter(Ref ref) {
             name: 'operation',
           ),
           GoRoute(
-            path: '/protocols',
-            builder: (context, state) => const Placeholder(),
-            name: 'protocols',
-          ),
-          GoRoute(
             path: '/settings',
             builder: (context, state) => const SettingsPage(),
             name: 'settings',
