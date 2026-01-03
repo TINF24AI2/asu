@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 import 'core/widget_new_trupp.dart';
 import 'model/einsatz/einsatz.dart';
 import 'model/trupp/trupp.dart' as model;
 import 'trupp.dart';
-import 'end_einsatz/end_einsatz_screen.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
 class HorizontalTruppView extends ConsumerStatefulWidget {
@@ -192,13 +191,8 @@ class _TruppEndWidget extends ConsumerWidget {
           const SizedBox(height: 32),
           if (allEnded && isLastTrupp)
             ElevatedButton.icon(
-              onPressed: () {
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => const EndEinsatzScreen(),
-                  ),
-                );
-              },
+              onPressed: () =>
+                  GoRouter.of(context).goNamed('einsatz_completed'),
               icon: const Icon(Icons.assignment_turned_in),
               label: const Text('Einsatz vollständig beenden'),
               style: ElevatedButton.styleFrom(
