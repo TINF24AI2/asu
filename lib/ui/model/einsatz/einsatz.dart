@@ -309,6 +309,8 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       _acknowledgedAlarms[truppNumber] = {};
     }
 
+    _acknowledgedAlarms[truppNumber]!.add(alarm);
+
     final newAlarms = state.alarms[truppNumber]!
         .where((a) => a.reason != alarm)
         .toList();
