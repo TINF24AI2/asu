@@ -30,14 +30,10 @@ mixin Pubspec {
 
   static const versionIsPreRelease = false;
 
-  static const environment = <dynamic, dynamic>{
-    'sdk': '^3.9.2',
-  };
+  static const environment = <dynamic, dynamic>{'sdk': '^3.9.2'};
 
   static const dependencies = <dynamic, dynamic>{
-    'flutter': <dynamic, dynamic>{
-      'sdk': 'flutter',
-    },
+    'flutter': <dynamic, dynamic>{'sdk': 'flutter'},
     'cupertino_icons': '^1.0.8',
     'flutter_riverpod': '^3.0.3',
     'riverpod_annotation': '^3.0.3',
@@ -46,14 +42,18 @@ mixin Pubspec {
     'freezed_annotation': '^3.1.0',
     'firebase_auth': '^6.1.2',
     'cloud_firestore': '^6.1.0',
+    'pdf': '^3.11.1',
+    'printing': '^5.13.4',
+    'share_plus': '^10.1.2',
+    'media_store_plus': '^0.1.3',
+    'permission_handler': '^11.0.0',
+    'device_info_plus': '^10.0.0',
     'mobile_scanner': '^7.1.4',
     'audioplayers': '^6.5.1',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
-    'flutter_test': <dynamic, dynamic>{
-      'sdk': 'flutter',
-    },
+    'flutter_test': <dynamic, dynamic>{'sdk': 'flutter'},
     'flutter_lints': '^6.0.0',
     'riverpod_generator': '^3.0.3',
     'build_runner': '^2.7.1',
@@ -67,10 +67,7 @@ mixin Pubspec {
 
   static const flutter = <dynamic, dynamic>{
     'uses-material-design': true,
-    'assets': <dynamic>[
-      'assets/icon/asu_logo.png',
-      'assets/sounds/alarm.mp3',
-    ],
+    'assets': <dynamic>['assets/icon/asu_logo.png', 'assets/sounds/alarm.mp3'],
   };
 
   static const pubspec_extract = <dynamic, dynamic>{
@@ -88,14 +85,8 @@ mixin Pubspec {
     'android': true,
     'ios': false,
     'image_path': 'assets/icon/asu_logo.png',
-    'web': <dynamic, dynamic>{
-      'generate': false,
-    },
-    'windows': <dynamic, dynamic>{
-      'generate': false,
-    },
-    'macos': <dynamic, dynamic>{
-      'generate': false,
-    },
+    'web': <dynamic, dynamic>{'generate': false},
+    'windows': <dynamic, dynamic>{'generate': false},
+    'macos': <dynamic, dynamic>{'generate': false},
   };
 }

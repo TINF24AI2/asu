@@ -22,12 +22,12 @@ Future<String?> showSelectCallNumberDialog(
   // show only the text input (useful for Settings).
   return showHorizontalChoiceSheet<String, String>(
     context,
-    title: 'Rufnummer wählen',
+    title: 'Funkrufnummer wählen',
     candidates: list,
     labelBuilder: (c) => c,
     valueBuilder: (c) => c,
     normalizeTyped: (s) => normalizeCallNumber(s),
-    textFieldLabel: 'Eigene Rufnummer (z.B. 111234 oder 23-573)',
+    textFieldLabel: 'Eigene Funkrufnummer (z.B. 111234 oder 23-573)',
     keyboardType: TextInputType.text,
   );
 }
@@ -40,12 +40,12 @@ Future<String?> showSelectCallNumberSheet(
   final list = callNumbers ?? [];
   return showHorizontalChoiceSheet<String, String>(
     context,
-    title: 'Rufnummer auswählen',
+    title: 'Funkrufnummer auswählen',
     candidates: list,
     labelBuilder: (c) => c,
     valueBuilder: (c) => c,
     normalizeTyped: (s) => normalizeCallNumber(s),
-    textFieldLabel: 'Andere Rufnummer:',
+    textFieldLabel: 'Andere Funkrufnummer:',
     keyboardType: TextInputType.text,
   );
 }

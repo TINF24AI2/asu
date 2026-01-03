@@ -17,9 +17,9 @@ class WidgetNewTrupp extends ConsumerWidget {
     // Watch stream to keep it active and preload data
     ref.watch(radioCallsStreamProvider);
 
-    final TruppForm trupp =
-        ref.watch(einsatzProvider.select((e) => e.trupps[truppNumber]))
-            as TruppForm;
+    // pressure input uses the shared 'Pressure' modal (same behaviour as in 'trupp.dart')
+    final einsatz = ref.watch(einsatzProvider);
+    final TruppForm trupp = einsatz.trupps[truppNumber] as TruppForm;
     return Container(
       margin: const EdgeInsets.all(12.0),
       child: Column(
@@ -53,7 +53,7 @@ class WidgetNewTrupp extends ConsumerWidget {
           // radio call number row
           Row(
             children: [
-              const Text('Funk: '),
+              const Text('Funkrufnummer: '),
               if (trupp.callName != null) ...[
                 Text(trupp.callName!),
                 IconButton(
@@ -83,15 +83,41 @@ class WidgetNewTrupp extends ConsumerWidget {
                     );
 
                     if (result != null) {
+                      // check if call number is already used in any trupp
+                      final callNumberUsed = ref
+                          .read(einsatzProvider)
+                          .trupps
+                          .values
+                          .any((t) {
+                            String? callName;
+                            if (t is TruppForm) {
+                              callName = t.callName;
+                            } else if (t is TruppAction) {
+                              callName = t.callName;
+                            } else if (t is TruppEnd) {
+                              callName = t.callName;
+                            }
+                            return callName == result;
+                          });
+
+                      if (callNumberUsed) {
+                        messenger.showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Diese Funkrufnummer ist bereits in einem Trupp vergeben',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
                       // Add to repository if the call number is new
                       if (!radioCallsList.any((r) => r.name == result)) {
                         try {
                           final repository = ref.read(
                             radioCallRepositoryProvider,
                           );
-                          if (repository != null) {
-                            await repository.add(result);
-                          }
+                          await repository?.add(result);
                         } catch (e) {
                           if (context.mounted) {
                             messenger.showSnackBar(
@@ -196,8 +222,38 @@ class WidgetNewTrupp extends ConsumerWidget {
               ),
             ],
           ),
+          // button to end trupp without activation
+          if (_canEndWithoutActivation(einsatz)) ...[
+            const SizedBox(height: 8),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  ref.read(einsatzProvider.notifier).endFormTrupp(truppNumber);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Trupp ohne Start beendet')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.grey.shade300,
+                ),
+                child: const Text('Verzicht auf Einsatzbeginn'),
+              ),
+            ),
+          ],
         ],
       ),
     );
+  }
+
+  bool _canEndWithoutActivation(Einsatz einsatz) {
+    // check if all trupps with lower numbers are ended
+    for (int i = 1; i < truppNumber; i++) {
+      final trupp = einsatz.trupps[i];
+      if (trupp == null || trupp is! TruppEnd) {
+        return false;
+      }
+    }
+    return truppNumber > 1;
   }
 }

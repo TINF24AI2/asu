@@ -31,19 +31,33 @@ class PersonSelector extends ConsumerWidget {
     if (result == null) return;
     final trimmed = result.trim();
     if (trimmed.isEmpty) return;
+    final normalized = trimmed.toLowerCase();
 
-    // Avoid duplicates -> if the name already exists in the other slot, remove it from there
-    final trupp = ref.read(
-      einsatzProvider.select((e) => e.trupps[truppNumber]),
-    )!;
-    final otherMember = index == 0 ? trupp.memberName : trupp.leaderName;
-
-    if (otherMember != null && otherMember == trimmed) {
-      if (index == 0) {
-        ref.read(einsatzProvider.notifier).setMemberName(truppNumber, null);
-      } else {
-        ref.read(einsatzProvider.notifier).setLeaderName(truppNumber, null);
+    // blocks reusing a name in any trupp
+    final nameUsed = ref.read(einsatzProvider).trupps.values.any((t) {
+      String? leader;
+      String? member;
+      if (t is TruppForm) {
+        leader = t.leaderName;
+        member = t.memberName;
+      } else if (t is TruppAction) {
+        leader = t.leaderName;
+        member = t.memberName;
+      } else if (t is TruppEnd) {
+        leader = t.leaderName;
+        member = t.memberName;
       }
+      return leader?.toLowerCase() == normalized ||
+          member?.toLowerCase() == normalized;
+    });
+
+    if (nameUsed) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Dieser Name ist bereits in einem Trupp vergeben'),
+        ),
+      );
+      return;
     }
 
     // Add to repository if the name is new
@@ -74,7 +88,7 @@ class PersonSelector extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     // Watch stream to keep it active and preload data
     ref.watch(firefightersStreamProvider);
-    
+
     final trupp =
         ref.watch(einsatzProvider.select((e) => e.trupps[truppNumber]))
             as TruppForm;

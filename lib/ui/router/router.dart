@@ -7,6 +7,7 @@ import '../auth/auth.dart';
 import '../core/core.dart';
 import '../horizontal_trupp_view.dart';
 import '../settings/settings.dart';
+import '../end_einsatz/einsatz_completed_screen.dart';
 
 part 'router.g.dart';
 
@@ -63,6 +64,11 @@ GoRouter goRouter(Ref ref) {
             path: '/operation',
             builder: (context, state) => HorizontalTruppView(key: einsatzKey),
             name: 'operation',
+          ),
+          GoRoute(
+            path: '/einsatz-completed',
+            name: 'einsatz_completed',
+            builder: (context, state) => const EinsatzCompletedScreen(),
           ),
           GoRoute(
             path: '/settings',

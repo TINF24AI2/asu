@@ -49,6 +49,26 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(trupps: {...state.trupps, number: endedTrupp});
   }
 
+  // end a trupp that was never activated
+  void endFormTrupp(int number) {
+    var trupp = state.trupps[number];
+    trupp = trupp as TruppForm;
+    final endedTrupp = Trupp.end(
+      number: number,
+      history: [
+        HistoryEntry.status(
+          date: DateTime.now(),
+          status: 'Trupp ohne aktiven Einsatz beendet',
+        ),
+      ],
+      callName: trupp.callName ?? '',
+      leaderName: trupp.leaderName ?? '',
+      memberName: trupp.memberName ?? '',
+      inAction: Duration.zero,
+    );
+    state = state.copyWith(trupps: {...state.trupps, number: endedTrupp});
+  }
+
   void activateTrupp(int number) {
     assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
     var trupp = state.trupps[number];
@@ -190,9 +210,13 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         ...state.trupps,
         _nextTruppNumber: Trupp.form(
           number: _nextTruppNumber,
-          maxPressure: settings?.defaultPressure ?? InitialSettingsModel.kStandardMaxPressure,
+          maxPressure:
+              settings?.defaultPressure ??
+              InitialSettingsModel.kStandardMaxPressure,
           theoreticalDuration: Duration(
-            minutes: settings?.theoreticalDurationMinutes ?? InitialSettingsModel.kStandardTheoreticalDurationMinutes,
+            minutes:
+                settings?.theoreticalDurationMinutes ??
+                InitialSettingsModel.kStandardTheoreticalDurationMinutes,
           ),
         ),
       },
@@ -265,6 +289,17 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
   }
 
+  // for resetting the einsatz state to start a new one
+  void reset() {
+    // cancel all trupp subscriptions
+    for (final subscription in _truppSubscriptions.values) {
+      subscription.cancel();
+    }
+    _truppSubscriptions.clear();
+    _currentPressureTrends.clear();
+    state = const Einsatz();
+  }
+
   void ackVisualAlarm(int truppNumber, AlarmReason alarm) {
     if (!state.alarms.containsKey(truppNumber)) {
       return;
@@ -273,7 +308,6 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     if (!_acknowledgedAlarms.containsKey(truppNumber)) {
       _acknowledgedAlarms[truppNumber] = {};
     }
-    _acknowledgedAlarms[truppNumber]!.add(alarm);
 
     final newAlarms = state.alarms[truppNumber]!
         .where((a) => a.reason != alarm)
@@ -285,10 +319,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     int truppNumber,
     TruppForm Function(TruppForm trupp) update,
   ) {
-    assert(
-      state.trupps.containsKey(truppNumber),
-      'Trupp $truppNumber does not exist',
-    );
+    assert(state.trupps.containsKey(truppNumber));
     if (state.trupps[truppNumber] is! TruppForm) {
       throw StateError('Trupp $truppNumber is not in form state');
     }
