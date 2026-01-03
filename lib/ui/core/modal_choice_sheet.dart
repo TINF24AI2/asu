@@ -1,5 +1,5 @@
-import 'package:asu/ui/core/qr_scanner.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 /* reusable bottom sheet that shows horizontal choice chips with a free-text input field
   it returns a value 'T' when the user picks a candidate or confirms their typed input
@@ -73,21 +73,22 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
                   if (enableQrScan) ...[
                     const SizedBox(height: 12),
                     ElevatedButton.icon(
-                    icon: const Icon(Icons.qr_code_scanner),
-                    label: const Text('QR-Code scannen'),
-                    onPressed: () async {
-                      final scannedName = await Navigator.of(context).push<String>(
-                        MaterialPageRoute(builder: (_) => const QrScanner()),
-                      );
-                      if (scannedName == null) return;
-                      
-                      final norm = normalizeTyped(scannedName);
+                      icon: const Icon(Icons.qr_code_scanner),
+                      label: const Text('QR-Code scannen'),
+                      onPressed: () async {
+                        final scannedName = await context.pushNamed<String>(
+                          'qr_scanner',
+                        );
 
-                      if (norm != null) {
-                        Navigator.of(context, rootNavigator: true).pop(norm);
-                      }
-                    }
-                   ),
+                        if (scannedName == null) return;
+
+                        final norm = normalizeTyped(scannedName);
+
+                        if (norm != null && context.mounted) {
+                          Navigator.of(context, rootNavigator: true).pop(norm);
+                        }
+                      },
+                    ),
                   ],
 
                   const SizedBox(height: 12),

@@ -190,8 +190,7 @@ class _TruppEndWidget extends ConsumerWidget {
           const SizedBox(height: 32),
           if (allEnded && isLastTrupp)
             ElevatedButton.icon(
-              onPressed: () =>
-                  GoRouter.of(context).goNamed('einsatz_completed'),
+              onPressed: () => GoRouter.of(context).goNamed('end_einsatz'),
               icon: const Icon(Icons.assignment_turned_in),
               label: const Text('Einsatz vollständig beenden'),
               style: ElevatedButton.styleFrom(
