@@ -33,6 +33,22 @@ class PersonSelector extends ConsumerWidget {
     if (trimmed.isEmpty) return;
     final normalized = trimmed.toLowerCase();
 
+    final existingName = firefightersList
+        .map((f) => f.name)
+        .firstWhere(
+          (name) => name.toLowerCase() == normalized,
+          orElse: () => '',
+        );
+
+    if (existingName.isNotEmpty && existingName != trimmed) {
+      messenger.showSnackBar(
+        const SnackBar(
+          content: Text('Dieser Name ist bereits vorhanden'),
+        ),
+      );
+      return;
+    }
+
     // blocks reusing a name in any trupp
     final nameUsed = ref.read(einsatzProvider).trupps.values.any((t) {
       String? leader;
@@ -61,7 +77,7 @@ class PersonSelector extends ConsumerWidget {
     }
 
     // Add to repository if the name is new
-    if (!firefightersList.any((f) => f.name == trimmed)) {
+    if (existingName.isEmpty) {
       try {
         final repository = ref.read(firefightersRepositoryProvider);
         if (repository != null) {
@@ -76,10 +92,15 @@ class PersonSelector extends ConsumerWidget {
       }
     }
     if (context.mounted) {
+      final selectedName = existingName.isEmpty ? trimmed : existingName;
       if (index == 0) {
-        ref.read(einsatzProvider.notifier).setLeaderName(truppNumber, trimmed);
+        ref
+            .read(einsatzProvider.notifier)
+            .setLeaderName(truppNumber, selectedName);
       } else {
-        ref.read(einsatzProvider.notifier).setMemberName(truppNumber, trimmed);
+        ref
+            .read(einsatzProvider.notifier)
+            .setMemberName(truppNumber, selectedName);
       }
     }
   }
