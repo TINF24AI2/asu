@@ -197,11 +197,16 @@ class Trupp extends ConsumerWidget {
                           color: Colors.amber,
                           borderRadius: BorderRadius.circular(4.0),
                         ),
-                        child: Text(
-                          t.callName,
-                          style: const TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 140),
+                          child: Text(
+                            t.callName,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ),

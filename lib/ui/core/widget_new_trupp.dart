@@ -55,7 +55,14 @@ class WidgetNewTrupp extends ConsumerWidget {
             children: [
               const Text('Funkrufnummer: '),
               if (trupp.callName != null) ...[
-                Text(trupp.callName!),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    trupp.callName!,
+                    overflow: TextOverflow.ellipsis,
+                    softWrap: false,
+                  ),
+                ),
                 IconButton(
                   icon: const Icon(Icons.delete),
                   onPressed: () {
