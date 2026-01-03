@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class Pressure extends StatelessWidget {
-  final Function(int, String) onPressureSelected;
+import 'pressure_selector.dart';
+
+class Pressure extends ConsumerStatefulWidget {
+  final Function(int leaderPressure, int memberPressure) onPressureSelected;
   final int lowestPressure;
 
   const Pressure({
@@ -11,6 +14,15 @@ class Pressure extends StatelessWidget {
   });
 
   @override
+  ConsumerState<Pressure> createState() => _PressureState();
+}
+
+class _PressureState extends ConsumerState<Pressure> {
+  int? _leaderPressure;
+  int? _memberPressure;
+  String? _error;
+
+  @override
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.all(8.0),
@@ -18,67 +30,75 @@ class Pressure extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Text(
-                "Druck eintragen",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ],
+          const Center(
+            child: Text(
+              'Druck eintragen',
+              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            ),
           ),
 
           const SizedBox(height: 30),
 
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              ElevatedButton(
-                onPressed: () {
-                  _showPressureSelection(context, "Truppführer");
+              const Text('Truppführer: '),
+              const Padding(padding: EdgeInsets.only(right: 10.0)),
+              PressureSelectionButton(
+                lowestPressure: widget.lowestPressure,
+                pressure: _leaderPressure,
+                onPressureSelected: (int pressure) {
+                  setState(() {
+                    _leaderPressure = pressure;
+                  });
                 },
-                child: const Text("Truppführer")
+                label: 'Truppführer',
               ),
-              ElevatedButton(onPressed: () {
-                 _showPressureSelection(context, "Truppmann");
-              }, 
-              child: const Text("Truppmann"),
-              )
-            ]
-          )
+            ],
+          ),
+          Row(
+            children: [
+              const Text('Truppmann: '),
+              const Padding(padding: EdgeInsets.only(right: 10.0)),
+              PressureSelectionButton(
+                lowestPressure: widget.lowestPressure,
+                pressure: _memberPressure,
+                onPressureSelected: (int pressure) {
+                  setState(() {
+                    _memberPressure = pressure;
+                  });
+                },
+                label: 'Truppmann',
+              ),
+            ],
+          ),
+          if (_error != null) ...[
+            const SizedBox(height: 10),
+            Text(_error!, style: const TextStyle(color: Colors.red)),
+          ],
+
+          const SizedBox(height: 20),
+          Center(
+            child: ElevatedButton(
+              onPressed: () {
+                if (_leaderPressure == null) {
+                  setState(() {
+                    _error = 'Bitte den Druck für den Truppführer auswählen.';
+                  });
+                  return;
+                }
+                if (_memberPressure == null) {
+                  setState(() {
+                    _error = 'Bitte den Druck für den Truppmann auswählen.';
+                  });
+                  return;
+                }
+                widget.onPressureSelected(_leaderPressure!, _memberPressure!);
+              },
+              child: const Text('Druck speichern'),
+            ),
+          ),
         ],
       ),
     );
-  }
-
-  // Function to show pressure selection
-  void _showPressureSelection(BuildContext context, String role) {
-  showModalBottomSheet(
-      context: context,
-      builder: (context) {
-        return Container(
-          margin: const EdgeInsets.all(8.0),
-          padding: const EdgeInsets.all(8.0),
-          child: Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: [
-              for (int pressure = lowestPressure - 10;
-                  pressure >= 10;
-                  pressure -= 10)
-                ElevatedButton(
-                  onPressed: () {
-                    onPressureSelected(pressure, role);
-                    Navigator.pop(context);
-                  },
-                  child: Text("$pressure bar"),
-                ),
-            ],
-          ),
-        );
-      },
-    );   
   }
 }

@@ -28,8 +28,8 @@ sealed class Trupp with _$Trupp {
     String? memberName,
     int? leaderPressure,
     int? memberPressure,
-    Duration? theoreticalDuration,
-    int? maxPressure,
+    @Default(Duration(minutes: 30)) Duration theoreticalDuration,
+    @Default(300) int maxPressure,
   }) = TruppForm;
   const factory Trupp.end({
     required int number,

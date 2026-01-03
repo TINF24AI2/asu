@@ -1,9 +1,10 @@
-import 'package:asu/ui/model/einsatz/einsatz.dart';
-import 'package:asu/ui/model/trupp/trupp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:asu/ui/trupp/report.dart';
-import 'package:asu/ui/model/history/history.dart';
+
+import '../model/einsatz/einsatz.dart';
+import '../model/trupp/trupp.dart';
+import 'report.dart';
+import '../model/history/history.dart';
 
 class ReportHandler extends ConsumerWidget {
   final int truppNumber;
@@ -27,21 +28,23 @@ class ReportHandler extends ConsumerWidget {
     final notifier = ref.read(einsatzProvider.notifier);
 
     return Report(
-      onPressureSelected: (selectedPressure, role) {
+      onPressureSelected: (leaderPressure, memberPressure) {
         notifier.addHistoryEntryToTrupp(
           truppNumber,
           PressureHistoryEntry(
             date: DateTime.now(),
-            leaderPressure: selectedPressure,
-            memberPressure: selectedPressure,
+            leaderPressure: leaderPressure,
+            memberPressure: memberPressure,
           ),
         );
+        Navigator.of(context).pop();
       },
       onStatusSelected: (selectedStatus) {
         notifier.addHistoryEntryToTrupp(
           truppNumber,
           StatusHistoryEntry(date: DateTime.now(), status: selectedStatus),
         );
+        Navigator.of(context).pop();
       },
       onLocationSelected: (selectedLocation) {
         notifier.addHistoryEntryToTrupp(
@@ -51,6 +54,7 @@ class ReportHandler extends ConsumerWidget {
             location: selectedLocation,
           ),
         );
+        Navigator.of(context).pop();
       },
       lowestPressure: lowestPressure,
     );

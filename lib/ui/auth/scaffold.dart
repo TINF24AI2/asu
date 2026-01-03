@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../pubspec.g.dart';
+import '../core/about_dialog.dart';
 
 class AuthScaffold extends StatelessWidget {
   final Widget? body;
@@ -15,12 +15,7 @@ class AuthScaffold extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              showAboutDialog(
-                context: context,
-                applicationName: Pubspec.name,
-                applicationVersion: Pubspec.versionFull,
-                applicationLegalese: '© 2025',
-              );
+              showAsuAbout(context: context);
             },
             icon: const Icon(Icons.info_outline),
           ),

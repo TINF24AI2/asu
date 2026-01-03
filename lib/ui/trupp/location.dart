@@ -13,11 +13,11 @@ class Location extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Text(
-                "Standort eintragen",
-                style: const TextStyle(
+                'Standort eintragen',
+                style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
@@ -33,24 +33,24 @@ class Location extends StatelessWidget {
             children: [
               ElevatedButton(
                 onPressed: () {
-                  onLocationSelected("UG");
+                  onLocationSelected('UG');
                   Navigator.pop(context);
                 }, 
-                child: const Text("UG")
+                child: const Text('UG')
               ),
               ElevatedButton(
                 onPressed: () {
-                  onLocationSelected("EG");
+                  onLocationSelected('EG');
                   Navigator.pop(context);
                 }, 
-                child: const Text("EG")
+                child: const Text('EG')
               ),
               ElevatedButton(
                 onPressed: () {
-                  onLocationSelected("1. OG");
+                  onLocationSelected('1. OG');
                   Navigator.pop(context);
                 }, 
-                child: const Text("1. OG")
+                child: const Text('1. OG')
               ),
             ],
           )

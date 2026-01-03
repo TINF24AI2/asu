@@ -44,13 +44,10 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
     final lowestPressure = trupp.lowestPressure;
     final notifier = ref.read(einsatzProvider.notifier);
 
-    void onPressureSelected(int pressure, String role) {
+    void onPressureSelected(int leaderPressure, int memberPressure) {
       setState(() {
-        if (role == 'Truppführer') {
-          leaderPressure = pressure;
-        } else if (role == 'Truppmann') {
-          memberPressure = pressure;
-        }
+        this.leaderPressure = leaderPressure;
+        this.memberPressure = memberPressure;
       });
     }
 

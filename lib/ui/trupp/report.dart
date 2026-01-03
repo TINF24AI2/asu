@@ -5,7 +5,7 @@ import 'pressure.dart';
 import 'status.dart';
 
 class Report extends StatelessWidget {
-  final Function(int, String) onPressureSelected;
+  final Function(int leaderPressure, int memberPressure) onPressureSelected;
   final Function(String) onStatusSelected;
   final Function(String) onLocationSelected;
   final int lowestPressure;
@@ -26,14 +26,11 @@ class Report extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
+          const Row(
             children: [
               Text(
-                "Meldung eintragen",
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
+                'Meldung eintragen',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -50,8 +47,9 @@ class Report extends StatelessWidget {
                     isScrollControlled: true,
                     builder: (context) {
                       return Pressure(
-                        onPressureSelected: (selectedPressure, role) {
-                          onPressureSelected(selectedPressure, role);
+                        onPressureSelected: (leaderPressure, memberPressure) {
+                          onPressureSelected(leaderPressure, memberPressure);
+                          Navigator.of(context).pop();
                         },
                         lowestPressure: lowestPressure,
                       );
@@ -60,7 +58,7 @@ class Report extends StatelessWidget {
                 },
                 icon: const Icon(Icons.speed, size: 18),
                 label: const Text(
-                  "Druck eintragen",
+                  'Druck eintragen',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
@@ -84,7 +82,7 @@ class Report extends StatelessWidget {
                 },
                 icon: const Icon(Icons.info, size: 18),
                 label: const Text(
-                  "Status eintragen",
+                  'Status eintragen',
                   style: TextStyle(fontSize: 18),
                 ),
               ),
@@ -108,7 +106,7 @@ class Report extends StatelessWidget {
                 },
                 icon: const Icon(Icons.location_pin, size: 18),
                 label: const Text(
-                  "Standort eintragen",
+                  'Standort eintragen',
                   style: TextStyle(fontSize: 18),
                 ),
               ),

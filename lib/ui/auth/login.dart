@@ -1,8 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../firebase/firebase_auth_provider.dart';
+import '../../firebase/firebase_auth_service.dart';
 import 'scaffold.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -14,7 +16,7 @@ class LoginScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Center(
           child: Container(
-            constraints: BoxConstraints.loose(Size.fromWidth(600)),
+            constraints: BoxConstraints.loose(const Size.fromWidth(600)),
             child: const LoginForm(),
           ),
         ),
@@ -35,6 +37,7 @@ class _LoginFormState extends ConsumerState<LoginForm> {
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _loading = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -51,43 +54,58 @@ class _LoginFormState extends ConsumerState<LoginForm> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "LOGIN",
+            'LOGIN',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontSize: 48,
               fontWeight: FontWeight.w300,
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
-          Text(
-            "Loggen Sie sich ein, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.",
+          const Text(
+            'Loggen Sie sich ein, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.',
           ),
           TextButton(
             onPressed: () {
               context.goNamed('register');
             },
             child: const Text(
-              "Noch keinen Account? Registrieren Sie Ihre Feuerwehr jetzt hier",
+              'Noch keinen Account? Registrieren Sie Ihre Feuerwehr jetzt hier',
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
           TextFormField(
             controller: _emailController,
-            decoration: InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'Email'),
             keyboardType: TextInputType.emailAddress,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Bitte geben Sie Ihre Email-Adresse ein.';
+              }
+              return null;
+            },
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
           TextFormField(
             controller: _passwordController,
-            decoration: InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
             keyboardType: TextInputType.visiblePassword,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Bitte geben Sie Ihr Passwort ein.';
+              }
+              return null;
+            },
           ),
           const Padding(padding: EdgeInsets.only(top: 32)),
 
           ElevatedButton(
             onPressed: () async {
+              setState(() {
+                _error = null;
+              });
               if (_formKey.currentState?.validate() != true) {
                 return;
               }
@@ -96,20 +114,41 @@ class _LoginFormState extends ConsumerState<LoginForm> {
               setState(() {
                 _loading = true;
               });
-              await ref
-                  .read(firebaseAuthServiceProvider)
-                  .signInWithEmailAndPassword(email, password);
-              setState(() {
-                _loading = false;
-              });
+              try {
+                await ref
+                    .read(firebaseAuthServiceProvider)
+                    .signInWithEmailAndPassword(email, password);
+              } on FirebaseAuthException catch (e) {
+                setState(() {
+                  _error = FirebaseAuthService.errorMessageFromException(
+                    e,
+                    true,
+                  );
+                  _loading = false;
+                });
+                return;
+              } catch (e) {
+                setState(() {
+                  _error =
+                      'Ein unbekannter Fehler ist aufgetreten. Versuchen Sie es später erneut.';
+                });
+                return;
+              } finally {
+                setState(() {
+                  _loading = false;
+                });
+              }
               if (!context.mounted) return;
               context.goNamed('operation');
             },
-            child: Text('Login'),
+            child: const Text('Login'),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
-          if (_loading) CircularProgressIndicator(),
+          if (_error != null)
+            Text(_error!, style: const TextStyle(color: Colors.red)),
+
+          if (_loading) const CircularProgressIndicator(),
         ],
       ),
     );

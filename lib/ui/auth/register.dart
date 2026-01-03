@@ -1,8 +1,12 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../firebase/firebase_auth_provider.dart';
+import '../../firebase/firebase_auth_service.dart';
+import '../../repositories/initial_settings_repository.dart';
+import '../../ui/model/settings/initial_settings.dart';
 import 'scaffold.dart';
 
 class RegisterScreen extends StatelessWidget {
@@ -14,7 +18,7 @@ class RegisterScreen extends StatelessWidget {
       body: SingleChildScrollView(
         child: Center(
           child: Container(
-            constraints: BoxConstraints.loose(Size.fromWidth(600)),
+            constraints: BoxConstraints.loose(const Size.fromWidth(600)),
             child: const RegisterForm(),
           ),
         ),
@@ -37,6 +41,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
       TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _loading = false;
+  String? _error;
 
   @override
   void dispose() {
@@ -53,15 +58,15 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            "REGISTRIEREN",
+            'REGISTRIEREN',
             style: Theme.of(context).textTheme.headlineLarge?.copyWith(
               fontSize: 48,
               fontWeight: FontWeight.w300,
             ),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
-          Text(
-            "Registrieren Sie Ihre Feuerwehr, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.",
+          const Text(
+            'Registrieren Sie Ihre Feuerwehr, um alle Vorteile wie das Speichern der Personen und Funkrufnamen zu nutzen.',
           ),
           TextButton(
             onPressed: () {
@@ -73,7 +78,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           TextFormField(
             controller: _emailController,
-            decoration: InputDecoration(labelText: 'Email'),
+            decoration: const InputDecoration(labelText: 'Email'),
             keyboardType: TextInputType.emailAddress,
             validator: (value) {
               if (value == null || value.isEmpty) {
@@ -89,7 +94,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           TextFormField(
             controller: _passwordController,
-            decoration: InputDecoration(labelText: 'Password'),
+            decoration: const InputDecoration(labelText: 'Password'),
             obscureText: true,
             keyboardType: TextInputType.visiblePassword,
             autovalidateMode: AutovalidateMode.onUserInteraction,
@@ -116,7 +121,7 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           TextFormField(
             controller: _confirmPasswordController,
-            decoration: InputDecoration(labelText: 'Password bestätigen'),
+            decoration: const InputDecoration(labelText: 'Password bestätigen'),
             obscureText: true,
             keyboardType: TextInputType.visiblePassword,
             validator: (value) {
@@ -132,6 +137,9 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
 
           ElevatedButton(
             onPressed: () async {
+              setState(() {
+                _error = null;
+              });
               if (_formKey.currentState?.validate() != true) {
                 return;
               }
@@ -140,20 +148,55 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
               setState(() {
                 _loading = true;
               });
-              await ref
-                  .read(firebaseAuthServiceProvider)
-                  .signUpWithEmailAndPassword(email, password);
+              try {
+                await ref
+                    .read(firebaseAuthServiceProvider)
+                    .signUpWithEmailAndPassword(email, password);
+              } on FirebaseAuthException catch (e) {
+                setState(() {
+                  _loading = false;
+                  _error = FirebaseAuthService.errorMessageFromException(
+                    e,
+                    false,
+                  );
+                });
+                return;
+              } catch (e) {
+                setState(() {
+                  _loading = false;
+                  _error =
+                      'Ein unbekannter Fehler ist aufgetreten. Bitte versuchen Sie es später erneut.';
+                });
+                return;
+              }
+              // Create InitialSettings with safe defaults.
+              // Reason: User might skip post_register screen, but app needs valid pressure/duration values for calculations.
+              final settingsRepo = ref.read(initialSettingsRepositoryProvider);
+              if (settingsRepo != null) {
+                try {
+                  await settingsRepo.save(
+                    defaultPressure: InitialSettingsModel.kStandardMaxPressure,
+                    theoreticalDurationMinutes: InitialSettingsModel
+                        .kStandardTheoreticalDurationMinutes,
+                  );
+                } catch (e) {
+                  debugPrint('Failed to create initial settings: $e');
+                }
+              }
               setState(() {
                 _loading = false;
               });
               if (!context.mounted) return;
               context.goNamed('post_register');
             },
-            child: Text('Registrieren'),
+            child: const Text('Registrieren'),
           ),
           const Padding(padding: EdgeInsets.only(top: 16)),
 
-          if (_loading) CircularProgressIndicator(),
+          if (_error != null)
+            Text(_error!, style: const TextStyle(color: Colors.red)),
+
+          if (_loading) const CircularProgressIndicator(),
         ],
       ),
     );

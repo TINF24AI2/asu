@@ -7,6 +7,7 @@ import 'modal_choice_sheet.dart';
 Future<String?> showAddPersonDialog(
   BuildContext context, {
   List<String>? candidates,
+  bool enableQrScan = true,
 }) {
   // Use the provided candidates list (for displaying available firefighters)
   // Candidates are typically passed from a stream provider watching firefighters
@@ -21,5 +22,6 @@ Future<String?> showAddPersonDialog(
     valueBuilder: (c) => c,
     normalizeTyped: (s) => s.trim().isEmpty ? null : s.trim(),
     textFieldLabel: 'Anderer Name:',
+    enableQrScan: enableQrScan,
   );
 }
