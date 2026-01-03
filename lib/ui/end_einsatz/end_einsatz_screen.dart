@@ -1,10 +1,12 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../model/einsatz/einsatz.dart';
 import '../model/trupp/trupp.dart';
 import '../model/history/history.dart';
 import '../../services/pdf_export_service.dart';
-import 'pdf_preview_screen.dart';
 
 // screen that displays all completed trupps from the current operation and allows PDF export
 class EndEinsatzScreen extends ConsumerWidget {
@@ -113,10 +115,9 @@ class EndEinsatzScreen extends ConsumerWidget {
             ElevatedButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                Navigator.of(context).push(
-                  MaterialPageRoute(
-                    builder: (context) => PdfPreviewScreen(pdfData: pdfData),
-                  ),
+                context.goNamed(
+                  'pdf_preview',
+                  queryParameters: {'pdfdata': base64Url.encode(pdfData)},
                 );
               },
               child: const Text('Vorschau'),

@@ -1,72 +1,70 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-
 
 class QrScanner extends StatefulWidget {
   const QrScanner({super.key});
 
-  @override 
+  @override
   State<QrScanner> createState() => _QrScannerState();
 }
 
 class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
-
   final MobileScannerController controller = MobileScannerController(
     detectionSpeed: DetectionSpeed.noDuplicates,
-    autoStart: false
+    autoStart: false,
   );
 
-//avoid scanning QR-Code multiple times
-bool _hasScanned = false;
+  //avoid scanning QR-Code multiple times
+  bool _hasScanned = false;
 
-void _handleBarcode(BarcodeCapture capture) async {
-  if (_hasScanned) return;
+  void _handleBarcode(BarcodeCapture capture) async {
+    if (_hasScanned) return;
 
-  final barcode = capture.barcodes.firstOrNull;
-  final value = barcode?.rawValue;
+    final barcode = capture.barcodes.firstOrNull;
+    final value = barcode?.rawValue;
 
-  if (value == null) return;
+    if (value == null) return;
 
-  //QR-Code should only contain a name
-  final isValid = RegExp(r'^[A-Za-zÄÖÜaöüß]{2,}$').hasMatch(value);
+    //QR-Code should only contain a name
+    final isValid = RegExp(r'^[A-Za-zÄÖÜaöüß]{2,}$').hasMatch(value);
 
-  
-  if (!isValid) {
+    if (!isValid) {
+      _hasScanned = true;
+
+      await showDialog(
+        context: context,
+        useRootNavigator: true,
+        builder: (ctx) => AlertDialog(
+          title: const Text('Ungültiger QR-Code'),
+          content: const Text('Der QR-Code entält keinen gültigen Namen.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(ctx, rootNavigator: true).pop(); //close dialogue
+                ctx.pop(); //return to main page
+              },
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      _hasScanned = false;
+      await controller.stop();
+      return;
+    }
+
     _hasScanned = true;
-    
 
-     await showDialog(
-      context: context,
-      useRootNavigator: true,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Ungültiger QR-Code'),
-        content: const Text('Der QR-Code entält keinen gültigen Namen.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.of(ctx, rootNavigator: true).pop();   //close dialogue
-              Navigator.of(context, rootNavigator: true).pop(); //return to main page
-            },
-            child: const Text('OK'),
-          )
-        ]
-      )
-     );
-     _hasScanned = false;
-     await controller.stop();
-     return;
+    await controller.stop();
+    if (mounted) {
+      context.pop(value);
+    }
   }
 
-  _hasScanned = true;
-
-  await controller.stop();
-  Navigator.of(context).pop(value);
-  }
-
-
-@override
+  @override
   void initState() {
     super.initState();
     //start listening for lifecycle changes
@@ -77,9 +75,9 @@ void _handleBarcode(BarcodeCapture capture) async {
 
     //start scanner
     unawaited(controller.start());
-  } 
+  }
 
-//Lifecycle Changes
+  //Lifecycle Changes
 
   StreamSubscription<BarcodeCapture>? _subscription;
 
@@ -97,14 +95,12 @@ void _handleBarcode(BarcodeCapture capture) async {
         _subscription?.cancel();
         _subscription = null;
         unawaited(controller.stop());
-        break;
 
       case AppLifecycleState.resumed:
         _subscription = controller.barcodes.listen(_handleBarcode);
         unawaited(controller.start());
     }
   }
-
 
   @override
   Future<void> dispose() async {
@@ -114,12 +110,10 @@ void _handleBarcode(BarcodeCapture capture) async {
     await controller.dispose();
     super.dispose();
   }
- 
- //Main Scanner
+
+  //Main Scanner
   @override
   Widget build(BuildContext context) {
-   return MobileScanner(
-    controller: controller,
-   );
+    return MobileScanner(controller: controller);
   }
 }

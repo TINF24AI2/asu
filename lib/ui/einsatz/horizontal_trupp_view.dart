@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'core/widget_new_trupp.dart';
-import 'model/einsatz/einsatz.dart';
-import 'model/trupp/trupp.dart' as model;
-import 'trupp.dart';
+import '../core/widget_new_trupp.dart';
+import '../model/einsatz/einsatz.dart';
+import '../model/trupp/trupp.dart' as model;
+import '../trupp.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
 class HorizontalTruppView extends ConsumerStatefulWidget {
@@ -21,7 +21,6 @@ class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
   void _onCreateNew() {
     ref.read(einsatzProvider.notifier).addTrupp();
     // scroll to new trupp automatically for better UX
-    // TODO: needs testing
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_pageController.hasClients) {
         final updated = ref.read(einsatzProvider);
@@ -191,8 +190,7 @@ class _TruppEndWidget extends ConsumerWidget {
           const SizedBox(height: 32),
           if (allEnded && isLastTrupp)
             ElevatedButton.icon(
-              onPressed: () =>
-                  GoRouter.of(context).goNamed('einsatz_completed'),
+              onPressed: () => GoRouter.of(context).goNamed('end_einsatz'),
               icon: const Icon(Icons.assignment_turned_in),
               label: const Text('Einsatz vollständig beenden'),
               style: ElevatedButton.styleFrom(

@@ -45,9 +45,6 @@ class PdfPreviewScreen extends ConsumerWidget {
     if (result == true) {
       if (context.mounted) {
         ref.read(einsatzProvider.notifier).reset();
-        // navigate back to completion
-        Navigator.of(context).pop();
-        Navigator.of(context).pop();
         context.go('/einsatz-completed');
       }
     }

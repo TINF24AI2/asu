@@ -1,34 +1,35 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../firebase/firebase_auth_provider.dart';
 import 'about_dialog.dart';
 
-class AsuScaffold extends StatelessWidget {
-  final String? topRouteName;
+class AsuScaffold extends ConsumerWidget {
+  final Widget? title;
   final Widget body;
-  final Future<void> Function()? signOut;
+  final bool showSettings;
 
   const AsuScaffold({
     super.key,
-    this.topRouteName,
+    this.title,
     required this.body,
-    this.signOut,
+    this.showSettings = true,
   });
 
   @override
-  Widget build(BuildContext context) {
-    const String title = 'Atemschutzüberwachung';
-
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(title),
+        title: title,
         actions: [
-          IconButton(
-            onPressed: () {
-              context.goNamed('settings');
-            },
-            icon: const Icon(Icons.settings),
-          ),
+          if (showSettings)
+            IconButton(
+              onPressed: () {
+                context.goNamed('settings');
+              },
+              icon: const Icon(Icons.settings),
+            ),
           IconButton(
             onPressed: () {
               showAsuAbout(context: context);
@@ -37,17 +38,14 @@ class AsuScaffold extends StatelessWidget {
           ),
           IconButton(
             onPressed: () async {
-              if (signOut != null) {
-                await signOut!();
-                if (!context.mounted) return;
-                context.goNamed('login');
-              }
+              await ref.read(firebaseAuthServiceProvider).signOut();
+              if (!context.mounted) return;
+              context.goNamed('login');
             },
             icon: const Icon(Icons.logout),
           ),
         ],
       ),
-      primary: true,
       body: body,
     );
   }

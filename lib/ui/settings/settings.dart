@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'; // for ConsumerWidget
-import 'package:go_router/go_router.dart';
 
+import '../core/core.dart';
 import 'settings_list_editor.dart';
 import '../../repositories/firefighters_repository.dart';
 import '../../repositories/radio_call_repository.dart';
@@ -44,7 +44,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
               case SettingsKey.callNumbers:
                 final repo = ref.read(radioCallRepositoryProvider);
                 if (repo != null) {
@@ -52,7 +51,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
               case SettingsKey.locations:
                 final repo = ref.read(locationsRepositoryProvider);
                 if (repo != null) {
@@ -60,7 +58,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
               case SettingsKey.status:
                 final repo = ref.read(statusRepositoryProvider);
                 if (repo != null) {
@@ -68,7 +65,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
             }
             if (context.mounted) {
               ScaffoldMessenger.of(
@@ -93,7 +89,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
               case SettingsKey.callNumbers:
                 final repo = ref.read(radioCallRepositoryProvider);
                 if (repo != null) {
@@ -101,7 +96,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
               case SettingsKey.locations:
                 final repo = ref.read(locationsRepositoryProvider);
                 if (repo != null) {
@@ -109,7 +103,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
               case SettingsKey.status:
                 final repo = ref.read(statusRepositoryProvider);
                 if (repo != null) {
@@ -117,7 +110,6 @@ class SettingsPage extends ConsumerWidget {
                 } else {
                   throw Exception('Repository nicht verfügbar');
                 }
-                break;
             }
             if (context.mounted) {
               ScaffoldMessenger.of(
@@ -144,18 +136,9 @@ class SettingsPage extends ConsumerWidget {
     final locationsAsync = ref.watch(locationsStreamProvider);
     final statusAsync = ref.watch(statusStreamProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Einstellungen'),
-        actions: [
-          IconButton(
-            onPressed: () {
-              context.goNamed('operation');
-            },
-            icon: const Icon(Icons.close),
-          ),
-        ],
-      ),
+    return AsuScaffold(
+      showSettings: false,
+      title: const Text('Einstellungen'),
       body: ListView(
         children: [
           // Firefighters (Truppmitglieder)
