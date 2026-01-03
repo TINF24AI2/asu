@@ -3,7 +3,7 @@
 // ignore_for_file: public_member_api_docs, constant_identifier_names, avoid_classes_with_only_static_members
 
 mixin Pubspec {
-  static final buildDate = DateTime.utc(2026, 1, 3, 15, 17, 49);
+  static final buildDate = DateTime.utc(2026, 1, 3, 21, 36, 9);
 
   static const name = 'asu';
 
@@ -54,6 +54,7 @@ mixin Pubspec {
     'device_info_plus': '^10.0.0',
     'mobile_scanner': '^7.1.4',
     'audioplayers': '^6.5.1',
+    'intl': '^0.20.2',
   };
 
   static const dev_dependencies = <dynamic, dynamic>{

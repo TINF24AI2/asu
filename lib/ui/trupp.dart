@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:intl/intl.dart';
 
 import '../audioplayers/sound_service.dart';
 import 'model/trupp/trupp.dart';
@@ -260,24 +261,24 @@ class Trupp extends ConsumerWidget {
                     if (entry is StatusHistoryEntry) {
                       return ListTile(
                         title: Text('Status: ${entry.status}'),
-                        subtitle: Text('Datum: ${entry.date}'),
+                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
                       );
                     } else if (entry is PressureHistoryEntry) {
                       return ListTile(
                         title: Text(
                           'Druck: ${entry.leaderPressure}/${entry.memberPressure}',
                         ),
-                        subtitle: Text('Datum: ${entry.date}'),
+                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
                       );
                     } else if (entry is LocationHistoryEntry) {
                       return ListTile(
                         title: Text('Standort: ${entry.location}'),
-                        subtitle: Text('Datum: ${entry.date}'),
+                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
                       );
                     } else {
                       return ListTile(
                         title: const Text('Unbekannter Eintrag'),
-                        subtitle: Text('Datum: ${entry.date}'),
+                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
                       );
                     }
                   },
@@ -350,9 +351,10 @@ class OperationInfo extends ConsumerWidget {
   });
 
   String formatTime(int seconds) {
-    final minutes = seconds ~/ 60;
-    final remainingSeconds = seconds % 60;
-    return "${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}";
+    final isNegative = seconds < 0;
+    final duration = Duration(seconds: seconds.abs());
+    final formatted = '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+    return isNegative ? '-$formatted' : formatted;
   }
 
   @override
