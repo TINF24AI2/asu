@@ -25,9 +25,15 @@ GoRouter goRouter(Ref ref) {
     redirect: (context, state) {
       final authenticated =
           ref.read(firebaseAuthServiceProvider).currentUser != null;
-      if (['/login', '/register'].contains(state.matchedLocation)) {
+      if ([
+        '/login',
+        '/register',
+        '/post_register',
+      ].contains(state.matchedLocation)) {
         if (authenticated) {
-          return '/';
+          if (state.matchedLocation != '/post_register') {
+            return '/';
+          }
         }
         return null;
       } else {

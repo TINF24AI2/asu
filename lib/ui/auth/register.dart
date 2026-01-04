@@ -148,10 +148,20 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
               setState(() {
                 _loading = true;
               });
+
+              UserCredential? userCredential;
               try {
-                await ref
+                userCredential = await ref
                     .read(firebaseAuthServiceProvider)
                     .signUpWithEmailAndPassword(email, password);
+
+                // Wait for the auth state stream to recognize the new user
+                final authService = ref.read(firebaseAuthServiceProvider);
+                await authService.authStateChanges
+                    .firstWhere(
+                      (user) => user?.uid == userCredential?.user?.uid,
+                    )
+                    .timeout(const Duration(seconds: 5));
               } on FirebaseAuthException catch (e) {
                 setState(() {
                   _loading = false;
@@ -171,6 +181,12 @@ class _RegisterFormState extends ConsumerState<RegisterForm> {
               }
               // Create InitialSettings with safe defaults.
               // Reason: User might skip post_register screen, but app needs valid pressure/duration values for calculations.
+
+              await Future.delayed(const Duration(milliseconds: 500));
+
+              // Invalidate provider to force re-evaluation with new auth state
+              ref.invalidate(initialSettingsRepositoryProvider);
+
               final settingsRepo = ref.read(initialSettingsRepositoryProvider);
               if (settingsRepo != null) {
                 try {

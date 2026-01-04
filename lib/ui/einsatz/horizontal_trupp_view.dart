@@ -18,8 +18,8 @@ class HorizontalTruppView extends ConsumerStatefulWidget {
 class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
   late final PageController _pageController;
 
-  void _onCreateNew() {
-    ref.read(einsatzProvider.notifier).addTrupp();
+  Future<void> _onCreateNew() async {
+    await ref.read(einsatzProvider.notifier).addTrupp();
     // scroll to new trupp automatically for better UX
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_pageController.hasClients) {

@@ -5,6 +5,8 @@ import 'package:go_router/go_router.dart';
 import 'scaffold.dart';
 import '../settings/initial_settings_form.dart';
 import '../../repositories/initial_settings_repository.dart';
+import '../../firebase/firebase_auth_provider.dart';
+import '../../firebase/firestore_provider.dart';
 
 class PostRegisterScreen extends ConsumerWidget {
   const PostRegisterScreen({super.key});
@@ -15,10 +17,11 @@ class PostRegisterScreen extends ConsumerWidget {
       body: Center(
         child: InitialSettingsForm(
           onSubmit: (pressure, duration) async {
-            // Ensure repository is available before saving
-            final repository = ref.read(initialSettingsRepositoryProvider);
-            if (repository == null) {
-              // Should not happen since user just registered, but guard anyway
+            // Get userId directly from currentUser - more reliable than waiting for provider
+            final authService = ref.read(firebaseAuthServiceProvider);
+            final userId = authService.currentUser?.uid;
+
+            if (userId == null) {
               if (!context.mounted) return;
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -27,7 +30,15 @@ class PostRegisterScreen extends ConsumerWidget {
               );
               return;
             }
+
             try {
+              // Create repository with current userId
+              final firestoreService = ref.read(firestoreServiceProvider);
+              final repository = InitialSettingsRepository(
+                firestoreService,
+                userId: userId,
+              );
+
               await repository.save(
                 defaultPressure: pressure,
                 theoreticalDurationMinutes: duration.inMinutes,
