@@ -4,26 +4,21 @@ import 'pressure.dart';
 
 class End extends StatelessWidget {
   final Function(int leaderPressure, int memberPressure) onPressureSelected;
-  final Function(String) onTypeSelected;
   final Function() onSubmitPressed;
   final Function(bool) onHeatExposedSelected;
   final Duration operationTime;
   final int lowestPressure;
   final bool isHeatExposed;
 
-  End({
+  const End({
     super.key,
     required this.operationTime,
     required this.lowestPressure,
     required this.onPressureSelected,
     required this.onSubmitPressed,
-    required this.onTypeSelected,
     required this.onHeatExposedSelected,
     required this.isHeatExposed,
-  }) {
-    // only one type for now
-    onTypeSelected('Brandeinsatz');
-  }
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -84,25 +79,6 @@ class End extends StatelessWidget {
 
           const SizedBox(height: 30),
 
-          // Button to enter type of operation
-          Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // uncomment when we need more than 'Brandeinsatz'
-                  // onTypeSelected
-                },
-                icon: const Icon(Icons.bookmark_rounded, size: 18),
-                label: const Text(
-                  'Art des Einsatzes - Brandeinsatz',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 30),
 
           // Button to enter 'Hitzebeaufschlagt'
           // Here look that user see wheter yes or no is activated

@@ -23,7 +23,6 @@ class EndHandler extends ConsumerStatefulWidget {
 class _EndHandlerState extends ConsumerState<EndHandler> {
   int? leaderPressure;
   int? memberPressure;
-  String? selectedType;
   bool? isHeatExposed;
 
   @override
@@ -51,10 +50,6 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
       });
     }
 
-    void onTypeSelected(String type) {
-      setState(() => selectedType = type);
-    }
-
     void onHeatExposedSelected(bool value) {
       setState(() => isHeatExposed = value);
     }
@@ -72,7 +67,7 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
       if (isHeatExposed == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Hitzebeanschlagung muss angegeben werden.'),
+            content: Text('Hitzebeaufschlagung muss angegeben werden.'),
           ),
         );
         return;
@@ -86,13 +81,6 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
             leaderPressure: leaderPressure!,
             memberPressure: memberPressure!,
           ),
-        );
-      }
-
-      if (selectedType != null) {
-        notifier.addHistoryEntryToTrupp(
-          truppNumber,
-          StatusHistoryEntry(date: DateTime.now(), status: selectedType!),
         );
       }
 
@@ -117,7 +105,6 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
       operationTime: operationTime,
       lowestPressure: lowestPressure,
       onPressureSelected: onPressureSelected,
-      onTypeSelected: onTypeSelected,
       onHeatExposedSelected: onHeatExposedSelected,
       isHeatExposed: isHeatExposed ?? false,
       onSubmitPressed: onSubmitPressed,
