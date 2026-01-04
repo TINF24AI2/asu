@@ -304,6 +304,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   }
 
   void ackVisualAlarm(int truppNumber, AlarmReason alarm) {
+    assert(alarm != AlarmReason.checkPressure);
     if (!state.alarms.containsKey(truppNumber)) {
       return;
     }
