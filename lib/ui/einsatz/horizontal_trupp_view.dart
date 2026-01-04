@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/widget_new_trupp.dart';
 import '../model/einsatz/einsatz.dart';
 import '../model/trupp/trupp.dart' as model;
-import '../trupp.dart';
+import '../trupp/trupp.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
 class HorizontalTruppView extends ConsumerStatefulWidget {
