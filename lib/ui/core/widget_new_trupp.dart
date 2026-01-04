@@ -90,6 +90,10 @@ class WidgetNewTrupp extends ConsumerWidget {
                     );
 
                     if (result != null) {
+                      final trimmed = result.trim();
+                      if (trimmed.isEmpty) return;
+                      final normalized = trimmed.toLowerCase();
+
                       // check if call number is already used in any trupp
                       final callNumberUsed = ref
                           .read(einsatzProvider)
@@ -104,7 +108,7 @@ class WidgetNewTrupp extends ConsumerWidget {
                             } else if (t is TruppEnd) {
                               callName = t.callName;
                             }
-                            return callName == result;
+                            return callName?.toLowerCase() == normalized;
                           });
 
                       if (callNumberUsed) {
@@ -118,13 +122,33 @@ class WidgetNewTrupp extends ConsumerWidget {
                         return;
                       }
 
+                      String? existingCallName;
+                      for (final r in radioCallsList) {
+                        if (r.name.toLowerCase() == normalized) {
+                          existingCallName = r.name;
+                          break;
+                        }
+                      }
+
+                      if (existingCallName != null &&
+                          existingCallName != trimmed) {
+                        messenger.showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Diese Funkrufnummer ist bereits vorhanden',
+                            ),
+                          ),
+                        );
+                        return;
+                      }
+
                       // Add to repository if the call number is new
-                      if (!radioCallsList.any((r) => r.name == result)) {
+                      if (existingCallName == null) {
                         try {
                           final repository = ref.read(
                             radioCallRepositoryProvider,
                           );
-                          await repository?.add(result);
+                          await repository?.add(trimmed);
                         } catch (e) {
                           if (context.mounted) {
                             messenger.showSnackBar(
@@ -138,7 +162,10 @@ class WidgetNewTrupp extends ConsumerWidget {
                       if (context.mounted) {
                         ref
                             .read(einsatzProvider.notifier)
-                            .setCallName(truppNumber, result);
+                            .setCallName(
+                              truppNumber,
+                              existingCallName ?? trimmed,
+                            );
                       }
                     }
                   },
