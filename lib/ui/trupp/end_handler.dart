@@ -23,8 +23,7 @@ class EndHandler extends ConsumerStatefulWidget {
 class _EndHandlerState extends ConsumerState<EndHandler> {
   int? leaderPressure;
   int? memberPressure;
-  String? selectedType;
-  bool isHeatExposed = false;
+  bool? isHeatExposed;
 
   @override
   Widget build(BuildContext context) {
@@ -51,15 +50,29 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
       });
     }
 
-    void onTypeSelected(String type) {
-      setState(() => selectedType = type);
-    }
-
     void onHeatExposedSelected(bool value) {
       setState(() => isHeatExposed = value);
     }
 
     void onSubmitPressed() {
+      if (leaderPressure == null || memberPressure == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Die Druckangaben fehlen.'),
+          ),
+        );
+        return;
+      }
+
+      if (isHeatExposed == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hitzebeaufschlagung muss angegeben werden.'),
+          ),
+        );
+        return;
+      }
+
       if (leaderPressure != null && memberPressure != null) {
         notifier.addHistoryEntryToTrupp(
           truppNumber,
@@ -71,18 +84,11 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
         );
       }
 
-      if (selectedType != null) {
-        notifier.addHistoryEntryToTrupp(
-          truppNumber,
-          StatusHistoryEntry(date: DateTime.now(), status: selectedType!),
-        );
-      }
-
       notifier.addHistoryEntryToTrupp(
         truppNumber,
         StatusHistoryEntry(
           date: DateTime.now(),
-          status: 'Hitzebeaufschlagt: ${isHeatExposed ? 'Ja' : 'Nein'}',
+          status: 'Hitzebeaufschlagt: ${isHeatExposed == true ? 'Ja' : 'Nein'}',
         ),
       );
 
@@ -99,9 +105,8 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
       operationTime: operationTime,
       lowestPressure: lowestPressure,
       onPressureSelected: onPressureSelected,
-      onTypeSelected: onTypeSelected,
       onHeatExposedSelected: onHeatExposedSelected,
-      isHeatExposed: isHeatExposed,
+      isHeatExposed: isHeatExposed ?? false,
       onSubmitPressed: onSubmitPressed,
     );
   }

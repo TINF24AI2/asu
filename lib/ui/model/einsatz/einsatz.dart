@@ -305,10 +305,14 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     }
     _truppSubscriptions.clear();
     _currentPressureTrends.clear();
+    _truppDates.clear();
+    _acknowledgedAlarms.clear();
+    _nextTruppNumber = 1;
     state = const Einsatz();
   }
 
   void ackVisualAlarm(int truppNumber, AlarmReason alarm) {
+    assert(alarm != AlarmReason.checkPressure);
     if (!state.alarms.containsKey(truppNumber)) {
       return;
     }
