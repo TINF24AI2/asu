@@ -41,7 +41,7 @@ final class EinsatzNotifierProvider
   }
 }
 
-String _$einsatzNotifierHash() => r'549ef3b730b427889c56490b655ee61a402ae055';
+String _$einsatzNotifierHash() => r'04032d9a4177593b11536c9f36058bbf35fa16ee';
 
 abstract class _$EinsatzNotifier extends $Notifier<Einsatz> {
   Einsatz build();
