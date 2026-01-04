@@ -24,7 +24,7 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
   int? leaderPressure;
   int? memberPressure;
   String? selectedType;
-  bool isHeatExposed = false;
+  bool? isHeatExposed;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +60,24 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
     }
 
     void onSubmitPressed() {
+      if (leaderPressure == null || memberPressure == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Die Druckangaben fehlen.'),
+          ),
+        );
+        return;
+      }
+
+      if (isHeatExposed == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Hitzebeanschlagung muss angegeben werden.'),
+          ),
+        );
+        return;
+      }
+
       if (leaderPressure != null && memberPressure != null) {
         notifier.addHistoryEntryToTrupp(
           truppNumber,
@@ -82,7 +100,7 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
         truppNumber,
         StatusHistoryEntry(
           date: DateTime.now(),
-          status: 'Hitzebeaufschlagt: ${isHeatExposed ? 'Ja' : 'Nein'}',
+          status: 'Hitzebeaufschlagt: ${isHeatExposed == true ? 'Ja' : 'Nein'}',
         ),
       );
 
@@ -101,7 +119,7 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
       onPressureSelected: onPressureSelected,
       onTypeSelected: onTypeSelected,
       onHeatExposedSelected: onHeatExposedSelected,
-      isHeatExposed: isHeatExposed,
+      isHeatExposed: isHeatExposed ?? false,
       onSubmitPressed: onSubmitPressed,
     );
   }
