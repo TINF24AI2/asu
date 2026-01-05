@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../core/widget_new_trupp.dart';
 import '../model/einsatz/einsatz.dart';
 import '../model/trupp/trupp.dart' as model;
-import '../trupp.dart';
+import '../trupp/trupp.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.
 class HorizontalTruppView extends ConsumerStatefulWidget {
@@ -18,8 +18,8 @@ class HorizontalTruppView extends ConsumerStatefulWidget {
 class _HorizontalTruppViewState extends ConsumerState<HorizontalTruppView> {
   late final PageController _pageController;
 
-  void _onCreateNew() {
-    ref.read(einsatzProvider.notifier).addTrupp();
+  Future<void> _onCreateNew() async {
+    await ref.read(einsatzProvider.notifier).addTrupp();
     // scroll to new trupp automatically for better UX
     Future.delayed(const Duration(milliseconds: 100), () {
       if (_pageController.hasClients) {

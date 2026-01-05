@@ -201,9 +201,17 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   // Loads default values from InitialSettings if available.
   // Uses fallback defaults (300 bar, 30 min) if settings unavailable.
   // Reason: App should remain functional even if user skipped post-registration setup or Firestore connection fails.
-  void addTrupp() {
-    final settingsAsync = ref.read(initialSettingsStreamProvider);
-    final settings = settingsAsync.asData?.value;
+  Future<void> addTrupp() async {
+    final repository = ref.read(initialSettingsRepositoryProvider);
+    InitialSettingsModel? settings;
+
+    if (repository != null) {
+      try {
+        settings = await repository.get();
+      } catch (_) {
+        // Ignore fetch errors and fall back to defaults.
+      }
+    }
 
     state = state.copyWith(
       trupps: {
