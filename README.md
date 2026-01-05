@@ -151,9 +151,11 @@ asu/
 
 ## 📲 How to Run the App
 ### Prerequisites
-Ensure the following tools are installed:
+Ensure the following tools are already installed and fully functional:
 - **Flutter SDK** (version 3.35.0 or higher)
 - **Dart SDK** (version 3.9.2 or higher)
+- **Android Studio or Visual Studio Code with Flutter extensions**
+- **Android tablet emulator or physical Android tablet device**
   - **Android API Level**: Target SDK 35 (used in test environment), Minimum SDK 33
   > **Note**: This app is optimized for tablets and should be used in landscape mode. For the best experience, use a tablet emulator (e.g., Pixel Tablet) or run the app on a physical tablet device.
 
