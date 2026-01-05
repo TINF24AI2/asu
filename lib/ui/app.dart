@@ -9,12 +9,34 @@ class AsuApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
-    return MaterialApp.router(
-      title: 'Atemschutzüberwachung',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFFE84230)),
-      ),
-      routerConfig: router,
+    return OrientationBuilder(
+      builder: (context, orientation) {
+        if (orientation == Orientation.portrait) {
+          return MaterialApp(
+            home: Scaffold(
+              appBar: AppBar(title: const Text('Atemschutzüberwachung')),
+              body: Center(
+                child: Text(
+                  'Bitte das Gerät in den Querformatmodus drehen.',
+                  style: TextStyle(
+                    fontSize: 30,
+                    color: Theme.of(context).colorScheme.error,
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
+        return MaterialApp.router(
+          title: 'Atemschutzüberwachung',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: const Color(0xFFE84230),
+            ),
+          ),
+          routerConfig: router,
+        );
+      },
     );
   }
 }
