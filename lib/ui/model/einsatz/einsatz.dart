@@ -14,6 +14,7 @@ part 'einsatz.freezed.dart';
 
 @Riverpod(keepAlive: true)
 class EinsatzNotifier extends _$EinsatzNotifier {
+  // private members for managing non-public state
   final Stream<void> _ticker = Stream.periodic(
     const Duration(seconds: 1),
   ).asBroadcastStream();
@@ -23,11 +24,15 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   final Map<int, Set<AlarmReason>> _acknowledgedAlarms = {};
   int _nextTruppNumber = 1;
 
+  /// Builds the initial Einsatz state.
+  ///
+  /// overrides the build method of Riverpod Notifier
   @override
   Einsatz build() {
     return const Einsatz();
   }
 
+  /// ends a trupp that is currently in [TruppAction] state
   Future<void> endTrupp(int number) async {
     assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
     var trupp = state.trupps[number];
@@ -49,9 +54,13 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(trupps: {...state.trupps, number: endedTrupp});
   }
 
-  // end a trupp that was never activated
+  /// end a trupp that was never activated
+  ///
+  /// Because the trupp was never active it is [TruppForm]
   void endFormTrupp(int number) {
+    assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
     var trupp = state.trupps[number];
+    assert(trupp is TruppForm, 'Trupp $number is not in form state');
     trupp = trupp as TruppForm;
     final endedTrupp = Trupp.end(
       number: number,
@@ -69,20 +78,27 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(trupps: {...state.trupps, number: endedTrupp});
   }
 
+  /// activate a trupp that is currently in [TruppForm] state
+  ///
+  /// transfers it to [TruppAction] state and starts tracking
   void activateTrupp(int number) {
     assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
     var trupp = state.trupps[number];
     assert(trupp is TruppForm, 'Trupp $number is not in form state');
     trupp = trupp as TruppForm;
+
     final lowestPressure = math.min(
       trupp.leaderPressure!,
       trupp.memberPressure!,
     );
+
     final checkDuration =
         trupp.theoreticalDuration > const Duration(minutes: 24)
         ? const Duration(minutes: 8)
         : const Duration(minutes: 6);
+
     _currentPressureTrends[number] = (m: 0, b: lowestPressure.toDouble());
+
     final activeTrupp = Trupp.action(
       number: number,
       callName: trupp.callName!,
@@ -105,27 +121,54 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         HistoryEntry.status(date: DateTime.now(), status: 'Geräte angelegt'),
       ],
     );
+
     _truppDates[number] = TruppDates(
       start: DateTime.now(),
       theoreticalEnd: DateTime.now().add(trupp.theoreticalDuration),
       potentialEnd: DateTime.now().add(trupp.theoreticalDuration),
       nextCheck: DateTime.now().add(checkDuration),
     );
+
     state = state.copyWith(trupps: {...state.trupps, number: activeTrupp});
+
     _truppSubscriptions[number] = _ticker.listen((_) {
       _onTruppTick(number);
     });
   }
 
+  /// called every second for each active trupp
   void _onTruppTick(int number) {
+    assert(state.trupps.containsKey(number), 'Trupp $number does not exist');
+    assert(
+      state.trupps[number] is TruppAction,
+      'Trupp $number is not in action state',
+    );
     final trupp = state.trupps[number]! as TruppAction;
     final now = DateTime.now();
+
+    // update trupp durations
     var newPotentialEnd = trupp.potentialEnd;
     if (trupp.potentialEnd > Duration.zero) {
       newPotentialEnd = _truppDates[number]!.potentialEnd.difference(now);
     }
 
     final newNextCheck = _truppDates[number]!.nextCheck.difference(now);
+
+    var newTheoreticalEnd = trupp.theoreticalEnd;
+    if (trupp.theoreticalEnd > Duration.zero) {
+      newTheoreticalEnd = _truppDates[number]!.theoreticalEnd.difference(now);
+    }
+
+    final newSinceStart = now.difference(_truppDates[number]!.start);
+
+    // calculate new lowest pressure from trend line
+    final newLowestPressure =
+        (_currentPressureTrends[number]!.m *
+                    (DateTime.now().millisecondsSinceEpoch / 1000) +
+                _currentPressureTrends[number]!.b)
+            .round();
+
+    // update alarms from new conditions
     final newAlarms = state.alarms[number] ?? [];
 
     if (newNextCheck.isNegative) {
@@ -142,19 +185,6 @@ class EinsatzNotifier extends _$EinsatzNotifier {
         );
       }
     }
-
-    var newTheoreticalEnd = trupp.theoreticalEnd;
-    if (trupp.theoreticalEnd > Duration.zero) {
-      newTheoreticalEnd = _truppDates[number]!.theoreticalEnd.difference(now);
-    }
-
-    final newSinceStart = now.difference(_truppDates[number]!.start);
-
-    final newLowestPressure =
-        (_currentPressureTrends[number]!.m *
-                    (DateTime.now().millisecondsSinceEpoch / 1000) +
-                _currentPressureTrends[number]!.b)
-            .round();
 
     if (newLowestPressure < 60) {
       if (!_alarmAlreadyExists(number, AlarmReason.lowPressure) &&
@@ -195,10 +225,11 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     return _acknowledgedAlarms[truppNumber]?.contains(reason) ?? false;
   }
 
-  // Adds a new Trupp in form state.
-  // Loads default values from InitialSettings if available.
-  // Uses fallback defaults (300 bar, 30 min) if settings unavailable.
-  // Reason: App should remain functional even if user skipped post-registration setup or Firestore connection fails.
+  /// Adds a new Trupp in [TruppForm] state.
+  ///
+  /// Loads default values from [InitialSettingsRepository] if available.
+  /// Uses fallback defaults (300 bar, 30 min) if settings unavailable.
+  /// Reason: App should remain functional even if user skipped post-registration setup or Firestore connection fails.
   Future<void> addTrupp() async {
     final repository = ref.read(initialSettingsRepositoryProvider);
     InitialSettingsModel? settings;
@@ -230,6 +261,10 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     _nextTruppNumber++;
   }
 
+  /// Adds a new [HistoryEntry] to the specified trupp.
+  ///
+  /// If the entry is a [PressureHistoryEntry], updates pressure trend and potential end time.
+  /// The trupp must be in [TruppAction] state.
   void addHistoryEntryToTrupp(int truppNumber, HistoryEntry entry) {
     assert(
       state.trupps.containsKey(truppNumber),
@@ -284,6 +319,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(trupps: {...state.trupps, truppNumber: newTrupp});
   }
 
+  /// acknowledges a sounding ([AlarmType.sound]) alarm for a trupp making it [AlarmType.visual]
   void ackSoundingAlarm(int truppNumber, AlarmReason alarm) {
     if (!state.alarms.containsKey(truppNumber)) {
       return;
@@ -295,7 +331,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
   }
 
-  // for resetting the einsatz state to start a new one
+  /// resets the entire Einsatz state to initial
   void reset() {
     // cancel all trupp subscriptions
     for (final subscription in _truppSubscriptions.values) {
@@ -309,6 +345,10 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = const Einsatz();
   }
 
+  /// acknowledges a visual ([AlarmType.visual]) alarm for a trupp removing it entirely
+  ///
+  /// cannot be used for [AlarmReason.checkPressure] because those alarms
+  /// self-reset on next check and are displayed until pressure is checked.
   void ackVisualAlarm(int truppNumber, AlarmReason alarm) {
     assert(alarm != AlarmReason.checkPressure);
     if (!state.alarms.containsKey(truppNumber)) {
@@ -327,6 +367,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     state = state.copyWith(alarms: {...state.alarms, truppNumber: newAlarms});
   }
 
+  /// helper to update a trupp in form state
   void _updateFormTrupp(
     int truppNumber,
     TruppForm Function(TruppForm trupp) update,
@@ -335,46 +376,69 @@ class EinsatzNotifier extends _$EinsatzNotifier {
     if (state.trupps[truppNumber] is! TruppForm) {
       throw StateError('Trupp $truppNumber is not in form state');
     }
+
     final trupp = state.trupps[truppNumber] as TruppForm;
     final newTrupp = update(trupp);
     state = state.copyWith(trupps: {...state.trupps, truppNumber: newTrupp});
   }
 
+  /// sets the leader name of the trupp in form state
+  ///
+  /// The corresponding [Trupp] needs to be in [TruppForm] state.
   void setLeaderName(int truppNumber, String? name) => _updateFormTrupp(
     truppNumber,
     (trupp) => trupp.copyWith(leaderName: name),
   );
 
+  /// sets the member name of the trupp in form state
+  ///
+  /// The corresponding [Trupp] needs to be in [TruppForm] state.
   void setMemberName(int truppNumber, String? name) => _updateFormTrupp(
     truppNumber,
     (trupp) => trupp.copyWith(memberName: name),
   );
 
+  /// sets the call name of the trupp in form state
+  ///
+  /// The corresponding [Trupp] needs to be in [TruppForm] state.
   void setCallName(int truppNumber, String? name) =>
       _updateFormTrupp(truppNumber, (trupp) => trupp.copyWith(callName: name));
 
+  /// sets the leader pressure of the trupp in form state
+  ///
+  /// The corresponding [Trupp] needs to be in [TruppForm] state.
   void setLeaderPressure(int truppNumber, int? pressure) => _updateFormTrupp(
     truppNumber,
     (trupp) => trupp.copyWith(leaderPressure: pressure),
   );
 
+  /// sets the member pressure of the trupp in form state
+  ///
+  /// The corresponding [Trupp] needs to be in [TruppForm] state.
   void setMemberPressure(int truppNumber, int? pressure) => _updateFormTrupp(
     truppNumber,
     (trupp) => trupp.copyWith(memberPressure: pressure),
   );
 
+  /// sets the theoretical duration of the trupp in form state
+  ///
+  /// The corresponding [Trupp] needs to be in [TruppForm] state.
   void setTheoreticalDuration(int truppNumber, Duration duration) =>
       _updateFormTrupp(
         truppNumber,
         (trupp) => trupp.copyWith(theoreticalDuration: duration),
       );
 
+  /// sets the max pressure of the trupp in form state
+  ///
+  /// The corresponding [Trupp] needs to be in [TruppForm] state.
   void setMaxPressure(int truppNumber, int pressure) => _updateFormTrupp(
     truppNumber,
     (trupp) => trupp.copyWith(maxPressure: pressure),
   );
 }
 
+/// reasons for an alarm, possibly more in the future
 enum AlarmReason { checkPressure, lowPressure }
 
 enum AlarmType { sound, visual }
@@ -389,5 +453,5 @@ abstract class Einsatz with _$Einsatz {
   }) = _Einsatz;
 }
 
-// A linear trend line represented by y = m*x + b
+/// A linear trend line represented by y = m*x + b
 typedef PressureTrend = ({double m, double b});
