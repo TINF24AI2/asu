@@ -22,8 +22,6 @@ class AlarmView extends ConsumerWidget {
         return 'DRUCK ABFRAGEN!';
       case AlarmReason.lowPressure:
         return 'NIEDRIGER DRUCK!';
-      case AlarmReason.retreat:
-        return 'RÜCKZUG!';
     }
   }
 

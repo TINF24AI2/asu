@@ -88,11 +88,7 @@ class Trupp extends ConsumerWidget {
     );
 
     final popUpAlarms = alarms
-        .where(
-          (a) =>
-              a.reason == AlarmReason.lowPressure ||
-              a.reason == AlarmReason.retreat,
-        )
+        .where((a) => a.reason != AlarmReason.checkPressure)
         .toList();
 
     if (popUpAlarms.isNotEmpty && !(_alarmOpenFlags[truppNumber] ?? false)) {
@@ -261,24 +257,32 @@ class Trupp extends ConsumerWidget {
                     if (entry is StatusHistoryEntry) {
                       return ListTile(
                         title: Text('Status: ${entry.status}'),
-                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
+                        subtitle: Text(
+                          'Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}',
+                        ),
                       );
                     } else if (entry is PressureHistoryEntry) {
                       return ListTile(
                         title: Text(
                           'Druck: ${entry.leaderPressure}/${entry.memberPressure}',
                         ),
-                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
+                        subtitle: Text(
+                          'Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}',
+                        ),
                       );
                     } else if (entry is LocationHistoryEntry) {
                       return ListTile(
                         title: Text('Standort: ${entry.location}'),
-                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
+                        subtitle: Text(
+                          'Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}',
+                        ),
                       );
                     } else {
                       return ListTile(
                         title: const Text('Unbekannter Eintrag'),
-                        subtitle: Text('Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}'),
+                        subtitle: Text(
+                          'Datum: ${DateFormat('dd.MM.yyyy HH:mm').format(entry.date)}',
+                        ),
                       );
                     }
                   },
@@ -353,7 +357,8 @@ class OperationInfo extends ConsumerWidget {
   String formatTime(int seconds) {
     final isNegative = seconds < 0;
     final duration = Duration(seconds: seconds.abs());
-    final formatted = '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
+    final formatted =
+        '${duration.inMinutes.toString().padLeft(2, '0')}:${(duration.inSeconds % 60).toString().padLeft(2, '0')}';
     return isNegative ? '-$formatted' : formatted;
   }
 
