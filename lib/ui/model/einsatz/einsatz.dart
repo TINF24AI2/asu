@@ -170,8 +170,6 @@ class EinsatzNotifier extends _$EinsatzNotifier {
       _acknowledgedAlarms[number]?.remove(AlarmReason.lowPressure);
     }
 
-    // TODO retreat alarm check
-
     final newTrupp = trupp.copyWith(
       potentialEnd: newPotentialEnd,
       nextCheck: newNextCheck,
@@ -377,7 +375,7 @@ class EinsatzNotifier extends _$EinsatzNotifier {
   );
 }
 
-enum AlarmReason { checkPressure, lowPressure, retreat }
+enum AlarmReason { checkPressure, lowPressure }
 
 enum AlarmType { sound, visual }
 
