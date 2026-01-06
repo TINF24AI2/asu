@@ -161,7 +161,7 @@ class Trupp extends ConsumerWidget {
                         children: [
                           CircleAvatar(
                             radius: 16,
-                            backgroundColor: Colors.black,
+                            backgroundColor: const Color(0xFFE84230),
                             child: Text(
                               getInitials(t.leaderName),
                               style: const TextStyle(
@@ -173,7 +173,7 @@ class Trupp extends ConsumerWidget {
                           const SizedBox(width: 8),
                           CircleAvatar(
                             radius: 16,
-                            backgroundColor: Colors.grey,
+                            backgroundColor: Colors.black,
                             child: Text(
                               getInitials(t.memberName),
                               style: const TextStyle(
@@ -191,7 +191,7 @@ class Trupp extends ConsumerWidget {
                           vertical: 4.0,
                         ),
                         decoration: BoxDecoration(
-                          color: Colors.amber,
+                          color: const Color(0xFFFFC000),
                           borderRadius: BorderRadius.circular(4.0),
                         ),
                         child: ConstrainedBox(
