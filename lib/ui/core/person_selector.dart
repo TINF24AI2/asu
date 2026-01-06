@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../repositories/firefighters_repository.dart';
-import '../model/einsatz/einsatz.dart';
-import '../model/trupp/trupp.dart';
+import '../../model/einsatz/einsatz.dart';
+import '../../model/trupp/trupp.dart';
 import '../trupp/pressure_selector.dart';
 import 'add_person.dart';
 

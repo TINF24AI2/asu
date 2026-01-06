@@ -4,8 +4,8 @@ import 'dart:math' as math;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
-import '../../../repositories/initial_settings_repository.dart';
-import '../../../ui/model/settings/initial_settings.dart';
+import '../../repositories/initial_settings_repository.dart';
+import '../settings/initial_settings.dart';
 import '../history/history.dart';
 import '../trupp/trupp.dart';
 

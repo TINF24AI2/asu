@@ -4,14 +4,14 @@ import 'package:flutter/material.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../firebase/firebase_auth_provider.dart';
-import '../auth/auth.dart';
-import '../core/qr_scanner.dart';
-import '../einsatz/einsatz_screen.dart';
-import '../end_einsatz/end_einsatz_screen.dart';
-import '../end_einsatz/pdf_preview_screen.dart';
-import '../settings/settings.dart';
-import '../end_einsatz/einsatz_completed_screen.dart';
+import '../firebase/firebase_auth_provider.dart';
+import '../ui/auth/auth.dart';
+import '../ui/core/qr_scanner.dart';
+import '../ui/einsatz/einsatz_screen.dart';
+import '../ui/end_einsatz/end_einsatz_screen.dart';
+import '../ui/end_einsatz/pdf_preview_screen.dart';
+import '../ui/settings/settings.dart';
+import '../ui/end_einsatz/einsatz_completed_screen.dart';
 
 part 'router.g.dart';
 

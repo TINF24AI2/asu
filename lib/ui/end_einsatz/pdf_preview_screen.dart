@@ -8,7 +8,7 @@ import 'package:media_store_plus/media_store_plus.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:device_info_plus/device_info_plus.dart';
 import 'package:go_router/go_router.dart';
-import '../model/einsatz/einsatz.dart';
+import '../../model/einsatz/einsatz.dart';
 
 // screen for previewing and sharing the generated einsatz PDF with download functionality
 class PdfPreviewScreen extends ConsumerWidget {

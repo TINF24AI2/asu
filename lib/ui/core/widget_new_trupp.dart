@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../model/trupp/trupp.dart';
-import '../model/einsatz/einsatz.dart';
+import '../../model/trupp/trupp.dart';
+import '../../model/einsatz/einsatz.dart';
 import 'add_radio_call_number.dart';
 import 'add_time.dart';
 import '../../repositories/radio_call_repository.dart';

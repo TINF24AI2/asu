@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
 import '../../audioplayers/sound_service.dart';
-import '../model/trupp/trupp.dart';
+import '../../model/trupp/trupp.dart';
 import 'alarm_view.dart';
 import 'end_handler.dart';
 import 'report_handler.dart';
-import '../model/einsatz/einsatz.dart';
-import '../model/history/history.dart';
+import '../../model/einsatz/einsatz.dart';
+import '../../model/history/history.dart';
 
 class Trupp extends ConsumerWidget {
   final int truppNumber;
