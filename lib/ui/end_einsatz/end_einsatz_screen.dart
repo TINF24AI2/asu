@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../model/einsatz/einsatz.dart';
-import '../model/trupp/trupp.dart';
-import '../model/history/history.dart';
+import '../../model/einsatz/einsatz.dart';
+import '../../model/trupp/trupp.dart';
+import '../../model/history/history.dart';
 import '../../services/pdf_export_service.dart';
 
 // screen that displays all completed trupps from the current operation and allows PDF export

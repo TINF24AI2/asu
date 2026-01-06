@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../repositories/initial_settings_repository.dart';
-import '../../ui/model/settings/initial_settings.dart';
+import '../../model/settings/initial_settings.dart';
 
 class InitialSettingsForm extends ConsumerStatefulWidget {
   final Future<void> Function(int pressure, Duration duration)? onSubmit;

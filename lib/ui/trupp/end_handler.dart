@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../model/einsatz/einsatz.dart';
-import '../model/history/history.dart';
-import '../model/trupp/trupp.dart';
+import '../../model/einsatz/einsatz.dart';
+import '../../model/history/history.dart';
+import '../../model/trupp/trupp.dart';
 import 'end.dart';
 
 // handler for collecting final trupp data before the ending operation

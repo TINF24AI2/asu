@@ -3,7 +3,7 @@
 // ignore_for_file: public_member_api_docs, constant_identifier_names, avoid_classes_with_only_static_members
 
 mixin Pubspec {
-  static final buildDate = DateTime.utc(2026, 1, 4, 16, 22, 38);
+  static final buildDate = DateTime.utc(2026, 1, 6, 17, 24, 22);
 
   static const name = 'asu';
 
@@ -30,10 +30,14 @@ mixin Pubspec {
 
   static const versionIsPreRelease = false;
 
-  static const environment = <dynamic, dynamic>{'sdk': '^3.9.2'};
+  static const environment = <dynamic, dynamic>{
+    'sdk': '^3.9.2',
+  };
 
   static const dependencies = <dynamic, dynamic>{
-    'flutter': <dynamic, dynamic>{'sdk': 'flutter'},
+    'flutter': <dynamic, dynamic>{
+      'sdk': 'flutter',
+    },
     'cupertino_icons': '^1.0.8',
     'flutter_riverpod': '^3.0.3',
     'riverpod_annotation': '^3.0.3',
@@ -54,7 +58,9 @@ mixin Pubspec {
   };
 
   static const dev_dependencies = <dynamic, dynamic>{
-    'flutter_test': <dynamic, dynamic>{'sdk': 'flutter'},
+    'flutter_test': <dynamic, dynamic>{
+      'sdk': 'flutter',
+    },
     'flutter_lints': '^6.0.0',
     'riverpod_generator': '^3.0.3',
     'build_runner': '^2.7.1',
@@ -68,7 +74,10 @@ mixin Pubspec {
 
   static const flutter = <dynamic, dynamic>{
     'uses-material-design': true,
-    'assets': <dynamic>['assets/icon/asu_logo.png', 'assets/sounds/alarm.mp3'],
+    'assets': <dynamic>[
+      'assets/icon/asu_logo.png',
+      'assets/sounds/alarm.mp3',
+    ],
   };
 
   static const pubspec_extract = <dynamic, dynamic>{
@@ -86,8 +95,14 @@ mixin Pubspec {
     'android': true,
     'ios': false,
     'image_path': 'assets/icon/asu_logo.png',
-    'web': <dynamic, dynamic>{'generate': false},
-    'windows': <dynamic, dynamic>{'generate': false},
-    'macos': <dynamic, dynamic>{'generate': false},
+    'web': <dynamic, dynamic>{
+      'generate': false,
+    },
+    'windows': <dynamic, dynamic>{
+      'generate': false,
+    },
+    'macos': <dynamic, dynamic>{
+      'generate': false,
+    },
   };
 }

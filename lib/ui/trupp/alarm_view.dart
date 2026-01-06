@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../audioplayers/sound_service.dart';
-import '../model/einsatz/einsatz.dart';
+import '../../model/einsatz/einsatz.dart';
 
 class AlarmView extends ConsumerWidget {
   final int truppNumber;

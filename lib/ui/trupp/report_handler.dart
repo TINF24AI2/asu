@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../model/einsatz/einsatz.dart';
-import '../model/trupp/trupp.dart';
+import '../../model/einsatz/einsatz.dart';
+import '../../model/trupp/trupp.dart';
 import 'report.dart';
-import '../model/history/history.dart';
+import '../../model/history/history.dart';
 
 class ReportHandler extends ConsumerWidget {
   final int truppNumber;

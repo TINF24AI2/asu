@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import '../firebase/firestore_service.dart';
 import '../firebase/firestore_provider.dart';
 import '../firebase/firebase_auth_provider.dart';
-import '../ui/model/settings/radio_call.dart';
+import '../model/settings/radio_call.dart';
 
 // Repository class for managing Radio Call data in Firestore.
 class RadioCallRepository {

@@ -2,8 +2,8 @@ import 'dart:typed_data';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:share_plus/share_plus.dart';
-import '../ui/model/trupp/trupp.dart';
-import '../ui/model/history/history.dart';
+import '../model/trupp/trupp.dart';
+import '../model/history/history.dart';
 
 class PdfExportService {
   // generate PDF document

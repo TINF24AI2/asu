@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../core/widget_new_trupp.dart';
-import '../model/einsatz/einsatz.dart';
-import '../model/trupp/trupp.dart' as model;
+import '../../model/einsatz/einsatz.dart';
+import '../../model/trupp/trupp.dart' as model;
 import '../trupp/trupp.dart';
 
 // Horizontal, paged view for "Trupp" pages with a final "New Trupp" tile.

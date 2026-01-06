@@ -6,7 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../firebase/firebase_auth_provider.dart';
 import '../../firebase/firebase_auth_service.dart';
 import '../../repositories/initial_settings_repository.dart';
-import '../../ui/model/settings/initial_settings.dart';
+import '../../model/settings/initial_settings.dart';
 import 'scaffold.dart';
 
 class RegisterScreen extends StatelessWidget {
