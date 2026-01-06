@@ -23,7 +23,8 @@ class EndHandler extends ConsumerStatefulWidget {
 class _EndHandlerState extends ConsumerState<EndHandler> {
   int? leaderPressure;
   int? memberPressure;
-  bool? isHeatExposed;
+  bool isHeatExposed = false; //default
+  String? errorMessage;
 
   @override
   Widget build(BuildContext context) {
@@ -41,35 +42,19 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
     final truppNumber = widget.truppNumber;
     final operationTime = widget.operationTime;
     final lowestPressure = trupp.lowestPressure;
+    final maxPressure = trupp.maxPressure;
     final notifier = ref.read(einsatzProvider.notifier);
-
-    void onPressureSelected(int leaderPressure, int memberPressure) {
-      setState(() {
-        this.leaderPressure = leaderPressure;
-        this.memberPressure = memberPressure;
-      });
-    }
 
     void onHeatExposedSelected(bool value) {
       setState(() => isHeatExposed = value);
     }
 
+    // handler for submit button
     void onSubmitPressed() {
       if (leaderPressure == null || memberPressure == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Die Druckangaben fehlen.'),
-          ),
-        );
-        return;
-      }
-
-      if (isHeatExposed == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Hitzebeaufschlagung muss angegeben werden.'),
-          ),
-        );
+        setState(() {
+          errorMessage = 'Eine Druckangabe fehlt';
+        });
         return;
       }
 
@@ -88,7 +73,7 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
         truppNumber,
         StatusHistoryEntry(
           date: DateTime.now(),
-          status: 'Hitzebeaufschlagt: ${isHeatExposed == true ? 'Ja' : 'Nein'}',
+          status: 'Hitzebeaufschlagt: ${isHeatExposed ? 'Ja' : 'Nein'}',
         ),
       );
 
@@ -101,13 +86,29 @@ class _EndHandlerState extends ConsumerState<EndHandler> {
       Navigator.pop(context);
     }
 
+    // render End widget
     return End(
       operationTime: operationTime,
       lowestPressure: lowestPressure,
-      onPressureSelected: onPressureSelected,
+      maxPressure: maxPressure,
+      leaderPressure: leaderPressure,
+      memberPressure: memberPressure,
+      onLeaderPressureSelected: (p) {
+        setState(() {
+          leaderPressure = p;
+          errorMessage = null;
+        });
+      },
+      onMemberPressureSelected: (p) {
+        setState(() {
+          memberPressure = p;
+          errorMessage = null;
+        });
+      },
       onHeatExposedSelected: onHeatExposedSelected,
-      isHeatExposed: isHeatExposed ?? false,
+      isHeatExposed: isHeatExposed,
       onSubmitPressed: onSubmitPressed,
+      errorMessage: errorMessage,
     );
   }
 }
