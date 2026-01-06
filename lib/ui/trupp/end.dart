@@ -1,23 +1,33 @@
 import 'package:flutter/material.dart';
 
-import 'pressure.dart';
+import 'pressure_selector.dart';
 
 class End extends StatelessWidget {
-  final Function(int leaderPressure, int memberPressure) onPressureSelected;
   final Function() onSubmitPressed;
   final Function(bool) onHeatExposedSelected;
+  final Function(int) onLeaderPressureSelected;
+  final Function(int) onMemberPressureSelected;
   final Duration operationTime;
   final int lowestPressure;
+  final int? maxPressure;
+  final int? leaderPressure;
+  final int? memberPressure;
   final bool isHeatExposed;
+  final String? errorMessage;
 
   const End({
     super.key,
     required this.operationTime,
     required this.lowestPressure,
-    required this.onPressureSelected,
     required this.onSubmitPressed,
     required this.onHeatExposedSelected,
+    required this.onLeaderPressureSelected,
+    required this.onMemberPressureSelected,
+    this.maxPressure,
+    this.leaderPressure,
+    this.memberPressure,
     required this.isHeatExposed,
+    this.errorMessage,
   });
 
   @override
@@ -30,7 +40,7 @@ class End extends StatelessWidget {
           const Row(
             children: [
               Text(
-                'Einsatz-Ende',
+                'Einsatzende',
                 style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ],
@@ -41,90 +51,99 @@ class End extends StatelessWidget {
             children: [
               const Icon(Icons.timer),
               Text(
-                " Einsatz-Zeit: ${operationTime.inMinutes}:${(operationTime.inSeconds % 60).toString().padLeft(2, '0')}",
+                " Einsatzzeit: ${operationTime.inMinutes}:${(operationTime.inSeconds % 60).toString().padLeft(2, '0')}",
                 style: const TextStyle(fontSize: 18),
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // final pressure selection for leader and member
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Enddruck Truppführer:',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              PressureSelectionButton(
+                lowestPressure: lowestPressure,
+                maxPressure: maxPressure,
+                label: 'Truppführer',
+                pressure: leaderPressure,
+                onPressureSelected: onLeaderPressureSelected,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 12),
+
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              const Expanded(
+                child: Text(
+                  'Enddruck Truppmann:',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              PressureSelectionButton(
+                lowestPressure: lowestPressure,
+                maxPressure: maxPressure,
+                label: 'Truppmann',
+                pressure: memberPressure,
+                onPressureSelected: onMemberPressureSelected,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: 20),
+
+          // 'Hitzebeaufschlagt' switch
+          Row(
+            children: [
+              const Icon(Icons.local_fire_department),
+              const SizedBox(width: 16),
+              const Expanded(
+                child: Text(
+                  'Hitzebeaufschlagt',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+              Text(
+                isHeatExposed ? 'Ja' : 'Nein',
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Switch.adaptive(
+                value: isHeatExposed,
+                onChanged: onHeatExposedSelected,
               ),
             ],
           ),
 
           const SizedBox(height: 30),
 
-          // Button to enter pressure
-          Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  showModalBottomSheet(
-                    context: context,
-                    isScrollControlled: true,
-                    builder: (bottomSheetContext) {
-                      return Pressure(
-                        onPressureSelected: (leaderPressure, memberPressure) {
-                          onPressureSelected(leaderPressure, memberPressure);
-
-                          Navigator.of(bottomSheetContext).pop();
-                        },
-                        lowestPressure: lowestPressure,
-                      );
-                    },
-                  );
-                },
-                icon: const Icon(Icons.speed, size: 18),
-                label: const Text(
-                  'Druck eintragen',
-                  style: TextStyle(fontSize: 18),
+          // error message
+          if (errorMessage != null)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 16.0),
+              child: Text(
+                errorMessage!,
+                style: const TextStyle(
+                  color: Color(0xFFE84230),
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
                 ),
+                textAlign: TextAlign.center,
               ),
             ),
-          ),
-
-          const SizedBox(height: 30),
-
-
-          // Button to enter 'Hitzebeaufschlagt'
-          // Here look that user see wheter yes or no is activated
-          Center(
-            child: SizedBox(
-              width: MediaQuery.of(context).size.width * 0.5,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // Dialog anzeigen
-                  showDialog(
-                    context: context,
-                    builder: (BuildContext context) {
-                      return AlertDialog(
-                        title: const Text('Hitzebeaufschlagt?'),
-                        actions: [
-                          TextButton(
-                            onPressed: () {
-                              onHeatExposedSelected(true);
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Ja'),
-                          ),
-                          TextButton(
-                            onPressed: () {
-                              onHeatExposedSelected(false);
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text('Nein'),
-                          ),
-                        ],
-                      );
-                    },
-                  );
-                },
-                icon: const Icon(Icons.local_fire_department, size: 18),
-                label: const Text(
-                  'Hitzebeaufschlagt',
-                  style: TextStyle(fontSize: 18),
-                ),
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 30),
 
           // Submit Button
           Center(
