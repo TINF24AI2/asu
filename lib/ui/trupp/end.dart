@@ -58,10 +58,12 @@ class End extends StatelessWidget {
                   showModalBottomSheet(
                     context: context,
                     isScrollControlled: true,
-                    builder: (context) {
+                    builder: (bottomSheetContext) {
                       return Pressure(
                         onPressureSelected: (leaderPressure, memberPressure) {
                           onPressureSelected(leaderPressure, memberPressure);
+
+                          Navigator.of(bottomSheetContext).pop();
                         },
                         lowestPressure: lowestPressure,
                       );
