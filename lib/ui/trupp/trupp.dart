@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 
-import '../../audioplayers/sound_service.dart';
 import '../../model/trupp/trupp.dart';
 import 'alarm_view.dart';
 import 'end_handler.dart';
@@ -64,27 +63,6 @@ class Trupp extends ConsumerWidget {
     // Alarms
     final alarms = ref.watch(
       einsatzProvider.select((e) => e.alarms[truppNumber] ?? []),
-    );
-
-    // Listen to sound alarms - handle both start and stop
-    ref.listen(
-      einsatzProvider.select((e) {
-        final alarms = e.alarms[truppNumber] ?? [];
-        return alarms.any((a) => a.type == AlarmType.sound);
-      }),
-      (previous, current) {
-        final soundService = SoundService();
-
-        // Start sound when sound alarm appears
-        if (previous == false && current == true) {
-          soundService.playAlarmSound();
-        }
-
-        // Stop sound when all sound alarms are cleared
-        if (previous == true && current == false) {
-          soundService.stopAlarmSound();
-        }
-      },
     );
 
     final popUpAlarms = alarms
@@ -422,8 +400,6 @@ class OperationInfo extends ConsumerWidget {
               const SizedBox(width: 8),
               ElevatedButton.icon(
                 onPressed: () async {
-                  final soundService = SoundService();
-                  await soundService.stopAlarmSound();
                   ref
                       .read(einsatzProvider.notifier)
                       .ackSoundingAlarm(truppNumber, AlarmReason.checkPressure);

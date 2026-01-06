@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../router/router.dart';
+import '../audioplayers/sound_service.dart';
+import '../model/einsatz/einsatz.dart';
 
 class AsuApp extends ConsumerWidget {
   const AsuApp({super.key});
@@ -9,6 +11,25 @@ class AsuApp extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final router = ref.watch(goRouterProvider);
+
+    ref.listen(
+      einsatzProvider.select((e) {
+        int count = 0;
+        for (final alarmList in e.alarms.values) {
+          count += alarmList.where((a) => a.type == AlarmType.sound).length;
+        }
+        return count;
+      }),
+      (previous, current) async {
+        final soundService = SoundService();
+        if (current > 0 && (previous == null || previous == 0)) {
+          await soundService.playAlarmSound();
+        } else if (current == 0 && previous != null && previous > 0) {
+          await soundService.stopAlarmSound();
+        }
+      }
+    );
+
     return OrientationBuilder(
       builder: (context, orientation) {
         if (orientation == Orientation.portrait) {

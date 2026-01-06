@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../audioplayers/sound_service.dart';
 import '../../model/einsatz/einsatz.dart';
 
 class AlarmView extends ConsumerWidget {
@@ -28,13 +27,6 @@ class AlarmView extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     if (alarms.isEmpty) return const SizedBox.shrink();
-
-    final soundService = SoundService();
-
-    final hasSoundingAlarm = alarms.any((a) => a.type == AlarmType.sound);
-    if (hasSoundingAlarm) {
-      soundService.playAlarmSound();
-    }
 
     return Center(
       child: Container(
@@ -70,7 +62,6 @@ class AlarmView extends ConsumerWidget {
             const SizedBox(height: 24),
             ElevatedButton.icon(
               onPressed: () async {
-                await soundService.stopAlarmSound();
                 for (var alarm in alarms) {
                   ref
                       .read(einsatzProvider.notifier)
