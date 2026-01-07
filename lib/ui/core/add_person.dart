@@ -23,5 +23,10 @@ Future<String?> showAddPersonDialog(
     normalizeTyped: (s) => s.trim().isEmpty ? null : s.trim(),
     textFieldLabel: 'Anderer Name:',
     enableQrScan: enableQrScan,
+    validate: (s) {
+      final name = RegExp(r'^[A-Za-zÄÖÜäöüß\- ]+$');
+      if (!name.hasMatch(s)) return 'Ungültiger Name';
+      return null;
+    }
   );
 }

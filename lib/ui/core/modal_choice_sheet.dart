@@ -13,6 +13,7 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
   required String Function(C) labelBuilder, // label for choice chips
   required T Function(C) valueBuilder, // value for selected candidate
   required T? Function(String) normalizeTyped, // validates/converts typed input
+  String? Function(T)? validate, //error messages for input validation
   String textFieldLabel = '', // label for the text field
   TextInputType keyboardType = TextInputType.text,
   bool enableQrScan = false,
@@ -23,11 +24,12 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
     useRootNavigator: true,
     builder: (context) {
       String? typed;
+      String? error;
       return Padding(
         padding: EdgeInsets.only(
           bottom: MediaQuery.of(context).viewInsets.bottom,
         ),
-        child: StatefulBuilder(
+        child: StatefulBuilder( 
           builder: (context, setState) {
             return Container(
               padding: const EdgeInsets.all(16),
@@ -64,9 +66,15 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
                   ),
                   const SizedBox(height: 12),
                   TextField(
-                    decoration: InputDecoration(labelText: textFieldLabel),
+                    decoration: InputDecoration(labelText: textFieldLabel, errorText: error),
                     keyboardType: keyboardType,
-                    onChanged: (v) => typed = v,
+                    
+                  onChanged: (v) { 
+                      setState(() {
+                        typed = v;
+                        error = null;
+                      });
+                    },
                   ),
 
                   //Button for QR-Scanning
@@ -101,17 +109,22 @@ Future<T?> showHorizontalChoiceSheet<C, T>(
                         child: const Text('Abbrechen'),
                       ),
                       const SizedBox(width: 8),
-                      ElevatedButton(
+                      ElevatedButton( 
                         onPressed: () {
-                          if (typed == null || typed!.trim().isEmpty) {
-                            Navigator.of(context, rootNavigator: true).pop();
+                          final input = typed?.trim();
+                          final norm = input != null ? normalizeTyped(input) : null;
+
+                          final errorText = (norm != null && validate != null) ? validate(norm) : null;
+
+                          //in case of invalid input
+                          if (norm == null || errorText != null) {
+                            setState(() {
+                              error = errorText;
+                            });
                             return;
                           }
-                          final norm = normalizeTyped(typed!.trim());
-                          if (norm == null) {
-                            Navigator.of(context, rootNavigator: true).pop();
-                            return;
-                          }
+
+                          //in case of valid input
                           Navigator.of(context, rootNavigator: true).pop(norm);
                         },
                         child: const Text('OK'),

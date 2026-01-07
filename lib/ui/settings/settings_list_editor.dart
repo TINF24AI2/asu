@@ -7,6 +7,9 @@ class SettingsListEditor extends ConsumerWidget {
   final StreamProvider<List<dynamic>> streamProvider;
   final Future<void> Function(String name)? onAdd;
   final Future<void> Function(String id, String name)? onDelete;
+  final bool validate;
+  
+  
 
   const SettingsListEditor({
     super.key,
@@ -14,7 +17,22 @@ class SettingsListEditor extends ConsumerWidget {
     required this.streamProvider,
     this.onAdd,
     this.onDelete,
+    this.validate = false,
   });
+
+  //Function to ensure input validation for Name
+  String? validateName(String value) {
+    if (!validate) {
+      return null;
+    }
+    final trimmed = value.trim();
+    if (trimmed.isEmpty) return 'Name darf nicht leer sein';
+
+    final regex = RegExp(r'^[A-Za-zÄÖÜäöü\- ]+$');
+    if (!regex.hasMatch(trimmed)) return 'Ungültiger Name';
+
+    return null;
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -24,15 +42,31 @@ class SettingsListEditor extends ConsumerWidget {
       data: (items) {
         Future<void> addItem() async {
           final controller = TextEditingController();
+          String? error;
           final result = await showDialog<String?>(
             context: context,
-            builder: (context) => AlertDialog(
-              title: Text('Hinzufügen zu $title'),
+            builder: (context) {
+              return StatefulBuilder(
+                builder: (context, setState) {
+
+                  return AlertDialog(
+                    title: Text('Hinzufügen zu $title'),
               content: TextField(
                 controller: controller,
                 autofocus: true,
-                decoration: const InputDecoration(labelText: 'Name eingeben'),
-                onSubmitted: (_) => Navigator.of(context).pop(controller.text),
+                decoration:  InputDecoration(labelText: 'Name eingeben', errorText: error,
+                ),
+                onChanged: (_) {
+                  setState(() => error = null);
+                },
+                onSubmitted: (_) {
+                  final validate = validateName(controller.text);
+                  if (validate != null) {
+                    setState(() => error = validate);
+                    return;
+                  }
+                  Navigator.of(context).pop(controller.text);
+                },
               ),
               actions: [
                 TextButton(
@@ -40,11 +74,21 @@ class SettingsListEditor extends ConsumerWidget {
                   child: const Text('Abbrechen'),
                 ),
                 ElevatedButton(
-                  onPressed: () => Navigator.of(context).pop(controller.text),
+                  onPressed: () {
+                    final validate = validateName(controller.text);
+                    if (validate != null) {
+                      setState(() => error = validate);
+                      return;
+                    }
+                    Navigator.of(context).pop(controller.text);
+                  },
                   child: const Text('OK'),
                 ),
               ],
-            ),
+                  );
+                }
+              );
+            } 
           );
 
           if (!context.mounted) return;
