@@ -21,6 +21,7 @@ class AuthScaffold extends StatelessWidget {
           ),
         ],
       ),
+      resizeToAvoidBottomInset: false,
       primary: true,
       body: body,
     );
