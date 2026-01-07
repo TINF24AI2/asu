@@ -28,10 +28,12 @@ class SettingsPage extends ConsumerWidget {
     SettingsKey key,
     String title,
     StreamProvider<List<dynamic>> streamProvider,
+    {bool validate = false}
   ) async {
     await showDialog<void>(
       context: context,
       builder: (_) => SettingsListEditor(
+        validate: validate,
         title: title,
         streamProvider: streamProvider,
         onAdd: (name) async {
@@ -153,6 +155,7 @@ class SettingsPage extends ConsumerWidget {
                   SettingsKey.truppMembers,
                   'Truppmitglieder',
                   firefightersStreamProvider,
+                  validate: true,
                 ),
                 trailing: const Icon(Icons.chevron_right),
               );

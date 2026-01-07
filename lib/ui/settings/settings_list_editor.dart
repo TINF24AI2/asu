@@ -7,6 +7,8 @@ class SettingsListEditor extends ConsumerWidget {
   final StreamProvider<List<dynamic>> streamProvider;
   final Future<void> Function(String name)? onAdd;
   final Future<void> Function(String id, String name)? onDelete;
+  final bool validate;
+  
   
 
   const SettingsListEditor({
@@ -15,10 +17,14 @@ class SettingsListEditor extends ConsumerWidget {
     required this.streamProvider,
     this.onAdd,
     this.onDelete,
+    this.validate = false,
   });
 
   //Function to ensure input validation for Name
   String? validateName(String value) {
+    if (!validate) {
+      return null;
+    }
     final trimmed = value.trim();
     if (trimmed.isEmpty) return 'Name darf nicht leer sein';
 
@@ -42,6 +48,7 @@ class SettingsListEditor extends ConsumerWidget {
             builder: (context) {
               return StatefulBuilder(
                 builder: (context, setState) {
+
                   return AlertDialog(
                     title: Text('Hinzufügen zu $title'),
               content: TextField(
@@ -57,7 +64,7 @@ class SettingsListEditor extends ConsumerWidget {
                   if (validate != null) {
                     setState(() => error = validate);
                     return;
-                  } 
+                  }
                   Navigator.of(context).pop(controller.text);
                 },
               ),
