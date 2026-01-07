@@ -13,11 +13,14 @@ class AuthScaffold extends StatelessWidget {
       appBar: AppBar(
         title: title,
         actions: [
-          IconButton(
-            onPressed: () {
-              showAsuAbout(context: context);
-            },
-            icon: const Icon(Icons.info_outline),
+          Tooltip(
+            message: 'Über',
+            child: IconButton(
+              onPressed: () {
+                showAsuAbout(context: context);
+              },
+              icon: const Icon(Icons.info_outline),
+            ),
           ),
         ],
       ),

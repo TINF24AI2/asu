@@ -25,25 +25,34 @@ class AsuScaffold extends ConsumerWidget {
         title: title,
         actions: [
           if (showSettings)
-            IconButton(
+          Tooltip(
+            message: 'Einstellungen',
+            child: IconButton(
               onPressed: () {
                 context.goNamed('settings');
               },
               icon: const Icon(Icons.settings),
             ),
-          IconButton(
-            onPressed: () {
-              showAsuAbout(context: context);
-            },
-            icon: const Icon(Icons.info_outline),
+          ), 
+          Tooltip(
+            message: 'Über',
+            child: IconButton(
+              onPressed: () {
+                showAsuAbout(context: context);
+              },
+              icon: const Icon(Icons.info_outline),
+            )
           ),
-          IconButton(
-            onPressed: () async {
-              await ref.read(firebaseAuthServiceProvider).signOut();
+          Tooltip(
+            message: 'Abmelden',
+            child: IconButton(
+              onPressed: () async {
+                await ref.read(firebaseAuthServiceProvider).signOut();
               if (!context.mounted) return;
               context.goNamed('login');
-            },
-            icon: const Icon(Icons.logout),
+              },
+              icon: const Icon(Icons.logout),
+            )
           ),
         ],
       ),
