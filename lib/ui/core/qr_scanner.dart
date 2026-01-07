@@ -29,7 +29,8 @@ class _QrScannerState extends State<QrScanner> with WidgetsBindingObserver {
     if (value == null) return;
 
     //QR-Code should only contain a name
-    final isValid = RegExp(r'^[A-Za-zÄÖÜaöüß]{2,}$').hasMatch(value);
+    final isValid = RegExp(r'^[A-Za-zÄÖÜaöüß\- ]{1,}$').hasMatch(value); 
+    
 
     if (!isValid) {
       _hasScanned = true;
